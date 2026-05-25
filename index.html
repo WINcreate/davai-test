@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ДАВАЙ! — Личен одит на живота</title>
-<script src="https://js.stripe.com/v3/"></script>
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -323,12 +323,13 @@
 // ─── КОНФИГУРАЦИЯ ────────────────────────────────────────────────────────────
 const CONFIG = {
   stripePublicKey: 'pk_test_51T5Lz2GlIluEKXB5DzV8meplRSdBN1y0EQWlzj4eVxdYkTZcZr04nZTgHVHY9R1YFvDo7aHKp8xno1Op5cbbf9t300aVJS2CXZ',
+  paymentLink: 'https://buy.stripe.com/3cI5kDdqEgXA6hAeps7Vm00',
   priceId: 'price_1TX1AQGlIluEKXB5cEyepYhd',
   // Замени след deploy на Cloudflare Worker:
   workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev'
 };
 
-let stripe;
+
 
 // ─── ДАННИ ───────────────────────────────────────────────────────────────────
 const AREAS = [
@@ -361,32 +362,8 @@ function showScreen(id) {
 }
 
 // ─── STRIPE CHECKOUT ─────────────────────────────────────────────────────────
-async function startCheckout() {
-  if (!stripe) stripe = Stripe(CONFIG.stripePublicKey);
-  const btn = document.getElementById('checkout-btn');
-  btn.disabled = true;
-  btn.textContent = 'Зареждане...';
-
-  try {
-    // Stripe Checkout — redirect към hosted страницата на Stripe
-    const { error } = await stripe.redirectToCheckout({
-      lineItems: [{ price: CONFIG.priceId, quantity: 1 }],
-      mode: 'payment',
-      // След успешно плащане Stripe ще върне на тази URL с ?payment=success&session_id=...
-      successUrl: window.location.href.split('?')[0] + '?payment=success&session_id={CHECKOUT_SESSION_ID}',
-      cancelUrl: window.location.href.split('?')[0] + '?payment=cancelled',
-    });
-
-    if (error) {
-      btn.disabled = false;
-      btn.textContent = 'Плати и започни одита →';
-      alert('Грешка: ' + error.message);
-    }
-  } catch(e) {
-    btn.disabled = false;
-    btn.textContent = 'Плати и започни одита →';
-    alert('Stripe не е зареден правилно.');
-  }
+function startCheckout() {
+  window.location.href = CONFIG.paymentLink;
 }
 
 // ─── ПРОВЕРКА НА ПЛАЩАНЕТО СЛЕД REDIRECT ─────────────────────────────────────
