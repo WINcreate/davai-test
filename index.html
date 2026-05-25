@@ -328,7 +328,7 @@ const CONFIG = {
   workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev'
 };
 
-const stripe = Stripe(CONFIG.stripePublicKey);
+let stripe;
 
 // ─── ДАННИ ───────────────────────────────────────────────────────────────────
 const AREAS = [
@@ -362,6 +362,7 @@ function showScreen(id) {
 
 // ─── STRIPE CHECKOUT ─────────────────────────────────────────────────────────
 async function startCheckout() {
+  if (!stripe) stripe = Stripe(CONFIG.stripePublicKey);
   const btn = document.getElementById('checkout-btn');
   btn.disabled = true;
   btn.textContent = 'Зареждане...';
