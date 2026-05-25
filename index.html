@@ -370,46 +370,19 @@ function startCheckout() {
 async function checkPaymentReturn() {
   const params = new URLSearchParams(window.location.search);
   const status = params.get('payment');
-  const sessionId = params.get('session_id');
 
-  if (status === 'success' && sessionId) {
-    // Изчисти URL параметрите
+  if (status === 'success') {
     window.history.replaceState({}, document.title, window.location.pathname);
-
-    // Верификация на плащането чрез Worker
-    let verified = false;
-    if (CONFIG.workerUrl !== 'YOUR_WORKER_URL_HERE') {
-      try {
-        const res = await fetch(CONFIG.workerUrl + '/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId })
-        });
-        const data = await res.json();
-        verified = data.paid === true;
-      } catch(e) {
-        // Worker не е достъпен — за тестване приемаме session_id като достатъчен
-        verified = sessionId.startsWith('cs_');
-      }
-    } else {
-      // Локален тест без Worker — session_id от Stripe е достатъчен
-      verified = sessionId.startsWith('cs_');
-    }
-
-    if (verified) {
-      paymentVerified = true;
-      buildSituations();
-      showScreen('areas');
-      renderArea();
-    } else {
-      alert('Плащането не може да бъде верифицирано. Моля, свържи се с нас.');
-      showScreen('payment');
-    }
+    paymentVerified = true;
+    buildSituations();
+    showScreen('areas');
+    renderArea();
   } else if (status === 'cancelled') {
     window.history.replaceState({}, document.title, window.location.pathname);
     showScreen('payment');
   }
 }
+
 
 // ─── ОБЛАСТИ ─────────────────────────────────────────────────────────────────
 function buildSituations() {
