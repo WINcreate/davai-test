@@ -475,9 +475,10 @@ async function generateAnalysis() {
       const res = await fetch(CONFIG.workerUrl + '/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, max_tokens: 3000 })
+        body: JSON.stringify({ prompt, max_tokens: 4096 })
       });
       const data = await res.json();
+      if (data.error) throw new Error(data.error);
       txt = data.content;
     } else {
       // Директно към API само за локален тест — смени с твой dev ключ
@@ -515,41 +516,27 @@ ${sSum}
 ГОРДОСТ: ${answers.proud}
 УРОЦИ: ${answers.lessons}
 
-Върни САМО валиден JSON, без друг текст, без markdown:
+Върни САМО валиден JSON без markdown. Бъди КРАТЪК — max 2 изречения на поле, max 2 действия на секция:
 
 {
-  "summary": "6-8 изречения — кой е този човек в момента, какво го движи, каква е основната тема на живота му, каква цена плаща и за какво. Директно към него.",
-  "summary_actions": ["Действие 1 — специфично, тази седмица", "Действие 2", "Действие 3"],
-  "top_pattern": "Едно изречение — най-силният модел, който управлява живота му",
+  "summary": "4-5 изречения — кой е този човек, основната тема, каква цена плаща. Директно.",
+  "summary_actions": ["Действие 1 — конкретно, тази седмица", "Действие 2", "Действие 3"],
+  "top_pattern": "1 изречение — най-силният модел",
   "patterns": [
-    {"title": "Заглавие", "description": "3-4 изречения — какво прави, защо, каква цена плаща, каква скрита полза има", "severity": "high или medium"}
+    {"title": "Заглавие", "description": "2 изречения — какво прави и каква цена плаща", "severity": "high или medium"}
   ],
   "blind_spots": [
-    {"area": "Областта", "insight": "2-3 изречения — точно каде се лъже и каква е реалността"}
+    {"area": "Областта", "insight": "1-2 изречения — точно каде се лъже"}
   ],
   "areas": [
-    {"name": "Областта", "score": числото, "insight": "2 директни изречения за тази ситуация", "actions": ["Действие 1 с времева рамка", "Действие 2", "Действие 3"]}
+    {"name": "Областта", "score": числото, "insight": "1-2 изречения", "actions": ["Действие 1 с дата", "Действие 2"]}
   ],
-  "morning_routines": [
-    "Рутина 1 — конкретна, персонализирана за ТОЗИ човек, с времева рамка",
-    "Рутина 2",
-    "Рутина 3"
-  ],
-  "evening_routines": [
-    "Рутина 1 — насочена към специфичните слабости на ТОЗИ човек",
-    "Рутина 2",
-    "Рутина 3"
-  ],
-  "daily_questions": [
-    "Въпрос 1 — дълбок, директно свързан с основния му модел",
-    "Въпрос 2",
-    "Въпрос 3",
-    "Въпрос 4",
-    "Въпрос 5"
-  ]
+  "morning_routines": ["Рутина 1 — конкретна за ТОЗИ човек", "Рутина 2", "Рутина 3"],
+  "evening_routines": ["Рутина 1 — за слабостите на ТОЗИ човек", "Рутина 2", "Рутина 3"],
+  "daily_questions": ["Въпрос 1 — свързан с основния модел", "Въпрос 2", "Въпрос 3", "Въпрос 4", "Въпрос 5"]
 }
 
-КРИТИЧНО: Рутините и въпросите трябва да са персонализирани за ТОЗИ конкретен човек — не общи съвети.`;
+КРИТИЧНО: Всичко да е персонализирано за ТОЗИ човек. JSON трябва да е валиден и завършен.`;
 }
 
 // ─── РЕНДИРАНЕ ───────────────────────────────────────────────────────────────
@@ -658,18 +645,33 @@ async function sendEmail() {
 
   try {
     const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
+    // Build compact email HTML from analysisResult (avoids sending heavy DOM innerHTML)
+    let emailHtml = '';
+    if (analysisResult) {
+      const d = analysisResult;
+      if (d.summary) emailHtml += `<h2>Обобщение</h2><p>${d.summary}</p>`;
+      if (d.top_pattern) emailHtml += `<h2>Основен модел</h2><p><em>"${d.top_pattern}"</em></p>`;
+      if (d.summary_actions?.length) emailHtml += '<h2>Три стъпки</h2><ol>' + d.summary_actions.map(a => `<li>${a}</li>`).join('') + '</ol>';
+      if (d.patterns?.length) { emailHtml += '<h2>Поведенчески модели</h2>'; d.patterns.forEach(p => { emailHtml += `<h3>${p.title}</h3><p>${p.description}</p>`; }); }
+      if (d.blind_spots?.length) { emailHtml += '<h2>Където се лъжеш</h2>'; d.blind_spots.forEach(b => { emailHtml += `<h3>${b.area}</h3><p>${b.insight}</p>`; }); }
+      if (d.areas?.length) { emailHtml += '<h2>Анализ по области</h2>'; d.areas.forEach(a => { emailHtml += `<h3>${a.name} — ${a.score}/10</h3><p>${a.insight}</p>`; if (a.actions?.length) emailHtml += '<ul>' + a.actions.map(x => `<li>${x}</li>`).join('') + '</ul>'; }); }
+      if (d.morning_routines?.length) emailHtml += '<h2>Сутрешни рутини</h2><ul>' + d.morning_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
+      if (d.evening_routines?.length) emailHtml += '<h2>Вечерни рутини</h2><ul>' + d.evening_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
+      if (d.daily_questions?.length) emailHtml += '<h2>Въпроси за всеки ден</h2><ol>' + d.daily_questions.map(q => `<li>${q}</li>`).join('') + '</ol>';
+    }
     const res = await fetch(CONFIG.workerUrl + '/email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, resultsHtml: document.getElementById('results-content').innerHTML, avg })
+      body: JSON.stringify({ email, resultsHtml: emailHtml, avg })
     });
-    closeEmailModal();
-    alert(res.ok ? '✓ Изпратено на ' + email : 'Грешка при изпращането. Свали PDF вместо това.');
+    const data = await res.json();
+    btn.textContent = data.ok ? '✓ Изпратено!' : 'Грешка — опитай пак';
+    if (data.ok) setTimeout(closeEmailModal, 2000);
+    else btn.disabled = false;
   } catch(e) {
-    closeEmailModal();
-    alert('Worker не е конфигуриран. Свали PDF.');
+    btn.textContent = 'Грешка — опитай пак';
+    btn.disabled = false;
   }
-  btn.disabled = false; btn.textContent = 'Изпрати →';
 }
 
 // ─── СТАРТ ───────────────────────────────────────────────────────────────────
@@ -720,7 +722,7 @@ export default {
           'anthropic-version': '2023-06-01'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-6',
           max_tokens: max_tokens || 3000,
           messages: [{ role: 'user', content: prompt }]
         })
