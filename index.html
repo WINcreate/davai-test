@@ -475,7 +475,7 @@ async function generateAnalysis() {
       const res = await fetch(CONFIG.workerUrl + '/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, max_tokens: 4096 })
+        body: JSON.stringify({ prompt, max_tokens: 6000 })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
