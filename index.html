@@ -312,11 +312,36 @@
       </div>
     </div>
 
-    <div class="upsell no-print">
+    <div class="upsell no-print" id="natal-upsell">
       <div class="upsell-title">Задълбочен анализ с натална карта</div>
       <div class="upsell-text">Одитът показва поведенческите модели. Наталната карта показва архетипните — вродените сили и предизвикателства. Заедно дават пълна картина на кой си и защо реагираш така.</div>
-      <button class="btn btn-primary" onclick="alert('Свържи се с нас за натална карта.')">Добави натална карта →</button>
+      <button class="btn btn-primary" onclick="toggleNatalForm()">Добави натална карта →</button>
+
+      <div id="natal-form" style="display:none;margin-top:1.5rem;text-align:left;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <div class="field-label">Дата на раждане</div>
+            <input type="date" id="natal-date" class="textarea" style="padding:10px 12px;height:auto;" max="2010-12-31" min="1930-01-01">
+          </div>
+          <div>
+            <div class="field-label">Час на раждане</div>
+            <input type="time" id="natal-time" class="textarea" style="padding:10px 12px;height:auto;" value="12:00">
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div class="field-label">Град на раждане</div>
+          <input type="text" id="natal-city" class="textarea" style="padding:10px 12px;height:auto;" placeholder="напр. София">
+        </div>
+        <div style="margin-bottom:10px;">
+          <div class="field-label">Държава (код)</div>
+          <input type="text" id="natal-country" class="textarea" style="padding:10px 12px;height:auto;" placeholder="BG" value="BG" maxlength="2" style="text-transform:uppercase;">
+        </div>
+        <button class="btn btn-primary" id="natal-submit-btn" onclick="fetchNatalChart()" style="width:100%;">Изчисли натална карта →</button>
+        <div id="natal-error" style="display:none;color:#A32D2D;font-size:13px;margin-top:8px;"></div>
+      </div>
     </div>
+
+    <div id="natal-results" style="display:none;margin-top:1rem;"></div>
 
     <div class="divider no-print"></div>
     <button class="btn btn-secondary no-print" onclick="location.reload()">Нов одит →</button>
@@ -647,6 +672,84 @@ function copyShareLink(btn) {
     btn.textContent = '✓ Копирано!';
     setTimeout(function() { btn.textContent = 'Копирай линка'; }, 2000);
   });
+}
+
+// ─── НАТАЛНА КАРТА ───────────────────────────────────────────────────────────
+function toggleNatalForm() {
+  const form = document.getElementById('natal-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function fetchNatalChart() {
+  const dateVal = document.getElementById('natal-date').value;
+  const timeVal = document.getElementById('natal-time').value;
+  const city = document.getElementById('natal-city').value.trim();
+  const country = document.getElementById('natal-country').value.trim().toUpperCase();
+  const errEl = document.getElementById('natal-error');
+  errEl.style.display = 'none';
+
+  if (!dateVal || !city) {
+    errEl.textContent = 'Моля въведи дата и град на раждане.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const [year, month, day] = dateVal.split('-').map(Number);
+  const [hour, minute] = (timeVal || '12:00').split(':').map(Number);
+
+  const btn = document.getElementById('natal-submit-btn');
+  btn.disabled = true; btn.textContent = 'Изчислява се...';
+
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/natal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ year, month, day, hour, minute, city, country_code: country || 'BG' })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderNatalResults(data.planets);
+    document.getElementById('natal-upsell').style.display = 'none';
+  } catch(e) {
+    errEl.textContent = 'Грешка: ' + e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Изчисли натална карта →';
+  }
+}
+
+const SIGN_BG = {
+  Aries:'Овен', Taurus:'Телец', Gemini:'Близнаци', Cancer:'Рак',
+  Leo:'Лъв', Virgo:'Дева', Libra:'Везни', Scorpio:'Скорпион',
+  Sagittarius:'Стрелец', Capricorn:'Козирог', Aquarius:'Водолей', Pisces:'Риби'
+};
+const PLANET_BG = {
+  Sun:'☀️ Слънце', Moon:'🌙 Луна', Mercury:'☿ Меркурий', Venus:'♀️ Венера',
+  Mars:'♂️ Марс', Jupiter:'♃ Юпитер', Saturn:'♄ Сатурн', Ascendant:'⬆️ Асцендент'
+};
+
+function renderNatalResults(data) {
+  const container = document.getElementById('natal-results');
+  const points = Array.isArray(data) ? data : (data.subject?.planets || data.planets || []);
+
+  let html = '<div class="card" style="border:2px solid var(--purple-light);">';
+  html += '<div class="card-title" style="margin-bottom:4px;">Натална карта</div>';
+  html += '<div class="card-text" style="margin-bottom:16px;color:var(--purple-text);">Планетите в момента на твоето раждане</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+
+  points.forEach(function(p) {
+    const name = PLANET_BG[p.name] || p.name;
+    const sign = SIGN_BG[p.sign] || p.sign;
+    const deg = p.position ? Math.floor(p.position) + '°' : '';
+    html += '<div style="background:var(--purple-light);border-radius:10px;padding:10px 12px;">';
+    html += '<div style="font-size:12px;color:var(--purple-text);font-weight:500;">' + name + '</div>';
+    html += '<div style="font-size:15px;font-weight:600;margin-top:2px;">' + sign + (deg ? ' ' + deg : '') + '</div>';
+    html += '</div>';
+  });
+
+  html += '</div></div>';
+  container.innerHTML = html;
+  container.style.display = 'block';
+  container.scrollIntoView({ behavior: 'smooth' });
 }
 
 // ─── ИМЕЙЛ ───────────────────────────────────────────────────────────────────
