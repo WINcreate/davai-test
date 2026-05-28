@@ -330,11 +330,18 @@
         </div>
         <div style="margin-bottom:10px;">
           <div class="field-label">Град на раждане</div>
-          <input type="text" id="natal-city" class="textarea" style="padding:10px 12px;height:auto;" placeholder="напр. София">
+          <input type="text" id="natal-city" class="textarea" style="padding:10px 12px;height:auto;" placeholder="напр. Sofia или London">
         </div>
         <div style="margin-bottom:10px;">
-          <div class="field-label">Държава (код)</div>
-          <input type="text" id="natal-country" class="textarea" style="padding:10px 12px;height:auto;" placeholder="BG" value="BG" maxlength="2" style="text-transform:uppercase;">
+          <div class="field-label">Часова зона (UTC офсет)</div>
+          <select id="natal-tzone" class="textarea" style="padding:10px 12px;height:auto;">
+            <option value="2" selected>UTC+2 (България, Гърция)</option>
+            <option value="1">UTC+1 (Германия, Франция)</option>
+            <option value="0">UTC+0 (Великобритания)</option>
+            <option value="3">UTC+3 (Турция, Русия-Москва)</option>
+            <option value="-5">UTC-5 (Ню Йорк)</option>
+            <option value="-8">UTC-8 (Лос Анджелис)</option>
+          </select>
         </div>
         <button class="btn btn-primary" id="natal-submit-btn" onclick="fetchNatalChart()" style="width:100%;">Изчисли натална карта →</button>
         <div id="natal-error" style="display:none;color:#A32D2D;font-size:13px;margin-top:8px;"></div>
@@ -684,7 +691,7 @@ async function fetchNatalChart() {
   const dateVal = document.getElementById('natal-date').value;
   const timeVal = document.getElementById('natal-time').value;
   const city = document.getElementById('natal-city').value.trim();
-  const country = document.getElementById('natal-country').value.trim().toUpperCase();
+  const tzone = document.getElementById('natal-tzone').value;
   const errEl = document.getElementById('natal-error');
   errEl.style.display = 'none';
 
@@ -695,7 +702,7 @@ async function fetchNatalChart() {
   }
 
   const [year, month, day] = dateVal.split('-').map(Number);
-  const [hour, minute] = (timeVal || '12:00').split(':').map(Number);
+  const [hour, min] = (timeVal || '12:00').split(':').map(Number);
 
   const btn = document.getElementById('natal-submit-btn');
   btn.disabled = true; btn.textContent = 'Изчислява се...';
@@ -704,7 +711,7 @@ async function fetchNatalChart() {
     const res = await fetch(CONFIG.workerUrl + '/natal', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ year, month, day, hour, minute, city, country_code: country || 'BG' })
+      body: JSON.stringify({ day, month, year, hour, min, city, tzone })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
@@ -729,17 +736,27 @@ const PLANET_BG = {
 
 function renderNatalResults(data) {
   const container = document.getElementById('natal-results');
-  const points = Array.isArray(data) ? data : (data.subject?.planets || data.planets || []);
+  // western_horoscope returns: { planets: [...], ascendant: {...}, houses: [...] }
+  const planets = data.planets || data || [];
+  const ascendant = data.ascendant;
 
   let html = '<div class="card" style="border:2px solid var(--purple-light);">';
   html += '<div class="card-title" style="margin-bottom:4px;">Натална карта</div>';
   html += '<div class="card-text" style="margin-bottom:16px;color:var(--purple-text);">Планетите в момента на твоето раждане</div>';
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
 
-  points.forEach(function(p) {
+  if (ascendant) {
+    const aSign = SIGN_BG[ascendant.sign] || ascendant.sign;
+    html += '<div style="background:var(--purple-light);border-radius:10px;padding:10px 12px;grid-column:1/-1;">';
+    html += '<div style="font-size:12px;color:var(--purple-text);font-weight:500;">⬆️ Асцендент</div>';
+    html += '<div style="font-size:15px;font-weight:600;margin-top:2px;">' + aSign + '</div>';
+    html += '</div>';
+  }
+
+  planets.forEach(function(p) {
     const name = PLANET_BG[p.name] || p.name;
     const sign = SIGN_BG[p.sign] || p.sign;
-    const deg = p.position ? Math.floor(p.position) + '°' : '';
+    const deg = p.full_degree ? Math.floor(p.full_degree % 30) + '°' : '';
     html += '<div style="background:var(--purple-light);border-radius:10px;padding:10px 12px;">';
     html += '<div style="font-size:12px;color:var(--purple-text);font-weight:500;">' + name + '</div>';
     html += '<div style="font-size:15px;font-weight:600;margin-top:2px;">' + sign + (deg ? ' ' + deg : '') + '</div>';
