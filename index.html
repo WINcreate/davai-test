@@ -145,7 +145,12 @@
     .no-print { display: none !important; }
     #screen-intro,#screen-payment,#screen-areas,#screen-situations,#screen-lessons,#screen-loading { display: none !important; }
     #screen-results { display: block !important; }
-    body { background: white; }
+    body { background: white !important; }
+    .container { padding: 0 !important; max-width: 100% !important; }
+    .card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; margin-bottom: 12px !important; }
+    .brand { font-size: 2rem !important; }
+    .share-block { border: 2px solid #1D9E75 !important; }
+    @page { margin: 20mm; }
   }
   @media (max-width: 480px) {
     .rating-btn { width: 40px; height: 40px; font-size: 13px; }
@@ -325,8 +330,8 @@ const CONFIG = {
   stripePublicKey: 'pk_test_51T5Lz2GlIluEKXB5DzV8meplRSdBN1y0EQWlzj4eVxdYkTZcZr04nZTgHVHY9R1YFvDo7aHKp8xno1Op5cbbf9t300aVJS2CXZ',
   paymentLink: 'https://buy.stripe.com/test_3cI5kDdqEgXA6hAeps7Vm00',
   priceId: 'price_1TX1AQGlIluEKXB5cEyepYhd',
-  // Замени след deploy на Cloudflare Worker:
-  workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev'
+  workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev',
+  siteUrl: 'https://davai.v.bg'
 };
 
 
@@ -624,7 +629,24 @@ function renderResults(d) {
     html += '</ul></div>';
   }
 
+  // Share block
+  html += '<div class="card share-block" style="margin-top:1rem;border:2px solid var(--green-light);background:linear-gradient(135deg,#f0fef8 0%,#fff 100%);">';
+  html += '<div class="card-title" style="margin-bottom:6px;">Знаеш ли някой, на когото би помогнало?</div>';
+  html += '<div class="card-text" style="margin-bottom:14px;">Сподели одита с приятел или близък. Всеки одит е напълно персонализиран и може да промени начина, по който някой вижда живота си.</div>';
+  html += '<div style="padding:10px 14px;background:#f5f5f3;border-radius:8px;font-size:13px;color:#444;word-break:break-all;margin-bottom:12px;letter-spacing:0.01em;"><strong>🔗</strong> ' + CONFIG.siteUrl + '</div>';
+  html += '<div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;">';
+  html += '<a class="btn btn-primary" href="' + CONFIG.siteUrl + '" target="_blank">Вземи твоя одит →</a>';
+  html += '<button class="btn btn-ghost" onclick="copyShareLink(this)">Копирай линка</button>';
+  html += '</div></div>';
+
   document.getElementById('results-content').innerHTML = html;
+}
+
+function copyShareLink(btn) {
+  navigator.clipboard.writeText(CONFIG.siteUrl).then(function() {
+    btn.textContent = '✓ Копирано!';
+    setTimeout(function() { btn.textContent = 'Копирай линка'; }, 2000);
+  });
 }
 
 // ─── ИМЕЙЛ ───────────────────────────────────────────────────────────────────
@@ -659,6 +681,13 @@ async function sendEmail() {
       if (d.evening_routines?.length) emailHtml += '<h2>Вечерни рутини</h2><ul>' + d.evening_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
       if (d.daily_questions?.length) emailHtml += '<h2>Въпроси за всеки ден</h2><ol>' + d.daily_questions.map(q => `<li>${q}</li>`).join('') + '</ol>';
     }
+    // Share block в имейла
+    emailHtml += `<div style="margin-top:28px;padding:24px 20px;background:#E1F5EE;border-radius:14px;text-align:center;">
+      <div style="font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:6px;">Знаеш ли някой, на когото би помогнало?</div>
+      <div style="font-size:14px;color:#555;margin-bottom:16px;line-height:1.6;">Сподели одита с приятел или близък —<br>помагаш му да види честната картина за живота си.</div>
+      <a href="${CONFIG.siteUrl}" style="display:inline-block;padding:12px 28px;background:#1D9E75;color:white;text-decoration:none;border-radius:50px;font-size:14px;font-weight:500;">Вземи твоя одит →</a>
+      <div style="font-size:12px;color:#999;margin-top:12px;">${CONFIG.siteUrl}</div>
+    </div>`;
     const res = await fetch(CONFIG.workerUrl + '/email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
