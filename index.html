@@ -350,6 +350,16 @@
 
     <div id="natal-results" style="display:none;margin-top:1rem;"></div>
 
+    <!-- PERPLEXITY DEEP ANALYSIS -->
+    <div class="upsell no-print" id="perplexity-upsell" style="display:none;">
+      <div class="upsell-title">🔍 Задълбочен анализ — техники и ресурси</div>
+      <div class="upsell-text">Perplexity търси в реални изследвания и книги конкретни техники за твоите модели. Три действия, приложими още днес — плюс библиотека с източници, синтезирани за теб.</div>
+      <button class="btn btn-primary" id="perplexity-btn" onclick="fetchPerplexityAnalysis()">Намери техниките →</button>
+      <div id="perplexity-error" style="display:none;color:#A32D2D;font-size:13px;margin-top:8px;"></div>
+    </div>
+
+    <div id="perplexity-results" style="display:none;margin-top:1rem;"></div>
+
     <div class="divider no-print"></div>
     <button class="btn btn-secondary no-print" onclick="location.reload()">Нов одит →</button>
   </div>
@@ -672,6 +682,11 @@ function renderResults(d) {
   html += '</div></div>';
 
   document.getElementById('results-content').innerHTML = html;
+
+  // Покажи Perplexity бутона след Claude анализа
+  if (d.patterns && d.patterns.length > 0) {
+    document.getElementById('perplexity-upsell').style.display = 'block';
+  }
 }
 
 function copyShareLink(btn) {
@@ -679,6 +694,95 @@ function copyShareLink(btn) {
     btn.textContent = '✓ Копирано!';
     setTimeout(function() { btn.textContent = 'Копирай линка'; }, 2000);
   });
+}
+
+// ─── PERPLEXITY АНАЛИЗ ───────────────────────────────────────────────────────
+async function fetchPerplexityAnalysis() {
+  const btn = document.getElementById('perplexity-btn');
+  const errEl = document.getElementById('perplexity-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '🔍 Търси в реални източници...';
+
+  try {
+    const d = analysisResult;
+    if (!d || !d.patterns) throw new Error('Няма анализ');
+
+    const res = await fetch(CONFIG.workerUrl + '/perplexity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patterns: d.patterns,
+        blind_spots: d.blind_spots || [],
+        top_pattern: d.top_pattern || ''
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderPerplexityResults(data.result);
+    document.getElementById('perplexity-upsell').style.display = 'none';
+  } catch(e) {
+    errEl.textContent = 'Грешка: ' + e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Намери техниките →';
+  }
+}
+
+function renderPerplexityResults(data) {
+  const container = document.getElementById('perplexity-results');
+  if (!data) { container.innerHTML = '<div class="card"><p>Няма резултати.</p></div>'; container.style.display = 'block'; return; }
+
+  let html = '';
+
+  // Техники по модел
+  if (data.techniques_by_pattern?.length) {
+    html += '<div class="card" style="border:2px solid var(--amber);background:linear-gradient(135deg,#fffbf2,#fff);">';
+    html += '<div class="card-title" style="margin-bottom:4px;">🎯 Техники за твоите модели</div>';
+    html += '<div class="card-text" style="margin-bottom:20px;color:var(--amber-text);">Три действия, приложими още днес — от реални изследвания.</div>';
+
+    data.techniques_by_pattern.forEach(function(item) {
+      html += '<div style="margin-bottom:20px;">';
+      html += '<div style="font-weight:600;font-size:15px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">📌 ' + item.pattern + '</div>';
+
+      (item.techniques || []).forEach(function(t, i) {
+        html += '<div style="background:var(--amber);border-radius:12px;padding:14px 16px;margin-bottom:10px;">';
+        html += '<div style="font-weight:600;font-size:14px;margin-bottom:6px;">' + (i+1) + '. ' + t.name + '</div>';
+        html += '<div style="font-size:14px;color:var(--amber-text);margin-bottom:8px;line-height:1.6;">' + t.action + '</div>';
+        html += '<div style="font-style:italic;font-size:13px;color:#6b4c12;margin-bottom:10px;padding:8px;background:rgba(255,255,255,0.5);border-radius:8px;">"' + t.sentence + '"</div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+        html += '<div style="font-size:12px;background:rgba(255,255,255,0.6);border-radius:8px;padding:8px;"><span style="color:#A32D2D;font-weight:600;">✗ Губиш:</span> ' + t.cost + '</div>';
+        html += '<div style="font-size:12px;background:rgba(255,255,255,0.6);border-radius:8px;padding:8px;"><span style="color:#0F6E56;font-weight:600;">✓ Печелиш:</span> ' + t.gain + '</div>';
+        html += '</div></div>';
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Библиотека
+  if (data.library?.length) {
+    html += '<div class="card" style="margin-top:1rem;">';
+    html += '<div class="card-title" style="margin-bottom:4px;">📚 Библиотека за самостоятелна работа</div>';
+    html += '<div class="card-text" style="margin-bottom:16px;">Не е нужно да четеш — стойността е синтезирана за теб.</div>';
+
+    data.library.forEach(function(src) {
+      const typeIcon = src.type === 'книга' ? '📖' : src.type === 'подкаст' ? '🎙️' : '📄';
+      html += '<div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;">';
+      html += '<div style="font-weight:600;font-size:14px;margin-bottom:2px;">' + typeIcon + ' ' + src.source + '</div>';
+      if (src.author) html += '<div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px;">' + src.author + '</div>';
+      html += '<ul style="margin:0 0 10px 16px;font-size:13px;color:var(--text-secondary);line-height:1.7;">';
+      (src.techniques || []).forEach(function(t) { html += '<li>' + t + '</li>'; });
+      html += '</ul>';
+      if (src.sentence) html += '<div style="font-style:italic;font-size:13px;color:var(--text-secondary);padding:8px 12px;background:var(--bg);border-radius:8px;">"' + src.sentence + '"</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+  container.style.display = 'block';
+  container.scrollIntoView({ behavior: 'smooth' });
 }
 
 // ─── НАТАЛНА КАРТА ───────────────────────────────────────────────────────────
