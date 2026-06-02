@@ -352,9 +352,9 @@
 
     <!-- PERPLEXITY DEEP ANALYSIS -->
     <div class="upsell no-print" id="perplexity-upsell" style="display:none;">
-      <div class="upsell-title">🔍 Задълбочен анализ — техники и ресурси</div>
-      <div class="upsell-text">Perplexity търси в реални изследвания и книги конкретни техники за твоите модели. Три действия, приложими още днес — плюс библиотека с източници, синтезирани за теб.</div>
-      <button class="btn btn-primary" id="perplexity-btn" onclick="fetchPerplexityAnalysis()">Намери техниките →</button>
+      <div class="upsell-title">🎯 Конкретни техники от науката</div>
+      <div class="upsell-text">Търси в реални изследвания, книги и подкасти конкретни техники за твоите поведенчески модели. Три действия, приложими още днес — плюс библиотека с източници, синтезирана специално за теб.</div>
+      <button class="btn btn-primary" id="perplexity-btn" onclick="fetchPerplexityAnalysis()">Вземи техниките →</button>
       <div id="perplexity-error" style="display:none;color:#A32D2D;font-size:13px;margin-top:8px;"></div>
     </div>
 
@@ -373,7 +373,7 @@ const CONFIG = {
   paymentLink: 'https://buy.stripe.com/test_3cI5kDdqEgXA6hAeps7Vm00',
   priceId: 'price_1TX1AQGlIluEKXB5cEyepYhd',
   workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev',
-  siteUrl: 'https://davai.v.bg'
+  siteUrl: 'https://wincreate.github.io/davai-test'  // → смени с https://davai.v.bg когато DNS е готов
 };
 
 
@@ -549,7 +549,10 @@ async function generateAnalysis() {
 
 // ─── ПРОМПТЪТ ────────────────────────────────────────────────────────────────
 function buildPrompt(aSum, sSum) {
-  return `Ти си личен одитор на живота. Философия: "Законът на размяната" — всичко има цена, повечето хора плащат грешната цена, защото не виждат ясно.
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  return `Днешна дата: ${today}. Всички срокове и конкретни действия трябва да са СЛЕД тази дата — никога в миналото.
+
+Ти си личен одитор на живота. Философия: "Законът на размяната" — всичко има цена, повечето хора плащат грешната цена, защото не виждат ясно.
 
 МИСИЯ: Дай безкомпромисен, дълбок анализ. Не захаросвай. Говори директно, като близък приятел, който те уважава достатъчно, за да ти каже истината. Езикът е силен, конкретен, без клишета.
 
@@ -821,6 +824,7 @@ async function fetchNatalChart() {
     if (data.error) throw new Error(data.error);
     renderNatalResults(data.planets);
     document.getElementById('natal-upsell').style.display = 'none';
+    fetchNatalAnalysis(data.planets);
   } catch(e) {
     errEl.textContent = 'Грешка: ' + e.message;
     errEl.style.display = 'block';
@@ -886,6 +890,89 @@ function renderNatalResults(data) {
   container.innerHTML = html;
   container.style.display = 'block';
   container.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─── AI АНАЛИЗ НА НАТАЛНАТА КАРТА ────────────────────────────────────────────
+async function fetchNatalAnalysis(planetsData) {
+  const container = document.getElementById('natal-results');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'natal-ai-loading';
+  loadingDiv.className = 'card';
+  loadingDiv.style.cssText = 'border:2px solid var(--purple-light);margin-top:1rem;text-align:center;padding:24px;';
+  loadingDiv.innerHTML = '<div class="card-text" style="color:var(--purple-text);margin-bottom:14px;">🔮 Анализирам наталната карта...</div><div class="dots"><div class="dot" style="background:var(--purple-text)"></div><div class="dot" style="background:var(--purple-text)"></div><div class="dot" style="background:var(--purple-text)"></div></div>';
+  container.appendChild(loadingDiv);
+
+  const allPlanets = (planetsData.planets || []).filter(function(p) { return MAIN_PLANETS.includes(p.name); });
+  const ascDeg = planetsData.ascendant;
+  const mcDeg = planetsData.midheaven;
+  const ascSign = SIGN_BG[degToSign(ascDeg)] || degToSign(ascDeg);
+  const mcSign = SIGN_BG[degToSign(mcDeg)] || degToSign(mcDeg);
+  const planetsText = allPlanets.map(function(p) {
+    return (PLANET_BG[p.name] || p.name).replace(/[^\w\sА-я]/gu,'').trim() + ' в ' + (SIGN_BG[p.sign] || p.sign) + (p.is_retro === 'true' ? ' (ретроградна)' : '');
+  }).join(', ');
+
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  const auditCtx = analysisResult ? '\nОдитът идентифицира основен модел: "' + (analysisResult.top_pattern || '') + '"' : '';
+
+  const prompt = 'Днешна дата: ' + today + '. Ти си астролог-психолог. Анализирай тази натална карта и обясни архетипните сили и предизвикателства на човека.\n\nНАТАЛНА КАРТА:\nАсцендент: ' + ascSign + '\nСреднонебие (MC): ' + mcSign + '\nПланети: ' + planetsText + auditCtx + '\n\nВърни САМО валиден JSON на БЪЛГАРСКИ:\n{\n  "asc_meaning": "2-3 изречения — какво казва асцендентът за личността и начина на представяне пред света",\n  "sun_moon": "2-3 изречения — динамиката между Слънце и Луна — съзнателно и несъзнателно",\n  "key_themes": ["Тема 1 — конкретна сила или предизвикателство", "Тема 2", "Тема 3"],\n  "life_mission": "2-3 изречения — MC и жизненото призвание",\n  "shadow": "2 изречения — какво е в сянката, какво трябва да се интегрира",\n  "practical": "2-3 конкретни съвета как тази карта да се използва като ресурс"\n}';
+
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt, max_tokens: 2000 })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const parsed = JSON.parse(data.content.replace(/```json\n?|```\n?/g, '').trim());
+    renderNatalAnalysis(parsed);
+  } catch(e) {
+    const el = document.getElementById('natal-ai-loading');
+    if (el) el.innerHTML = '<div class="card-text" style="color:var(--red-text);">Грешка при астрологичния анализ: ' + e.message + '</div>';
+  }
+}
+
+function renderNatalAnalysis(d) {
+  let html = '<div class="card" style="border:2px solid var(--purple-light);background:linear-gradient(135deg,#f5f3ff 0%,#fff 100%);margin-top:1rem;">';
+  html += '<div class="card-title" style="color:var(--purple-text);margin-bottom:4px;">🔮 Астрологичен психоанализ</div>';
+  html += '<div class="card-text" style="margin-bottom:18px;color:var(--purple-text);">Архетипните сили и предизвикателства на твоята карта</div>';
+
+  if (d.asc_meaning) {
+    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
+    html += '<div class="summary-label" style="color:var(--purple-text);">Асцендент — как те виждат</div>';
+    html += '<div class="card-text">' + d.asc_meaning + '</div></div>';
+  }
+  if (d.sun_moon) {
+    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
+    html += '<div class="summary-label" style="color:var(--purple-text);">Слънце &amp; Луна — вътрешната динамика</div>';
+    html += '<div class="card-text">' + d.sun_moon + '</div></div>';
+  }
+  if (d.key_themes && d.key_themes.length) {
+    html += '<div style="margin-bottom:16px;"><div class="field-label" style="color:var(--purple-text);margin-bottom:10px;">Ключови теми в картата</div>';
+    d.key_themes.forEach(function(t, i) {
+      html += '<div class="action-item"><div class="action-num" style="background:var(--purple-light);color:var(--purple-text);">' + (i+1) + '</div><div class="action-text">' + t + '</div></div>';
+    });
+    html += '</div>';
+  }
+  if (d.life_mission) {
+    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
+    html += '<div class="summary-label" style="color:var(--purple-text);">Жизнено призвание (MC)</div>';
+    html += '<div class="card-text">' + d.life_mission + '</div></div>';
+  }
+  if (d.shadow) {
+    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
+    html += '<div class="summary-label" style="color:var(--purple-text);">Сянката — за интегриране</div>';
+    html += '<div class="card-text" style="font-style:italic;">' + d.shadow + '</div></div>';
+  }
+  if (d.practical) {
+    html += '<div style="background:var(--purple-light);border-radius:10px;padding:14px 16px;">';
+    html += '<div class="field-label" style="color:var(--purple-text);margin-bottom:8px;">Практически насоки</div>';
+    html += '<div class="card-text">' + d.practical + '</div></div>';
+  }
+  html += '</div>';
+
+  const el = document.getElementById('natal-ai-loading');
+  if (el) el.outerHTML = html;
 }
 
 // ─── ИМЕЙЛ ───────────────────────────────────────────────────────────────────
