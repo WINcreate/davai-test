@@ -181,18 +181,18 @@
   <!-- INTRO -->
   <div id="screen-intro" class="screen active">
     <div class="brand">ДА<span class="brand-accent">ВАЙ</span><span style="color:var(--green)">!</span></div>
-    <div class="brand-sub">Личен одит на живота</div>
-    <p class="intro-text">Честна оценка на седем области от живота ти. Без маски, без извинения. AI анализ на поведенческите модели, персонални рутини и ключови въпроси за всеки ден.</p>
+    <div class="brand-sub">Личен жизнен отчет</div>
+    <p class="intro-text">Честна оценка на седем области от живота ти. AI анализ на поведенческите модели, персонални рутини и ключови въпроси за всеки ден.</p>
     <div class="card" style="background:var(--amber);border-color:transparent;margin-bottom:2rem;">
       <div class="card-text" style="color:var(--amber-text);font-size:13px;">⏱ Около 15–20 минути. Колкото по-честен си, толкова по-точен е анализът.</div>
     </div>
-    <button class="btn btn-primary" onclick="showScreen('payment')">Виж какво включва →</button>
+    <button class="btn btn-primary" onclick="showScreen('payment')">Започни одита →</button>
   </div>
 
   <!-- PAYMENT -->
   <div id="screen-payment" class="screen">
     <div class="brand" style="margin-bottom:4px;">ДА<span class="brand-accent">ВАЙ</span><span style="color:var(--green)">!</span></div>
-    <div class="brand-sub">Личен одит на живота</div>
+    <div class="brand-sub">Личен жизнен отчет</div>
 
     <div class="price-tag"><span class="price-currency">€</span>14.60</div>
     <div class="price-note">≈ 28.55 лв · еднократно плащане · незабавен достъп</div>
@@ -207,7 +207,7 @@
     </ul>
 
     <button class="btn btn-primary" id="checkout-btn" onclick="startCheckout()" style="width:100%;justify-content:center;padding:16px;">
-      Плати и започни одита →
+      Започни одита →
     </button>
     <div class="secure-note">🔒 Плащането е обработено от Stripe. Картовите данни не достигат до нас.</div>
 
@@ -265,7 +265,7 @@
     </div>
     <div class="area-title" style="margin-bottom:1.5rem;">Регрети, гордост и уроци</div>
     <div class="sit-block">
-      <div class="sit-label">Най-големите ти регрети</div>
+      <div class="sit-label">Нещата, за които най-много съжаляваш до момента</div>
       <textarea id="regrets" placeholder="Какво би направил по различен начин? Кое те измъчва когато се сетиш за него?"></textarea>
     </div>
     <div class="sit-block">
@@ -285,8 +285,8 @@
   <!-- LOADING -->
   <div id="screen-loading" class="screen">
     <div class="loading-wrap">
-      <div class="loading-title">Анализирам...</div>
-      <div class="loading-sub">Разглеждам моделите в отговорите ти.</div>
+      <div class="loading-title">Анализираме...</div>
+      <div class="loading-sub">Определяме моделите в отговорите ти.</div>
       <div class="loading-steps">
         <div class="loading-step active" id="lstep-1"><div class="step-dot"></div>Идентифициране на поведенчески модели</div>
         <div class="loading-step" id="lstep-2"><div class="step-dot"></div>Анализ на самозаблудите</div>
@@ -315,7 +315,10 @@
     <div class="upsell no-print" id="natal-upsell">
       <div class="upsell-title">Задълбочен анализ с натална карта</div>
       <div class="upsell-text">Одитът показва поведенческите модели. Наталната карта показва архетипните — вродените сили и предизвикателства. Заедно дават пълна картина на кой си и защо реагираш така.</div>
-      <button class="btn btn-primary" onclick="toggleNatalForm()">Добави натална карта →</button>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="toggleNatalForm()">Добави натална карта →</button>
+        <div style="font-size:13px;color:var(--green-dark);"><span style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;">€7</span> · еднократно</div>
+      </div>
 
       <div id="natal-form" style="display:none;margin-top:1.5rem;text-align:left;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
@@ -554,7 +557,7 @@ function buildPrompt(aSum, sSum) {
 
 Ти си личен одитор на живота. Философия: "Законът на размяната" — всичко има цена, повечето хора плащат грешната цена, защото не виждат ясно.
 
-МИСИЯ: Дай безкомпромисен, дълбок анализ. Не захаросвай. Говори директно, като близък приятел, който те уважава достатъчно, за да ти каже истината. Езикът е силен, конкретен, без клишета.
+МИСИЯ: Дай дълбок, честен анализ. Езикът е уравновесен, топъл и ясен — като добър ментор, не като прокурор. Представяй трудните наблюдения деликатно, но без да ги скриваш. Не захаросвай, но и без болезнена директност. Конкретен, без клишета.
 
 ДАННИ:
 ${aSum}
@@ -583,21 +586,10 @@ ${sSum}
   ],
   "morning_routines": ["Рутина 1 — конкретна за ТОЗИ човек", "Рутина 2", "Рутина 3"],
   "evening_routines": ["Рутина 1 — за слабостите на ТОЗИ човек", "Рутина 2", "Рутина 3"],
-  "daily_questions": ["Въпрос 1 — свързан с основния модел", "Въпрос 2", "Въпрос 3", "Въпрос 4", "Въпрос 5"],
-  "principles": [
-    {
-      "number": 1,
-      "title": "Кратко заглавие (3-5 думи)",
-      "statement": "Аз... — формулировка в първо лице, конкретна и лична",
-      "origin": "1 изречение — от кой точен опит, съжаление или урок идва",
-      "morning_question": "Въпрос за сутринта, директно свързан с принципа"
-    }
-  ]
+  "daily_questions": ["Въпрос 1 — свързан с основния модел", "Въпрос 2", "Въпрос 3", "Въпрос 4", "Въпрос 5"]
 }
 
-КРИТИЧНО: Всичко да е персонализирано за ТОЗИ човек. JSON трябва да е валиден и завършен.
-
-За "principles": Извлечи 5-7 принципа САМО от неговите собствени съжаления, гордост и уроци. НЕ общи принципи от книги. Търси онези убеждения, които той вече е открил чрез живота, но никога не е формулирал официално. Всеки трябва да звучи като негов — конкретен, с неговия глас, свързан с реален момент от живота му.`;
+КРИТИЧНО: Всичко да е персонализирано за ТОЗИ човек. JSON трябва да е валиден и завършен.`;
 }
 
 // ─── РЕНДИРАНЕ ───────────────────────────────────────────────────────────────
@@ -723,6 +715,69 @@ function renderResults(d) {
   if (d.patterns && d.patterns.length > 0) {
     document.getElementById('perplexity-upsell').style.display = 'block';
   }
+
+  // Стартирай принципите като отделна заявка
+  fetchPrinciples();
+}
+
+// ─── ЛИЧЕН КОДЕКС (отделна заявка — избягва 524 timeout) ─────────────────────
+async function fetchPrinciples() {
+  // Добавяме loading placeholder в резултатите
+  const placeholder = document.createElement('div');
+  placeholder.id = 'principles-loading';
+  placeholder.className = 'card';
+  placeholder.style.cssText = 'border:2px solid #2d2d2d;background:#1a1a1a;text-align:center;padding:24px;margin-bottom:14px;';
+  placeholder.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Извличаме личния ти кодекс...</div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+
+  // Вмъкваме преди share блока
+  const shareBlock = document.querySelector('.share-block');
+  if (shareBlock) shareBlock.parentNode.insertBefore(placeholder, shareBlock);
+
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  const prompt = 'Днешна дата: ' + today + '.\n\nТи си психолог и лайф коуч. Имаш следните лични данни на човек:\n\nСЪЖАЛЕНИЯ: ' + answers.regrets + '\n\nГОРДОСТ: ' + answers.proud + '\n\nУРОЦИ ПО ТРУДНИЯ НАЧИН: ' + answers.lessons + '\n\nИзвлечи 5-7 лични принципа, САМО от неговите собствени думи — не общи принципи от книги. Търси убежденията, които той вече е открил чрез опит, но никога не е формулирал официално. Всеки принцип трябва да звучи като негов — с неговия глас, свързан с реален момент.\n\nВърни САМО валиден JSON на БЪЛГАРСКИ:\n{"principles":[{"number":1,"title":"Кратко заглавие (3-5 думи)","statement":"Аз... — формулировка в първо лице","origin":"От кой точен опит или урок идва — 1 изречение","morning_question":"Въпрос за сутринта, директно свързан с принципа"}]}';
+
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt, max_tokens: 3000 })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const parsed = JSON.parse(data.content.replace(/```json\n?|```\n?/g, '').trim());
+    renderPrinciples(parsed.principles || []);
+  } catch(e) {
+    const el = document.getElementById('principles-loading');
+    if (el) el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;">Личният кодекс не успя да се зареди.</div>';
+  }
+}
+
+function renderPrinciples(principles) {
+  if (!principles || !principles.length) {
+    const el = document.getElementById('principles-loading');
+    if (el) el.remove();
+    return;
+  }
+  let html = '<div class="card" style="border:2px solid #1a1a1a;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);color:#fff;">';
+  html += '<div class="card-title" style="color:#fff;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</div>';
+  html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:24px;text-transform:uppercase;letter-spacing:0.06em;">Принципите, открити чрез твоя живот</div>';
+  principles.forEach(function(p) {
+    html += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:20px 0;">';
+    html += '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:10px;">';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-size:2rem;font-weight:600;color:var(--green);line-height:1;flex-shrink:0;">' + p.number + '</div>';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;font-weight:500;color:#fff;line-height:1.3;">' + p.title + '</div>';
+    html += '</div>';
+    html += '<div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.7;margin-bottom:10px;font-style:italic;">' + p.statement + '</div>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Откъде идва</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:12px;">' + p.origin + '</div>';
+    html += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;">';
+    html += '<div style="font-size:11px;color:var(--green);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Сутрешен въпрос</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;">' + p.morning_question + '</div>';
+    html += '</div></div>';
+  });
+  html += '</div>';
+  const el = document.getElementById('principles-loading');
+  if (el) el.outerHTML = html;
 }
 
 function copyShareLink(btn) {
@@ -796,16 +851,19 @@ function renderPerplexityResults(data) {
     html += '</div>';
   }
 
-  // Библиотека
+  // Източници
   if (data.library?.length) {
     html += '<div class="card" style="margin-top:1rem;">';
-    html += '<div class="card-title" style="margin-bottom:4px;">📚 Библиотека за самостоятелна работа</div>';
-    html += '<div class="card-text" style="margin-bottom:16px;">Не е нужно да четеш — стойността е синтезирана за теб.</div>';
+    html += '<div class="card-title" style="margin-bottom:4px;">📚 Препоръчани източници за самостоятелна работа</div>';
+    html += '<div class="card-text" style="margin-bottom:16px;">На база на твоя профил и поведенческите модели, предлагаме следните източници — ключовото е синтезирано за теб.</div>';
 
     data.library.forEach(function(src) {
       const typeIcon = src.type === 'книга' ? '📖' : src.type === 'подкаст' ? '🎙️' : '📄';
       html += '<div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;">';
-      html += '<div style="font-weight:600;font-size:14px;margin-bottom:2px;">' + typeIcon + ' ' + src.source + '</div>';
+      html += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:2px;">';
+      html += '<div style="font-weight:600;font-size:14px;">' + typeIcon + ' ' + src.source + '</div>';
+      if (src.lang) html += '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:' + (src.lang === 'БГ' ? 'var(--green-light)' : 'var(--amber)') + ';color:' + (src.lang === 'БГ' ? 'var(--green-dark)' : 'var(--amber-text)') + ';">' + src.lang + '</span>';
+      html += '</div>';
       if (src.author) html += '<div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px;">' + src.author + '</div>';
       html += '<ul style="margin:0 0 10px 16px;font-size:13px;color:var(--text-secondary);line-height:1.7;">';
       (src.techniques || []).forEach(function(t) { html += '<li>' + t + '</li>'; });
