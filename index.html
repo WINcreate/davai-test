@@ -525,7 +525,7 @@ async function generateAnalysis() {
       const res = await fetch(CONFIG.workerUrl + '/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, max_tokens: 6000 })
+        body: JSON.stringify({ prompt, max_tokens: 8000 })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
@@ -553,43 +553,99 @@ async function generateAnalysis() {
 // ─── ПРОМПТЪТ ────────────────────────────────────────────────────────────────
 function buildPrompt(aSum, sSum) {
   const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
-  return `Днешна дата: ${today}. Всички срокове и конкретни действия трябва да са СЛЕД тази дата — никога в миналото.
+  return `Днешна дата: ${today}. Всички срокове трябва да са СЛЕД тази дата — никога в миналото.
 
-Ти си личен одитор на живота. Философия: "Законът на размяната" — всичко има цена, повечето хора плащат грешната цена, защото не виждат ясно.
+Ти си личен одитор на живота, обучен в психология, поведенчески науки и философията на даването. Мисията ти е да дадеш анализ, по-честен, по-дълбок и по-полезен от всичко чуто досега — като близък приятел с психологическо образование. Директен, топъл, без захаросване.
 
-МИСИЯ: Дай дълбок, честен анализ. Езикът е уравновесен, топъл и ясен — като добър ментор, не като прокурор. Представяй трудните наблюдения деликатно, но без да ги скриваш. Не захаросвай, но и без болезнена директност. Конкретен, без клишета.
+ФИЛОСОФИЯ: Всичко има цена. Повечето хора плащат грешната — не от лошо намерение, а от липса на яснота. Даването е изкуство: на внимание, усилие, присъствие, честност. Колкото по-добре разбира себе си, толкова по-добре може да дава — и животът му отвръща.
 
-ДАННИ:
+ДАННИ ОТ ОДИТА:
 ${aSum}
 
-СИТУАЦИИ:
+СИТУАЦИИ НА ЗАСЯДАНЕ:
 ${sSum}
 
-РЕГРЕТИ: ${answers.regrets}
+СЪЖАЛЕНИЯ: ${answers.regrets}
 ГОРДОСТ: ${answers.proud}
 УРОЦИ: ${answers.lessons}
 
-Върни САМО валиден JSON без markdown. Бъди КРАТЪК — max 2 изречения на поле, max 2 действия на секция:
+АНАЛИЗИРАЙ ПРЕЗ ЧЕТИРИ ПСИХОЛОГИЧЕСКИ ЛЕЩИ:
+
+ЛЕЩА 1 — СТИЛ НА ПРИВЪРЗАНОСТ
+Идентифицирай стила (Сигурен / Тревожен / Избягващ / Дезорганизиран) и обясни как се проявява в конкретните отговори.
+
+ЛЕЩА 2 — ЛОКУС НА КОНТРОЛ
+Определи (Вътрешен / Външен / Смесен) и покажи конкретно как се вижда в работата, финансите и отношенията.
+
+ЛЕЩА 3 — СХЕМА НА ДАВАНЕ
+Анализирай от каква позиция дава (От страх / От дълг / От изтощение / От пълнота) и каква цена плаща за това.
+
+ЛЕЩА 4 — ОСНОВНА ПСИХОЛОГИЧЕСКА СХЕМА
+Идентифицирай доминиращата схема (Хиперконтрол/перфекционизъм, Самосаботаж, Синдром на измамника, Избягване на конфликти, Нужда от одобрение, Прокрастинация като защита, Мисловни капани). Обясни произхода и как управлява решенията днес.
+
+ВЪРНИ САМО ВАЛИДЕН JSON БЕЗ НИКАКЪВ ДРУГ ТЕКСТ:
 
 {
-  "summary": "4-5 изречения — кой е този човек, основната тема, каква цена плаща. Директно.",
-  "summary_actions": ["Действие 1 — конкретно, тази седмица", "Действие 2", "Действие 3"],
-  "top_pattern": "1 изречение — най-силният модел",
+  "summary": "8-10 изречения — кой е този човек, какво го движи в дълбочина, основната тема, каква цена плаща и за какво, от каква позиция дава. Деликатно, но директно — без захаросване.",
+  "summary_actions": [
+    "Конкретно действие 1 — специфично, с дата след ${today}, свързано с основния модел",
+    "Конкретно действие 2",
+    "Конкретно действие 3"
+  ],
+  "top_pattern": "1 изречение — най-силният модел, управляващ живота му",
+  "psychological_profile": {
+    "attachment_style": "Стилът на привързаност с 2 изречения — конкретно от неговите отговори",
+    "locus_of_control": "Локусът с конкретен пример от работата, финансите или отношенията",
+    "giving_schema": "Схемата на даване — от какво дава и каква цена плаща",
+    "core_schema": "Основната психологическа схема с кратко обяснение как се е формирала"
+  },
   "patterns": [
-    {"title": "Заглавие", "description": "2 изречения — какво прави и каква цена плаща", "severity": "high или medium"}
+    {
+      "title": "Заглавие на модела",
+      "description": "4-5 изречения — какво прави, защо, каква цена плаща, скрита полза, проявление в отговорите",
+      "severity": "high или medium",
+      "psychological_root": "Психологическият корен — 1 изречение"
+    }
   ],
   "blind_spots": [
-    {"area": "Областта", "insight": "1-2 изречения — точно каде се лъже"}
+    {
+      "area": "Областта",
+      "insight": "3 изречения — историята която си разказва, реалността, каква цена плаща"
+    }
   ],
   "areas": [
-    {"name": "Областта", "score": числото, "insight": "1-2 изречения", "actions": ["Действие 1 с дата", "Действие 2"]}
+    {
+      "name": "Точното ime на областта",
+      "score": числото,
+      "insight": "2-3 изречения с психологически контекст и връзка с основния модел",
+      "actions": ["Действие 1 с конкретна дата", "Действие 2", "Действие 3"]
+    }
   ],
-  "morning_routines": ["Рутина 1 — конкретна за ТОЗИ човек", "Рутина 2", "Рутина 3"],
-  "evening_routines": ["Рутина 1 — за слабостите на ТОЗИ човек", "Рутина 2", "Рутина 3"],
-  "daily_questions": ["Въпрос 1 — свързан с основния модел", "Въпрос 2", "Въпрос 3", "Въпрос 4", "Въпрос 5"]
+  "giving_analysis": {
+    "current_giving": "2-3 изречения — как дава в момента и на кого",
+    "giving_cost": "1-2 изречения — каква цена плаща за начина на даване",
+    "giving_invitation": "3-4 изречения — как би изглеждало даването от пълнота за ТОЗИ конкретен човек"
+  },
+  "morning_routines": [
+    "Рутина 1 — конкретна за ТОЗИ човек, с обяснение защо точно тя",
+    "Рутина 2",
+    "Рутина 3"
+  ],
+  "evening_routines": [
+    "Рутина 1 — насочена към психологическите нужди на ТОЗИ човек",
+    "Рутина 2",
+    "Рутина 3"
+  ],
+  "daily_questions": [
+    "Въпрос 1 — дълбок, свързан с основната схема и даването",
+    "Въпрос 2",
+    "Въпрос 3",
+    "Въпрос 4",
+    "Въпрос 5"
+  ]
 }
 
-КРИТИЧНО: Всичко да е персонализирано за ТОЗИ човек. JSON трябва да е валиден и завършен.`;
+КРИТИЧНО: Всяка секция — персонализирана за ТОЗИ човек с конкретни примери от отговорите. JSON валиден и завършен.`;
 }
 
 // ─── РЕНДИРАНЕ ───────────────────────────────────────────────────────────────
@@ -623,11 +679,36 @@ function renderResults(d) {
     html += '<div class="card-text" style="font-style:italic;font-size:15px;">"' + d.top_pattern + '"</div></div>';
   }
 
+  // Психологически профил (нов)
+  if (d.psychological_profile) {
+    const pp = d.psychological_profile;
+    html += '<div class="card" style="border:2px solid var(--purple-light);">';
+    html += '<div class="card-title" style="color:var(--purple-text);margin-bottom:16px;">🧠 Психологически профил</div>';
+    const profileItems = [
+      { label: 'Стил на привързаност', value: pp.attachment_style },
+      { label: 'Локус на контрол', value: pp.locus_of_control },
+      { label: 'Схема на даване', value: pp.giving_schema },
+      { label: 'Основна схема', value: pp.core_schema }
+    ];
+    profileItems.forEach(function(item) {
+      if (!item.value) return;
+      html += '<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--purple-text);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + item.label + '</div>';
+      html += '<div class="card-text">' + item.value + '</div></div>';
+    });
+    html += '</div>';
+  }
+
   if (d.patterns?.length) {
     html += '<div class="card"><div class="card-title">Поведенческите модели</div>';
     d.patterns.forEach(p => {
-      html += '<div style="margin-bottom:16px;"><span class="tag ' + (p.severity === 'high' ? 'tag-red' : 'tag-amber') + '">' + p.title + '</span>';
-      html += '<div class="card-text">' + p.description + '</div></div>';
+      html += '<div style="margin-bottom:18px;">';
+      html += '<span class="tag ' + (p.severity === 'high' ? 'tag-red' : 'tag-amber') + '">' + p.title + '</span>';
+      html += '<div class="card-text" style="margin-bottom:8px;">' + p.description + '</div>';
+      if (p.psychological_root) {
+        html += '<div style="font-size:12px;color:var(--purple-text);background:var(--purple-light);border-radius:8px;padding:6px 10px;display:inline-block;">🔍 ' + p.psychological_root + '</div>';
+      }
+      html += '</div>';
     });
     html += '</div>';
   }
@@ -638,6 +719,29 @@ function renderResults(d) {
       html += '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">' + b.area + '</div>';
       html += '<div class="card-text">' + b.insight + '</div></div>';
     });
+    html += '</div>';
+  }
+
+  // Анализ на даването (нов)
+  if (d.giving_analysis) {
+    const ga = d.giving_analysis;
+    html += '<div class="card" style="border-left:3px solid var(--green);">';
+    html += '<div class="card-title" style="margin-bottom:16px;">🤲 Твоята схема на даване</div>';
+    if (ga.current_giving) {
+      html += '<div class="summary-block" style="margin-bottom:14px;">';
+      html += '<div class="summary-label">Как даваш сега</div>';
+      html += '<div class="card-text">' + ga.current_giving + '</div></div>';
+    }
+    if (ga.giving_cost) {
+      html += '<div style="background:var(--red-light);border-radius:10px;padding:12px 14px;margin-bottom:14px;">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--red-text);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Цената, която плащаш</div>';
+      html += '<div class="card-text">' + ga.giving_cost + '</div></div>';
+    }
+    if (ga.giving_invitation) {
+      html += '<div style="background:var(--green-light);border-radius:10px;padding:12px 14px;">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Даването от пълнота — как би изглеждало</div>';
+      html += '<div class="card-text">' + ga.giving_invitation + '</div></div>';
+    }
     html += '</div>';
   }
 
@@ -1091,8 +1195,23 @@ async function sendEmail() {
       if (d.summary) emailHtml += `<h2>Обобщение</h2><p>${d.summary}</p>`;
       if (d.top_pattern) emailHtml += `<h2>Основен модел</h2><p><em>"${d.top_pattern}"</em></p>`;
       if (d.summary_actions?.length) emailHtml += '<h2>Три стъпки</h2><ol>' + d.summary_actions.map(a => `<li>${a}</li>`).join('') + '</ol>';
-      if (d.patterns?.length) { emailHtml += '<h2>Поведенчески модели</h2>'; d.patterns.forEach(p => { emailHtml += `<h3>${p.title}</h3><p>${p.description}</p>`; }); }
+      if (d.psychological_profile) {
+        const pp = d.psychological_profile;
+        emailHtml += '<h2>Психологически профил</h2>';
+        if (pp.attachment_style) emailHtml += `<p><strong>Стил на привързаност:</strong> ${pp.attachment_style}</p>`;
+        if (pp.locus_of_control) emailHtml += `<p><strong>Локус на контрол:</strong> ${pp.locus_of_control}</p>`;
+        if (pp.giving_schema) emailHtml += `<p><strong>Схема на даване:</strong> ${pp.giving_schema}</p>`;
+        if (pp.core_schema) emailHtml += `<p><strong>Основна схема:</strong> ${pp.core_schema}</p>`;
+      }
+      if (d.patterns?.length) { emailHtml += '<h2>Поведенчески модели</h2>'; d.patterns.forEach(p => { emailHtml += `<h3>${p.title}</h3><p>${p.description}</p>`; if (p.psychological_root) emailHtml += `<p><em>Корен: ${p.psychological_root}</em></p>`; }); }
       if (d.blind_spots?.length) { emailHtml += '<h2>Където се лъжеш</h2>'; d.blind_spots.forEach(b => { emailHtml += `<h3>${b.area}</h3><p>${b.insight}</p>`; }); }
+      if (d.giving_analysis) {
+        const ga = d.giving_analysis;
+        emailHtml += '<h2>Твоята схема на даване</h2>';
+        if (ga.current_giving) emailHtml += `<p><strong>Как даваш сега:</strong> ${ga.current_giving}</p>`;
+        if (ga.giving_cost) emailHtml += `<p><strong>Цената:</strong> ${ga.giving_cost}</p>`;
+        if (ga.giving_invitation) emailHtml += `<p><strong>Даването от пълнота:</strong> ${ga.giving_invitation}</p>`;
+      }
       if (d.areas?.length) { emailHtml += '<h2>Анализ по области</h2>'; d.areas.forEach(a => { emailHtml += `<h3>${a.name} — ${a.score}/10</h3><p>${a.insight}</p>`; if (a.actions?.length) emailHtml += '<ul>' + a.actions.map(x => `<li>${x}</li>`).join('') + '</ul>'; }); }
       if (d.morning_routines?.length) emailHtml += '<h2>Сутрешни рутини</h2><ul>' + d.morning_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
       if (d.evening_routines?.length) emailHtml += '<h2>Вечерни рутини</h2><ul>' + d.evening_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
