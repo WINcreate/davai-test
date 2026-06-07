@@ -266,7 +266,7 @@
       <div class="phase-chip done">2. Ситуации</div>
       <div class="phase-chip active">3. Уроци</div>
     </div>
-    <div class="area-title" style="margin-bottom:1.5rem;">Регрети, гордост и уроци</div>
+    <div class="area-title" style="margin-bottom:1.5rem;">Съжаления, Гордост и Уроци</div>
     <div class="sit-block">
       <div class="sit-label">Нещата, за които най-много съжаляваш до момента</div>
       <textarea id="regrets" placeholder="Какво би направил по различен начин? Кое те измъчва когато се сетиш за него?"></textarea>
@@ -529,7 +529,7 @@ async function generateAnalysis() {
       const res = await fetch(CONFIG.workerUrl + '/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, max_tokens: 5000 })
+        body: JSON.stringify({ prompt, max_tokens: 6000 })
       });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
