@@ -319,7 +319,7 @@
       <div class="upsell-title">Задълбочен анализ с натална карта</div>
       <div class="upsell-text">Одитът показва поведенческите модели. Наталната карта показва архетипните — вродените сили и предизвикателства. Заедно дават пълна картина на кой си и защо реагираш така.</div>
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-        <button class="btn btn-primary" onclick="toggleNatalForm()">Добави натална карта →</button>
+        <button class="btn btn-primary" onclick="payForNatal()">Добави натална карта →</button>
         <div style="font-size:13px;color:var(--green-dark);"><span style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;">€8,90</span> · еднократно</div>
       </div>
 
@@ -378,6 +378,7 @@
 const CONFIG = {
   stripePublicKey: 'pk_test_51T5Lz2GlIluEKXB5DzV8meplRSdBN1y0EQWlzj4eVxdYkTZcZr04nZTgHVHY9R1YFvDo7aHKp8xno1Op5cbbf9t300aVJS2CXZ',
   paymentLink: 'https://buy.stripe.com/test_3cI5kDdqEgXA6hAeps7Vm00',
+  natalPaymentLink: 'NATAL_PAYMENT_LINK_HERE', // → Stripe link €8,90, success URL: https://davai.v.bg?natal=success
   priceId: 'price_1TX1AQGlIluEKXB5cEyepYhd',
   workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev',
   siteUrl: 'https://wincreate.github.io/davai-test'  // → смени с https://davai.v.bg когато DNS е готов
@@ -434,9 +435,43 @@ async function checkPaymentReturn() {
   } else if (status === 'cancelled') {
     window.history.replaceState({}, document.title, window.location.pathname);
     showScreen('payment');
+  } else if (params.get('natal') === 'success') {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    try {
+      const savedResult = sessionStorage.getItem('davai_analysis');
+      const savedAnswers = sessionStorage.getItem('davai_answers');
+      if (savedResult) {
+        analysisResult = JSON.parse(savedResult);
+        answers = JSON.parse(savedAnswers || '{}');
+        paymentVerified = true;
+        renderResults(analysisResult);
+        setTimeout(function() {
+          const upsell = document.getElementById('natal-upsell');
+          if (upsell) { upsell.style.display = 'block'; }
+          toggleNatalForm();
+          document.getElementById('natal-upsell').scrollIntoView({ behavior: 'smooth' });
+        }, 400);
+      } else {
+        showScreen('intro');
+      }
+    } catch(e) { showScreen('intro'); }
   }
 }
 
+
+// ─── НАТАЛНА КАРТА — ПЛАЩАНЕ ─────────────────────────────────────────────────
+function payForNatal() {
+  if (!CONFIG.natalPaymentLink || CONFIG.natalPaymentLink === 'NATAL_PAYMENT_LINK_HERE') {
+    // Без конфигуриран линк — показва формата директно (за тест)
+    toggleNatalForm();
+    return;
+  }
+  try {
+    sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
+    sessionStorage.setItem('davai_answers', JSON.stringify(answers));
+  } catch(e) {}
+  window.location.href = CONFIG.natalPaymentLink;
+}
 
 // ─── ОБЛАСТИ ─────────────────────────────────────────────────────────────────
 function buildSituations() {
@@ -1239,9 +1274,17 @@ async function sendEmail() {
     }
     // Натална карта в имейла (ако е заредена)
     const natalEl = document.getElementById('natal-results');
-    if (natalEl && natalEl.innerHTML.trim()) {
-      emailHtml += '<h2 style="margin-top:24px;">🔮 Астрологичен анализ</h2>';
-      emailHtml += '<div style="border:1px solid #e0d9ff;border-radius:12px;padding:20px;background:#f8f6ff;">' + natalEl.innerText + '</div>';
+    if (natalEl && natalEl.innerText.trim()) {
+      emailHtml += '<div style="margin-top:24px;padding:20px;border:1px solid #e0d9ff;border-radius:12px;background:#f8f6ff;">';
+      emailHtml += '<h2 style="color:#4A3BAA;font-size:16px;margin-bottom:12px;">🔮 Астрологичен анализ</h2>';
+      emailHtml += '<pre style="font-family:-apple-system,sans-serif;font-size:13px;color:#333;white-space:pre-wrap;line-height:1.7;">' + natalEl.innerText + '</pre></div>';
+    }
+    // Техники (Perplexity) в имейла (ако са заредени)
+    const perpEl = document.getElementById('perplexity-results');
+    if (perpEl && perpEl.innerText.trim()) {
+      emailHtml += '<div style="margin-top:24px;padding:20px;border:1px solid #f0d898;border-radius:12px;background:#fffbf2;">';
+      emailHtml += '<h2 style="color:#854F0B;font-size:16px;margin-bottom:12px;">🎯 Конкретни техники и препоръчани източници</h2>';
+      emailHtml += '<pre style="font-family:-apple-system,sans-serif;font-size:13px;color:#333;white-space:pre-wrap;line-height:1.7;">' + perpEl.innerText + '</pre></div>';
     }
     // Share block в имейла
     emailHtml += `<div style="margin-top:28px;padding:24px 20px;background:#E1F5EE;border-radius:14px;text-align:center;">
