@@ -667,23 +667,32 @@ function buildPromptAreas(aSum, sSum) {
 
 Ти си личен одитор — говориш ДИРЕКТНО (второ лице). Чист БЪЛГАРСКИ.
 
-ДАННИ:
+ДАННИ (включва самооценката на клиента):
 ${aSum}
 
 СЪЖАЛЕНИЯ: ${answers.regrets}
 ГОРДОСТ: ${answers.proud}
 УРОЦИ: ${answers.lessons}
 
+ВАЖНО — РЕАЛНА ОЦЕНКА: За всяка от 7-те области прецени обективно дали описанието оправдава по-висока оценка от дадената. Ако клиентът се е подценил с 2 или повече точки — вписвай "assessed_score" и "encouragement". Прави го САМО при съществена разлика и САМО ако реалната е по-висока. Ако разликата е под 2 точки или реалната е по-ниска — assessed_score: null.
+
 ВЪРНИ САМО ВАЛИДЕН JSON:
 {
   "areas": [
-    {"name": "Точното име на областта", "score": числото, "insight": "2 изречения директно към него.", "actions": ["Действие 1 с дата след ${today}", "Действие 2", "Действие 3"]}
+    {
+      "name": "Точното ime на областта",
+      "score": числото_на_клиента,
+      "assessed_score": числото_от_анализа_ако_е_с_2+_точки_по-голямо (иначе null),
+      "encouragement": "1-2 изречения директно: 'Виждам, че се оцени на X, но реалността показва...' Окуражи го да види постиженията си. САМО ако assessed_score съществува, иначе null.",
+      "insight": "2 изречения директно.",
+      "actions": ["Действие 1 с дата след ${today}", "Действие 2", "Действие 3"]
+    }
   ],
   "morning_routines": ["Рутина 1 — конкретна за теб", "Рутина 2", "Рутина 3"],
   "evening_routines": ["Рутина 1 — за твоите нужди", "Рутина 2", "Рутина 3"],
   "daily_questions": ["Въпрос 1 — свързан с основния ти модел", "Въпрос 2", "Въпрос 3", "Въпрос 4", "Въпрос 5"]
 }
-Включи ВСИЧКИТЕ 7 области. Max 2 изречения на insight. JSON завършен.`;
+Включи ВСИЧКИТЕ 7 области. Max 2 изречения на поле. JSON завършен.`;
 }
 
 // ─── РЕНДИРАНЕ ───────────────────────────────────────────────────────────────
@@ -786,9 +795,24 @@ function renderResults(d) {
   if (d.areas?.length) {
     html += '<div class="card"><div class="card-title">Анализ по области</div>';
     d.areas.forEach(a => {
+      const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
       html += '<div class="area-result"><div class="area-result-header">';
       html += '<div class="area-result-name">' + a.name + '</div>';
-      html += '<span class="score-badge ' + scoreClass(a.score || 0) + '">' + (a.score || 0) + '/10</span></div>';
+      if (hasGap) {
+        html += '<div style="display:flex;align-items:center;gap:8px;">';
+        html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score || 0) + '/10</span>';
+        html += '<span class="score-badge score-high" style="font-size:13px;padding:5px 14px;">▲ ' + a.assessed_score + '/10</span>';
+        html += '</div>';
+      } else {
+        html += '<span class="score-badge ' + scoreClass(a.score || 0) + '">' + (a.score || 0) + '/10</span>';
+      }
+      html += '</div>';
+      if (hasGap && a.encouragement) {
+        html += '<div style="background:var(--green-light);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:10px;">';
+        html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Реалната картина</div>';
+        html += '<div style="font-size:13px;color:var(--green-dark);line-height:1.6;">' + a.encouragement + '</div>';
+        html += '</div>';
+      }
       if (a.insight) html += '<div class="area-insight">' + a.insight + '</div>';
       (a.actions || []).forEach((act, i) => {
         html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div><div class="action-text">' + act + '</div></div>';
