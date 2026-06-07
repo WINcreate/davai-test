@@ -182,9 +182,12 @@
   <div id="screen-intro" class="screen active">
     <div class="brand">ДА<span class="brand-accent">ВАЙ</span><span style="color:var(--green)">!</span></div>
     <div class="brand-sub">Личен жизнен отчет</div>
-    <p class="intro-text">Честна оценка на седем области от живота ти. AI анализ на поведенческите модели, персонални рутини и ключови въпроси за всеки ден.</p>
-    <div class="card" style="background:var(--amber);border-color:transparent;margin-bottom:2rem;">
+    <p class="intro-text">Честна оценка на седем области от живота ти. Задълбочен анализ на поведенческите модели, персонални рутини и ключови въпроси за всеки ден.</p>
+    <div class="card" style="background:var(--amber);border-color:transparent;margin-bottom:1rem;">
       <div class="card-text" style="color:var(--amber-text);font-size:13px;">⏱ Около 15–20 минути. Колкото по-честен си, толкова по-точен е анализът.</div>
+    </div>
+    <div class="card" style="border-color:var(--border);margin-bottom:2rem;padding:14px 18px;">
+      <div class="card-text" style="font-size:13px;line-height:1.7;">🔒 Изследването е напълно <strong style="color:var(--green);">анонимно</strong>. Данните, които предоставяш, <em>не се запазват</em> при нас.</div>
     </div>
     <button class="btn btn-primary" onclick="showScreen('payment')">Започни одита →</button>
   </div>
@@ -356,7 +359,8 @@
     <!-- PERPLEXITY DEEP ANALYSIS -->
     <div class="upsell no-print" id="perplexity-upsell" style="display:none;">
       <div class="upsell-title">🎯 Конкретни техники от науката</div>
-      <div class="upsell-text">Търси в реални изследвания, книги и подкасти конкретни техники за твоите поведенчески модели. Три действия, приложими още днес — плюс библиотека с източници, синтезирана специално за теб.</div>
+      <div class="upsell-text">Търсим в реални изследвания, книги и подкасти конкретни техники за твоите поведенчески модели. Три действия, приложими още днес — плюс библиотека с източници, синтезирана специално за теб.</div>
+      <div style="font-size:13px;color:var(--green-dark);font-weight:500;margin-bottom:14px;">🎁 Даваме ги като <strong>БОНУС</strong> за теб — <em>ДАВАЙ напред и ти!</em></div>
       <button class="btn btn-primary" id="perplexity-btn" onclick="fetchPerplexityAnalysis()">Вземи техниките →</button>
       <div id="perplexity-error" style="display:none;color:#A32D2D;font-size:13px;margin-top:8px;"></div>
     </div>
@@ -539,7 +543,8 @@ async function generateAnalysis() {
     }
 
     clearInterval(loadingTimer);
-    const parsed = JSON.parse(txt.replace(/```json|```/g, '').trim());
+    const parsed = repairAndParseJSON(txt);
+    if (!parsed) throw new Error('Неуспешен JSON анализ — опитай отново.');
     analysisResult = parsed;
     renderResults(parsed);
   } catch(e) {
@@ -548,6 +553,30 @@ async function generateAnalysis() {
     document.getElementById('results-content').innerHTML =
       '<div class="card"><div class="card-title">Грешка</div><div class="card-text">Нещо се обърка: ' + e.message + '</div></div>';
   }
+}
+
+// ─── JSON REPAIR ─────────────────────────────────────────────────────────────
+function repairAndParseJSON(txt) {
+  txt = txt.replace(/```json\n?|```\n?/g, '').trim();
+  // Опит 1: директно парсване
+  try { return JSON.parse(txt); } catch(e) {}
+  // Опит 2: намери последния затворен root обект { }
+  let depth = 0, inStr = false, escaped = false, lastClose = -1;
+  const start = txt.indexOf('{');
+  if (start === -1) return null;
+  for (let i = start; i < txt.length; i++) {
+    const c = txt[i];
+    if (escaped) { escaped = false; continue; }
+    if (c === '\\' && inStr) { escaped = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) lastClose = i; }
+  }
+  if (lastClose > start) {
+    try { return JSON.parse(txt.slice(start, lastClose + 1)); } catch(e) {}
+  }
+  return null;
 }
 
 // ─── ПРОМПТЪТ ────────────────────────────────────────────────────────────────
@@ -887,7 +916,7 @@ async function fetchPerplexityAnalysis() {
   const errEl = document.getElementById('perplexity-error');
   errEl.style.display = 'none';
   btn.disabled = true;
-  btn.textContent = '🔍 Търси в реални източници...';
+  btn.textContent = '🔍 Търсим в реални източници...';
 
   try {
     const d = analysisResult;
@@ -1084,7 +1113,7 @@ async function fetchNatalAnalysis(planetsData) {
   loadingDiv.id = 'natal-ai-loading';
   loadingDiv.className = 'card';
   loadingDiv.style.cssText = 'border:2px solid var(--purple-light);margin-top:1rem;text-align:center;padding:24px;';
-  loadingDiv.innerHTML = '<div class="card-text" style="color:var(--purple-text);margin-bottom:14px;">🔮 Анализирам наталната карта...</div><div class="dots"><div class="dot" style="background:var(--purple-text)"></div><div class="dot" style="background:var(--purple-text)"></div><div class="dot" style="background:var(--purple-text)"></div></div>';
+  loadingDiv.innerHTML = '<div class="card-text" style="color:var(--purple-text);margin-bottom:14px;">🔮 Анализираме наталната карта.</div><div class="dots"><div class="dot" style="background:var(--purple-text)"></div><div class="dot" style="background:var(--purple-text)"></div><div class="dot" style="background:var(--purple-text)"></div></div>';
   container.appendChild(loadingDiv);
 
   const allPlanets = (planetsData.planets || []).filter(function(p) { return MAIN_PLANETS.includes(p.name); });
@@ -1223,6 +1252,12 @@ async function sendEmail() {
         });
         emailHtml += '</div>';
       }
+    }
+    // Натална карта в имейла (ако е заредена)
+    const natalEl = document.getElementById('natal-results');
+    if (natalEl && natalEl.innerHTML.trim()) {
+      emailHtml += '<h2 style="margin-top:24px;">🔮 Астрологичен анализ</h2>';
+      emailHtml += '<div style="border:1px solid #e0d9ff;border-radius:12px;padding:20px;background:#f8f6ff;">' + natalEl.innerText + '</div>';
     }
     // Share block в имейла
     emailHtml += `<div style="margin-top:28px;padding:24px 20px;background:#E1F5EE;border-radius:14px;text-align:center;">
