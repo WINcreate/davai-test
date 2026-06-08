@@ -158,6 +158,20 @@
     .routine-grid { grid-template-columns: 1fr; }
     .price-tag { font-size: 2.8rem; }
   }
+
+  /* ── ГЛАСОВО ВЪВЕЖДАНЕ ── */
+  .voice-btn-wrap { margin: -6px 0 1.5rem; }
+  .voice-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 7px 16px; color: var(--text-tertiary); border: 1px solid var(--border); background: transparent; border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .voice-btn:hover { color: var(--green); border-color: var(--green); background: var(--green-light); }
+  .voice-message { font-size: 13px; color: var(--green-dark); background: var(--green-light); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; line-height: 1.6; }
+  .voice-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .voice-timer-wrap { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+  .voice-timer-svg { width: 52px; height: 52px; transform: rotate(-90deg); }
+  .voice-timer-bg { fill: none; stroke: var(--border); stroke-width: 3; }
+  .voice-timer-fill { fill: none; stroke: var(--green); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 119.4; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
+  .voice-timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 10px; font-weight: 600; color: var(--green); font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .voice-stop-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 7px 14px; background: var(--red-light); color: var(--red-text); border: 1px solid var(--red-text); border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .voice-add-btn { font-size: 12px; padding: 6px 12px; background: var(--amber); color: var(--amber-text); border: 1px solid var(--amber-text); border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
 </style>
 </head>
 <body>
@@ -411,9 +425,11 @@ let analysisResult = null;
 
 // ─── НАВИГАЦИЯ ───────────────────────────────────────────────────────────────
 function showScreen(id) {
+  stopVoice();
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
   window.scrollTo(0, 0);
+  setTimeout(initVoiceInputs, 50);
 }
 
 // ─── STRIPE CHECKOUT ─────────────────────────────────────────────────────────
@@ -496,6 +512,7 @@ function renderArea() {
     '<button class="rating-btn' + (saved === n ? ' selected' : '') + '" onclick="selectRating(' + n + ')">' + n + '</button>'
   ).join('');
   document.getElementById('btn-back').style.visibility = current === 0 ? 'hidden' : 'visible';
+  setTimeout(initVoiceInputs, 50);
 }
 
 function selectRating(n) {
@@ -1330,6 +1347,116 @@ async function sendEmail() {
     btn.textContent = 'Грешка — опитай пак';
     btn.disabled = false;
   }
+}
+
+// ─── ГЛАСОВО ВЪВЕЖДАНЕ ───────────────────────────────────────────────────────
+const VOICE_DURATIONS = {
+  'area-desc': 120,
+  'sit-1': 180, 'sit-2': 180, 'sit-3': 180, 'sit-4': 180, 'sit-5': 180,
+  'regrets': 180, 'proud': 120, 'lessons-text': 180
+};
+const VOICE_CIRC = 119.4;
+let voiceRec = null, voiceTimerInt = null;
+let voiceSecondsLeft = 0, voiceTotal = 0, voiceOrigDur = 0;
+let voiceTargetId = null, voiceFinal = '';
+
+function initVoiceInputs() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  Object.keys(VOICE_DURATIONS).forEach(function(id) {
+    const ta = document.getElementById(id);
+    if (!ta) return;
+    if (document.getElementById('voice-wrap-' + id)) return;
+    const dur = VOICE_DURATIONS[id];
+    const wrap = document.createElement('div');
+    wrap.className = 'voice-btn-wrap';
+    wrap.id = 'voice-wrap-' + id;
+    wrap.innerHTML = '<button class="voice-btn" onclick="startVoice(\'' + id + '\',' + dur + ')">🎙 Говори</button>';
+    ta.insertAdjacentElement('afterend', wrap);
+  });
+}
+
+function startVoice(id, dur) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Гласовото въвеждане работи в Chrome и Edge.'); return; }
+  if (voiceRec) { stopVoice(); return; }
+
+  voiceTargetId = id;
+  voiceOrigDur = dur;
+  voiceTotal = dur;
+  voiceSecondsLeft = dur;
+  voiceFinal = document.getElementById(id).value || '';
+
+  const mins = Math.floor(dur / 60);
+  const wrap = document.getElementById('voice-wrap-' + id);
+  if (!wrap) return;
+  wrap.innerHTML =
+    '<div class="voice-message">Имаш ' + mins + ' минути. Говори конкретно с факти, истории и събития — не какво мислиш за това.</div>' +
+    '<div class="voice-controls">' +
+      '<div class="voice-timer-wrap">' +
+        '<svg class="voice-timer-svg" viewBox="0 0 44 44">' +
+          '<circle class="voice-timer-bg" cx="22" cy="22" r="19"/>' +
+          '<circle class="voice-timer-fill" id="vtc" cx="22" cy="22" r="19"/>' +
+        '</svg>' +
+        '<div class="voice-timer-text" id="vtt">' + fmtTime(voiceSecondsLeft) + '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;">' +
+        '<button class="voice-stop-btn" onclick="stopVoice()">⏹ Спри записа</button>' +
+        '<button class="voice-add-btn" id="vadd" style="display:none;" onclick="addVoiceMin()">+1 минута</button>' +
+      '</div>' +
+    '</div>';
+
+  voiceRec = new SR();
+  voiceRec.lang = 'bg-BG';
+  voiceRec.continuous = true;
+  voiceRec.interimResults = true;
+  voiceRec.onresult = function(e) {
+    var fin = '', intr = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) fin += e.results[i][0].transcript + ' ';
+      else intr += e.results[i][0].transcript;
+    }
+    if (fin) voiceFinal += fin;
+    var ta = document.getElementById(id);
+    if (ta) ta.value = voiceFinal + intr;
+  };
+  voiceRec.onend = function() {
+    if (voiceSecondsLeft > 0 && voiceRec) { try { voiceRec.start(); } catch(e){} }
+  };
+  voiceRec.onerror = function(e) { if (e.error !== 'no-speech') stopVoice(); };
+  try { voiceRec.start(); } catch(e) { stopVoice(); return; }
+
+  voiceTimerInt = setInterval(function() {
+    voiceSecondsLeft--;
+    var tEl = document.getElementById('vtt');
+    var cEl = document.getElementById('vtc');
+    var aEl = document.getElementById('vadd');
+    if (tEl) tEl.textContent = fmtTime(voiceSecondsLeft);
+    if (cEl) cEl.style.strokeDashoffset = VOICE_CIRC * (1 - voiceSecondsLeft / voiceTotal);
+    if (aEl && voiceSecondsLeft <= 30 && voiceSecondsLeft > 0) aEl.style.display = 'inline-flex';
+    if (voiceSecondsLeft <= 0) stopVoice();
+  }, 1000);
+}
+
+function addVoiceMin() {
+  voiceSecondsLeft += 60; voiceTotal += 60;
+  var el = document.getElementById('vadd');
+  if (el) el.style.display = 'none';
+}
+
+function stopVoice() {
+  if (voiceTimerInt) { clearInterval(voiceTimerInt); voiceTimerInt = null; }
+  if (voiceRec) { voiceRec.onend = null; try { voiceRec.stop(); } catch(e){} voiceRec = null; }
+  if (voiceTargetId) {
+    var wrap = document.getElementById('voice-wrap-' + voiceTargetId);
+    var savedId = voiceTargetId, savedDur = voiceOrigDur;
+    voiceTargetId = null;
+    if (wrap) wrap.innerHTML = '<button class="voice-btn" onclick="startVoice(\'' + savedId + '\',' + savedDur + ')">🎙 Говори</button>';
+  }
+}
+
+function fmtTime(s) {
+  return Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60);
 }
 
 // ─── СТАРТ ───────────────────────────────────────────────────────────────────
