@@ -150,6 +150,7 @@
     .card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; margin-bottom: 12px !important; }
     .brand { font-size: 2rem !important; }
     .share-block { border: 2px solid #1D9E75 !important; }
+    #natal-results.loaded, #perplexity-results.loaded { display: block !important; }
     @page { margin: 20mm; }
   }
   @media (max-width: 480px) {
@@ -422,6 +423,8 @@ let current = 0;
 let answers = {};
 let paymentVerified = false;
 let analysisResult = null;
+let natalEmailHTML = '';    // Съхранява натален анализ за имейл
+let perplexityEmailHTML = ''; // Съхранява техниките за имейл
 
 // ─── НАВИГАЦИЯ ───────────────────────────────────────────────────────────────
 function showScreen(id) {
@@ -1059,7 +1062,43 @@ function renderPerplexityResults(data) {
 
   container.innerHTML = html;
   container.style.display = 'block';
+  container.classList.add('loaded');
+  perplexityEmailHTML = buildPerplexityEmailSection(data);
   container.scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildPerplexityEmailSection(data) {
+  if (!data) return '';
+  var h = '<div style="margin-top:20px;padding:20px;border:1px solid #f0d898;border-radius:12px;background:#fffbf2;">';
+  h += '<h2 style="color:#854F0B;font-size:15px;margin:0 0 14px;">🎯 Конкретни техники и препоръчани източници</h2>';
+  if (data.techniques_by_pattern && data.techniques_by_pattern.length) {
+    data.techniques_by_pattern.forEach(function(item) {
+      h += '<h3 style="font-size:14px;color:#333;margin:14px 0 8px;">📌 ' + item.pattern + '</h3>';
+      (item.techniques || []).forEach(function(t, i) {
+        h += '<div style="background:#fff;border-radius:8px;padding:10px;margin-bottom:8px;border:1px solid #f0d898;">';
+        h += '<strong>' + (i+1) + '. ' + t.name + '</strong><br>';
+        h += '<p style="margin:4px 0;font-size:13px;">' + t.action + '</p>';
+        h += '<p style="margin:4px 0;font-size:12px;font-style:italic;color:#6b4c12;">"' + t.sentence + '"</p>';
+        h += '<p style="font-size:12px;color:#A32D2D;margin:2px 0;">✗ ' + t.cost + '</p>';
+        h += '<p style="font-size:12px;color:#0F6E56;margin:2px 0;">✓ ' + t.gain + '</p>';
+        h += '</div>';
+      });
+    });
+  }
+  if (data.library && data.library.length) {
+    h += '<h3 style="font-size:14px;color:#333;margin:16px 0 8px;">📚 Препоръчани източници</h3>';
+    data.library.forEach(function(src) {
+      h += '<div style="border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:8px;">';
+      h += '<strong>' + src.source + '</strong>';
+      if (src.lang) h += ' <span style="font-size:11px;background:#E1F5EE;color:#0F6E56;padding:1px 6px;border-radius:8px;">' + src.lang + '</span>';
+      if (src.author) h += '<br><span style="font-size:12px;color:#999;">' + src.author + '</span>';
+      if (src.techniques && src.techniques.length) h += '<ul style="font-size:12px;margin:6px 0 0 16px;">' + src.techniques.map(function(t){return '<li>' + t + '</li>';}).join('') + '</ul>';
+      if (src.sentence) h += '<p style="font-size:12px;font-style:italic;color:#555;margin:4px 0 0;">"' + src.sentence + '"</p>';
+      h += '</div>';
+    });
+  }
+  h += '</div>';
+  return h;
 }
 
 // ─── НАТАЛНА КАРТА ───────────────────────────────────────────────────────────
@@ -1163,6 +1202,7 @@ function renderNatalResults(data) {
   html += '</div></div>';
   container.innerHTML = html;
   container.style.display = 'block';
+  container.classList.add('loaded');
   container.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -1247,6 +1287,25 @@ function renderNatalAnalysis(d) {
 
   const el = document.getElementById('natal-ai-loading');
   if (el) el.outerHTML = html;
+  // Съхрани за имейл (inline styles за email клиенти)
+  natalEmailHTML = buildNatalEmailSection(d);
+  // Обнови #natal-results с loaded клас
+  var nr = document.getElementById('natal-results');
+  if (nr) { nr.classList.add('loaded'); nr.style.display = 'block'; }
+}
+
+function buildNatalEmailSection(d) {
+  if (!d) return '';
+  var h = '<div style="margin-top:20px;padding:20px;border:1px solid #d0c8f8;border-radius:12px;background:#f8f6ff;">';
+  h += '<h2 style="color:#4A3BAA;font-size:15px;margin:0 0 14px;">🔮 Астрологичен психоанализ</h2>';
+  if (d.asc_meaning) h += '<p><strong>Асцендент:</strong> ' + d.asc_meaning + '</p>';
+  if (d.sun_moon) h += '<p><strong>Слънце &amp; Луна:</strong> ' + d.sun_moon + '</p>';
+  if (d.key_themes && d.key_themes.length) h += '<p><strong>Ключови теми:</strong></p><ul>' + d.key_themes.map(function(t){return '<li>' + t + '</li>';}).join('') + '</ul>';
+  if (d.life_mission) h += '<p><strong>Жизнено призвание:</strong> ' + d.life_mission + '</p>';
+  if (d.shadow) h += '<p><strong>Сянката:</strong> <em>' + d.shadow + '</em></p>';
+  if (d.practical) h += '<p><strong>Практически насоки:</strong> ' + d.practical + '</p>';
+  h += '</div>';
+  return h;
 }
 
 // ─── ИМЕЙЛ ───────────────────────────────────────────────────────────────────
@@ -1313,20 +1372,10 @@ async function sendEmail() {
         emailHtml += '</div>';
       }
     }
-    // Натална карта в имейла (ако е заредена)
-    const natalEl = document.getElementById('natal-results');
-    if (natalEl && natalEl.innerText.trim()) {
-      emailHtml += '<div style="margin-top:24px;padding:20px;border:1px solid #e0d9ff;border-radius:12px;background:#f8f6ff;">';
-      emailHtml += '<h2 style="color:#4A3BAA;font-size:16px;margin-bottom:12px;">🔮 Астрологичен анализ</h2>';
-      emailHtml += '<pre style="font-family:-apple-system,sans-serif;font-size:13px;color:#333;white-space:pre-wrap;line-height:1.7;">' + natalEl.innerText + '</pre></div>';
-    }
-    // Техники (Perplexity) в имейла (ако са заредени)
-    const perpEl = document.getElementById('perplexity-results');
-    if (perpEl && perpEl.innerText.trim()) {
-      emailHtml += '<div style="margin-top:24px;padding:20px;border:1px solid #f0d898;border-radius:12px;background:#fffbf2;">';
-      emailHtml += '<h2 style="color:#854F0B;font-size:16px;margin-bottom:12px;">🎯 Конкретни техники и препоръчани източници</h2>';
-      emailHtml += '<pre style="font-family:-apple-system,sans-serif;font-size:13px;color:#333;white-space:pre-wrap;line-height:1.7;">' + perpEl.innerText + '</pre></div>';
-    }
+    // Натален анализ в имейла (от съхранен HTML)
+    if (natalEmailHTML) emailHtml += natalEmailHTML;
+    // Техники в имейла (от съхранен HTML)
+    if (perplexityEmailHTML) emailHtml += perplexityEmailHTML;
     // Share block в имейла
     emailHtml += `<div style="margin-top:28px;padding:24px 20px;background:#E1F5EE;border-radius:14px;text-align:center;">
       <div style="font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:6px;">Знаеш ли някой, на когото би помогнало?</div>
