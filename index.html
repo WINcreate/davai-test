@@ -204,7 +204,7 @@
     <div class="card" style="border-color:var(--border);margin-bottom:2rem;padding:14px 18px;">
       <div class="card-text" style="font-size:13px;line-height:1.7;">🔒 Изследването е напълно <strong style="color:var(--green);">анонимно</strong>. Данните, които предоставяш, <em>не се запазват</em> при нас.</div>
     </div>
-    <button class="btn btn-primary" onclick="showScreen('payment')">Започни одита →</button>
+    <button class="btn btn-primary" onclick="startAudit()">Започни одита →</button>
   </div>
 
   <!-- PAYMENT -->
@@ -435,8 +435,19 @@ function showScreen(id) {
   setTimeout(initVoiceInputs, 50);
 }
 
-// ─── STRIPE CHECKOUT ─────────────────────────────────────────────────────────
-function startCheckout() {
+// ─── СТАРТ НА ОДИТА (без предварително плащане) ──────────────────────────────
+function startAudit() {
+  buildSituations();
+  showScreen('areas');
+  renderArea();
+}
+
+// ─── ПЛАЩАНЕ ЗА ПЪЛНИ РЕЗУЛТАТИ ──────────────────────────────────────────────
+function payForFullResults() {
+  try {
+    sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
+    sessionStorage.setItem('davai_answers', JSON.stringify(answers));
+  } catch(e) {}
   window.location.href = CONFIG.paymentLink;
 }
 
@@ -447,13 +458,22 @@ async function checkPaymentReturn() {
 
   if (status === 'success') {
     window.history.replaceState({}, document.title, window.location.pathname);
-    paymentVerified = true;
-    buildSituations();
-    showScreen('areas');
-    renderArea();
+    const saved = sessionStorage.getItem('davai_analysis');
+    if (saved) {
+      // Плащане след анализ → разкрий пълните резултати
+      analysisResult = JSON.parse(saved);
+      answers = JSON.parse(sessionStorage.getItem('davai_answers') || '{}');
+      sessionStorage.removeItem('davai_analysis');
+      sessionStorage.removeItem('davai_answers');
+      paymentVerified = true;
+      renderResults(analysisResult);
+      fetchPrinciples();
+    } else {
+      showScreen('intro');
+    }
   } else if (status === 'cancelled') {
     window.history.replaceState({}, document.title, window.location.pathname);
-    showScreen('payment');
+    showScreen('intro');
   } else if (params.get('natal') === 'success') {
     window.history.replaceState({}, document.title, window.location.pathname);
     try {
@@ -603,7 +623,7 @@ async function generateAnalysis() {
 
     clearInterval(loadingTimer);
     analysisResult = core;
-    renderResults(core);
+    renderPreview(core);
   } catch(e) {
     clearInterval(loadingTimer);
     showScreen('results');
@@ -715,11 +735,93 @@ ${aSum}
 Включи ВСИЧКИТЕ 7 области. Max 2 изречения на поле. JSON завършен.`;
 }
 
+// ─── PREVIEW (заключени резултати преди плащане) ─────────────────────────────
+function renderPreview(d) {
+  showScreen('results');
+  // Скрий бутоните за запазване до плащане
+  var saveCard = document.querySelector('#screen-results .card.no-print');
+  if (saveCard) saveCard.style.display = 'none';
+  document.getElementById('natal-upsell').style.display = 'none';
+  document.getElementById('perplexity-upsell').style.display = 'none';
+
+  const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
+  let html = '';
+
+  // Среден резултат + начало на обобщението
+  html += '<div class="card">';
+  html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:16px;">';
+  html += '<div class="avg-score">' + avg + '</div><div class="avg-label">/10 средна оценка</div></div>';
+  if (d.summary) {
+    const sentences = d.summary.match(/[^.!?]+[.!?]+/g) || [d.summary];
+    const teaser = sentences.slice(0, 2).join(' ');
+    html += '<div class="summary-block"><div class="summary-label">Обобщение</div>';
+    html += '<div style="position:relative;overflow:hidden;max-height:72px;">';
+    html += '<div class="card-text">' + teaser + '</div>';
+    html += '<div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,white);"></div>';
+    html += '</div></div>';
+  }
+  html += '</div>';
+
+  // Заключени секции — показва структурата, скрива съдържанието
+  function lockedCard(title, placeholder) {
+    return '<div class="card" style="position:relative;overflow:hidden;">' +
+      '<div class="card-title" style="color:var(--text-tertiary);">🔒 ' + title + '</div>' +
+      '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">' + placeholder + '</div>' +
+      '<div style="position:absolute;inset:0;background:rgba(250,250,248,0.15);"></div>' +
+      '</div>';
+  }
+
+  html += lockedCard('Основният модел', 'Основният модел, управляващ живота ти в момента...');
+  html += lockedCard('Психологически профил', 'Начин на свързване · Чие влияние · Откъде даваш · Основно убеждение');
+  html += lockedCard('Поведенческите модели', (d.patterns ? d.patterns.length : 3) + ' идентифицирани модела с психологически корен и конкретна цена.');
+  html += lockedCard('Слепи зони · Схема на даване', 'Историите, които си разказваш, и реалността зад тях.');
+
+  // Области — показва имена и оценки, blur на анализа
+  if (d.areas && d.areas.length) {
+    html += '<div class="card"><div class="card-title" style="color:var(--text-tertiary);">🔒 Анализ по области</div>';
+    d.areas.forEach(function(a) {
+      const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
+      html += '<div class="area-result"><div class="area-result-header">';
+      html += '<div class="area-result-name">' + a.name + '</div>';
+      if (hasGap) {
+        html += '<div style="display:flex;align-items:center;gap:8px;">';
+        html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score||0) + '/10</span>';
+        html += '<span class="score-badge score-high">▲ ' + a.assessed_score + '/10</span>';
+        html += '</div>';
+      } else {
+        html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
+      }
+      html += '</div>';
+      html += '<div style="filter:blur(4px);user-select:none;font-size:13px;color:var(--text-secondary);margin-top:6px;">Задълбочен анализ и три конкретни действия за тази област...</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += lockedCard('Персонални рутини · Дневни въпроси · Личен кодекс',
+    'Сутрешни и вечерни рутини · 5 ключови въпроса · 5-7 лични принципа');
+
+  // Payment CTA
+  html += '<div style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:16px;padding:32px 28px;text-align:center;color:white;margin:1.5rem 0;">';
+  html += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px;">Пълният анализ е готов</div>';
+  html += '<div style="font-family:\'Playfair Display\',serif;font-size:2.6rem;font-weight:600;color:white;line-height:1;margin-bottom:4px;">';
+  html += '<span style="font-size:1.3rem;vertical-align:super;color:rgba(255,255,255,0.6);">€</span>14,60</div>';
+  html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:22px;">Еднократно · Незабавен достъп · PDF + имейл</div>';
+  html += '<button onclick="payForFullResults()" style="background:#1D9E75;color:white;border:none;padding:15px 36px;border-radius:50px;font-size:15px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;letter-spacing:0.01em;">Плати и виж пълния анализ →</button>';
+  html += '<div style="font-size:12px;color:rgba(255,255,255,0.25);margin-top:14px;">🔒 Обработено от Stripe · Криптирано и сигурно</div>';
+  html += '</div>';
+
+  document.getElementById('results-content').innerHTML = html;
+}
+
 // ─── РЕНДИРАНЕ ───────────────────────────────────────────────────────────────
 function scoreClass(n) { return n >= 7 ? 'score-high' : n >= 4 ? 'score-mid' : 'score-low'; }
 
 function renderResults(d) {
   showScreen('results');
+  // Увери се, че бутоните за запазване са видими
+  var saveCard = document.querySelector('#screen-results .card.no-print');
+  if (saveCard) saveCard.style.display = '';
   const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
   let html = '';
 
