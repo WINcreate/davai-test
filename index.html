@@ -872,10 +872,9 @@ ${aSum}
 Включи ВСИЧКИТЕ 7 области. Max 2 изречения на поле. JSON завършен.`;
 }
 
-// ─── PREVIEW (заключени резултати преди плащане) ─────────────────────────────
+// ─── PREVIEW (безплатно видимо + заключени резултати преди плащане) ──────────
 function renderPreview(d) {
   showScreen('results');
-  // Скрий бутоните за запазване до плащане
   var saveCard = document.querySelector('#screen-results .card.no-print');
   if (saveCard) saveCard.style.display = 'none';
   document.getElementById('natal-upsell').style.display = 'none';
@@ -884,22 +883,44 @@ function renderPreview(d) {
   const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
   let html = '';
 
-  // Среден резултат + начало на обобщението
+  // ── БЕЗПЛАТНО: Средна оценка + пълно обобщение ──────────────────────────────
   html += '<div class="card">';
-  html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:16px;">';
+  html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:20px;">';
   html += '<div class="avg-score">' + avg + '</div><div class="avg-label">/10 средна оценка</div></div>';
   if (d.summary) {
-    const sentences = d.summary.match(/[^.!?]+[.!?]+/g) || [d.summary];
-    const teaser = sentences.slice(0, 2).join(' ');
     html += '<div class="summary-block"><div class="summary-label">Обобщение</div>';
-    html += '<div style="position:relative;overflow:hidden;max-height:72px;">';
-    html += '<div class="card-text">' + teaser + '</div>';
-    html += '<div style="position:absolute;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,white);"></div>';
-    html += '</div></div>';
+    html += '<div class="card-text">' + d.summary + '</div></div>';
   }
   html += '</div>';
 
-  // Заключени секции — показва структурата, скрива съдържанието
+  // ── БЕЗПЛАТНО: Основният модел ───────────────────────────────────────────────
+  if (d.top_pattern) {
+    html += '<div class="card" style="border-left:3px solid var(--green);">';
+    html += '<div class="card-title">Основният модел</div>';
+    html += '<div class="card-text" style="font-style:italic;font-size:15px;">"' + d.top_pattern + '"</div>';
+    html += '</div>';
+  }
+
+  // ── БЕЗПЛАТНО: Психологически профил (4 лещи) ───────────────────────────────
+  if (d.psychological_profile) {
+    const pp = d.psychological_profile;
+    html += '<div class="card" style="border:2px solid var(--purple-light);">';
+    html += '<div class="card-title" style="color:var(--purple-text);margin-bottom:16px;">🧠 Психологически профил</div>';
+    [
+      { label: 'Стил на привързаност', value: pp.attachment_style },
+      { label: 'Локус на контрол',     value: pp.locus_of_control },
+      { label: 'Схема на даване',      value: pp.giving_schema },
+      { label: 'Основна схема',        value: pp.core_schema }
+    ].forEach(function(item) {
+      if (!item.value) return;
+      html += '<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--purple-text);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + item.label + '</div>';
+      html += '<div class="card-text">' + item.value + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  // ── ЗАКЛЮЧЕНО: останалите секции ────────────────────────────────────────────
   function lockedCard(title, placeholder) {
     return '<div class="card" style="position:relative;overflow:hidden;">' +
       '<div class="card-title" style="color:var(--text-tertiary);">🔒 ' + title + '</div>' +
@@ -908,12 +929,10 @@ function renderPreview(d) {
       '</div>';
   }
 
-  html += lockedCard('Основният модел', 'Основният модел, управляващ живота ти в момента...');
-  html += lockedCard('Психологически профил', 'Начин на свързване · Чие влияние · Откъде даваш · Основно убеждение');
   html += lockedCard('Поведенческите модели', (d.patterns ? d.patterns.length : 3) + ' идентифицирани модела с психологически корен и конкретна цена.');
-  html += lockedCard('Слепи зони · Схема на даване', 'Историите, които си разказваш, и реалността зад тях.');
+  html += lockedCard('Слепи зони · Схема на даване', 'Историите, които си разказваш, и реалността зад тях. Схемата на даване и нейната цена.');
 
-  // Области — показва имена и оценки, blur на анализа
+  // Области — имена и оценки видими, анализът заключен
   if (d.areas && d.areas.length) {
     html += '<div class="card"><div class="card-title" style="color:var(--text-tertiary);">🔒 Анализ по области</div>';
     d.areas.forEach(function(a) {
@@ -937,14 +956,16 @@ function renderPreview(d) {
 
   html += lockedCard('Персонални рутини · Дневни въпроси · Личен кодекс',
     'Сутрешни и вечерни рутини · 5 ключови въпроса · 5-7 лични принципа');
+  html += lockedCard('Смисъл',
+    'Четирите избора разкриват разликата между казаното и живяното — и въпросът за носене с теб.');
 
-  // Payment CTA
+  // ── Payment CTA ─────────────────────────────────────────────────────────────
   html += '<div style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:16px;padding:32px 28px;text-align:center;color:white;margin:1.5rem 0;">';
   html += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px;">Пълният анализ е готов</div>';
   html += '<div style="font-family:\'Playfair Display\',serif;font-size:2.6rem;font-weight:600;color:white;line-height:1;margin-bottom:4px;">';
   html += '<span style="font-size:1.3rem;vertical-align:super;color:rgba(255,255,255,0.6);">€</span>14,60</div>';
   html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:22px;">Еднократно · Незабавен достъп · PDF + имейл</div>';
-  html += '<button onclick="payForFullResults()" style="background:#1D9E75;color:white;border:none;padding:15px 36px;border-radius:50px;font-size:15px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;letter-spacing:0.01em;">Плати и виж пълния анализ →</button>';
+  html += '<button onclick="payForFullResults()" style="background:#1D9E75;color:white;border:none;padding:15px 36px;border-radius:50px;font-size:15px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;letter-spacing:0.01em;">Отключи пълния анализ — €14.60 →</button>';
   html += '<div style="font-size:12px;color:rgba(255,255,255,0.25);margin-top:14px;">🔒 Обработено от Stripe · Криптирано и сигурно</div>';
   html += '</div>';
 
