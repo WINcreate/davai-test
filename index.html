@@ -10,6 +10,7 @@
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
     --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #0F6E56; --green-deep: #085041;
+    --gold: #B08D57; --gold-dark: #7A5E2F; --gold-light: #FDF6EC;
     --amber: #FAEEDA; --amber-text: #854F0B;
     --red-light: #FCEBEB; --red-text: #A32D2D;
     --purple-light: #F0EFFE; --purple-text: #4A3BAA;
@@ -143,7 +144,7 @@
 
   @media print {
     .no-print { display: none !important; }
-    #screen-intro,#screen-payment,#screen-areas,#screen-situations,#screen-lessons,#screen-loading { display: none !important; }
+    #screen-intro,#screen-payment,#screen-areas,#screen-situations,#screen-lessons,#screen-meaning,#screen-loading { display: none !important; }
     #screen-results { display: block !important; }
     body { background: white !important; }
     .container { padding: 0 !important; max-width: 100% !important; }
@@ -173,6 +174,12 @@
   .voice-timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 10px; font-weight: 600; color: var(--green); font-family: 'DM Sans', sans-serif; white-space: nowrap; }
   .voice-stop-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 7px 14px; background: var(--red-light); color: var(--red-text); border: 1px solid var(--red-text); border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
   .voice-add-btn { font-size: 12px; padding: 6px 12px; background: var(--amber); color: var(--amber-text); border: 1px solid var(--amber-text); border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  /* ── СМИСЪЛ — ИЗБОР ── */
+  .choices-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
+  .choice-btn { padding: 10px 18px; border-radius: 50px; border: 1.5px solid var(--border); background: var(--card); font-size: 14px; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; line-height: 1.4; }
+  .choice-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+  .choice-btn.selected { background: var(--green); border-color: var(--green); color: white; }
 </style>
 </head>
 <body>
@@ -240,6 +247,7 @@
       <div class="phase-chip done">1. Одит</div>
       <div class="phase-chip">2. Ситуации</div>
       <div class="phase-chip">3. Уроци</div>
+      <div class="phase-chip">4. Смисъл</div>
     </div>
     <div class="progress-label">
       <span id="area-progress-text">1 от 7</span>
@@ -264,6 +272,7 @@
       <div class="phase-chip done">1. Одит</div>
       <div class="phase-chip active">2. Ситуации</div>
       <div class="phase-chip">3. Уроци</div>
+      <div class="phase-chip">4. Смисъл</div>
     </div>
     <div class="area-title" style="margin-bottom:8px;">Петте ситуации</div>
     <p class="card-text" style="margin-bottom:1.5rem;">Опиши пет момента, когато си се чувствал заседнал, провалил се или саботирал себе си. Конкретно — какво се случи, как реагира, какъв беше резултатът.</p>
@@ -280,6 +289,7 @@
       <div class="phase-chip done">1. Одит</div>
       <div class="phase-chip done">2. Ситуации</div>
       <div class="phase-chip active">3. Уроци</div>
+      <div class="phase-chip">4. Смисъл</div>
     </div>
     <div class="area-title" style="margin-bottom:1.5rem;">Съжаления, Гордост и Уроци</div>
     <div class="sit-block">
@@ -296,7 +306,66 @@
     </div>
     <div>
       <button class="btn btn-secondary" onclick="showScreen('situations')">Назад</button>
-      <button class="btn btn-primary" onclick="generateAnalysis()">Виж анализа →</button>
+      <button class="btn btn-primary" onclick="goToMeaning()">Напред →</button>
+    </div>
+  </div>
+
+  <!-- MEANING -->
+  <div id="screen-meaning" class="screen">
+    <div class="phase-chips">
+      <div class="phase-chip done">1. Одит</div>
+      <div class="phase-chip done">2. Ситуации</div>
+      <div class="phase-chip done">3. Уроци</div>
+      <div class="phase-chip active">4. Смисъл</div>
+    </div>
+    <div class="area-title" style="margin-bottom:6px;">Смисъл</div>
+    <p class="area-question" style="margin-bottom:2rem;">Последният въпрос — не какво правиш, а на какво стъпваш, докато го правиш.</p>
+
+    <div class="sit-block">
+      <div class="sit-label">Когато всичко се обърка, на какво разчиташ най-много? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери до 2)</span></div>
+      <div class="choices-grid" id="m-q1">
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Контрол</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Другите хора</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Работата</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Парите</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Вътрешните си принципи</button>
+      </div>
+    </div>
+
+    <div class="sit-block">
+      <div class="sit-label">Кое е по-болезнено за теб? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери до 2)</span></div>
+      <div class="choices-grid" id="m-q2">
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да загубя пари</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да загубя репутация</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да загубя връзка</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да изгубя себе си</button>
+      </div>
+    </div>
+
+    <div class="sit-block">
+      <div class="sit-label">Кога се чувстваш най-истински жив? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери до 2)</span></div>
+      <div class="choices-grid" id="m-q3">
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато постигам</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато помагам</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато съм свободен</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато съм свързан с нещо по-голямо от мен</button>
+      </div>
+    </div>
+
+    <div class="sit-block">
+      <div class="sit-label">Кое от изреченията най-точно те описва в момента? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери 1)</span></div>
+      <div class="choices-grid" id="m-q4" style="flex-direction:column;">
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Още не съм постигнал това, което искам — и не съм сигурен как</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Постигнах това, което исках — но щастието не дойде с него</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Чувствам се уморен, но не знам точно защо</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Имам добър живот, но се питам — това ли е всичко?</button>
+      </div>
+    </div>
+
+    <div id="meaning-error" style="display:none;font-size:13px;color:var(--red-text);background:var(--red-light);padding:10px 14px;border-radius:10px;margin-bottom:14px;"></div>
+    <div>
+      <button class="btn btn-secondary" onclick="showScreen('lessons')">Назад</button>
+      <button class="btn btn-primary" onclick="validateAndGenerateAnalysis()">Виж пълния анализ →</button>
     </div>
   </div>
 
@@ -425,6 +494,54 @@ let paymentVerified = false;
 let analysisResult = null;
 let natalEmailHTML = '';    // Съхранява натален анализ за имейл
 let perplexityEmailHTML = ''; // Съхранява техниките за имейл
+
+// ─── СМИСЪЛ — МНОГОКРАТЕН ИЗБОР ─────────────────────────────────────────────
+function toggleChoice(groupId, btn, maxSelect) {
+  const group = document.getElementById(groupId);
+  if (btn.classList.contains('selected')) {
+    btn.classList.remove('selected');
+    return;
+  }
+  if (maxSelect === 1) {
+    group.querySelectorAll('.choice-btn.selected').forEach(function(b) { b.classList.remove('selected'); });
+  } else if (group.querySelectorAll('.choice-btn.selected').length >= maxSelect) {
+    return;
+  }
+  btn.classList.add('selected');
+}
+
+function goToMeaning() {
+  const reg = document.getElementById('regrets').value.trim();
+  const pr = document.getElementById('proud').value.trim();
+  const ls = document.getElementById('lessons-text').value.trim();
+  if (reg.length < 10 || pr.length < 10 || ls.length < 10) {
+    alert('Моля, попълни и трите полета.');
+    return;
+  }
+  answers.regrets = reg; answers.proud = pr; answers.lessons = ls;
+  showScreen('meaning');
+}
+
+function validateAndGenerateAnalysis() {
+  const errEl = document.getElementById('meaning-error');
+  const q1 = document.querySelectorAll('#m-q1 .choice-btn.selected');
+  const q2 = document.querySelectorAll('#m-q2 .choice-btn.selected');
+  const q3 = document.querySelectorAll('#m-q3 .choice-btn.selected');
+  const q4 = document.querySelectorAll('#m-q4 .choice-btn.selected');
+  if (q1.length < 1 || q2.length < 1 || q3.length < 1 || q4.length !== 1) {
+    errEl.textContent = 'Моля, отговори на всичките четири въпроса.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  answers.meaning = {
+    q1: Array.from(q1).map(function(b) { return b.textContent; }),
+    q2: Array.from(q2).map(function(b) { return b.textContent; }),
+    q3: Array.from(q3).map(function(b) { return b.textContent; }),
+    q4: q4[0].textContent
+  };
+  generateAnalysis();
+}
 
 // ─── НАВИГАЦИЯ ───────────────────────────────────────────────────────────────
 function showScreen(id) {
@@ -596,13 +713,20 @@ async function generateAnalysis() {
 
   const aSum = AREAS.map(a => a.name + ' [' + (answers[a.key]?.rating || '?') + '/10]: ' + (answers[a.key]?.desc || '')).join('\n\n');
   const sSum = (answers.situations || []).filter(s => s.length > 5).map((s, i) => 'Ситуация ' + (i+1) + ': ' + s).join('\n\n');
+  const m = answers.meaning || {};
+  const mSum = [
+    'На какво разчита най-много: ' + (m.q1 || []).join(' и '),
+    'Кое е по-болезнено: ' + (m.q2 || []).join(' и '),
+    'Кога се чувства най-жив: ' + (m.q3 || []).join(' и '),
+    'Жизнен етап (самоописание): ' + (m.q4 || '')
+  ].filter(function(l) { return !l.endsWith(': '); }).join('\n');
 
   try {
     // Заявка 1: Психологически профил, модели, слепи зони (~3500 токена, ~35 сек)
     const res1 = await fetch(CONFIG.workerUrl + '/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: buildPromptCore(aSum, sSum), max_tokens: 4000 })
+      body: JSON.stringify({ prompt: buildPromptCore(aSum, sSum, mSum), max_tokens: 4500 })
     });
     const data1 = await res1.json();
     if (data1.error) throw new Error(data1.error);
@@ -657,7 +781,7 @@ function repairAndParseJSON(txt) {
 }
 
 // ─── ПРОМПТ 1: ПСИХОЛОГИЧЕСКИ ПРОФИЛ, МОДЕЛИ, СЛЕПИ ЗОНИ ────────────────────
-function buildPromptCore(aSum, sSum) {
+function buildPromptCore(aSum, sSum, mSum) {
   const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
   return `Днешна дата: ${today}.
 
@@ -671,6 +795,9 @@ ${aSum}
 СЪЖАЛЕНИЯ: ${answers.regrets}
 ГОРДОСТ: ${answers.proud}
 УРОЦИ: ${answers.lessons}
+
+СМИСЪЛ (четири избора на клиента):
+${mSum}
 
 АНАЛИЗИРАЙ ПРЕЗ 4 ЛЕЩИ:
 1. НАЧИН НА СВЪРЗВАНЕ: Сигурен/Тревожен/Избягващ/Объркан — конкретно от отговорите.
@@ -695,9 +822,19 @@ ${aSum}
     "current_giving": "1-2 изречения — как даваш и на кого.",
     "giving_cost": "1 изречение.",
     "giving_invitation": "2 изречения — даването от пълнота за теб конкретно."
+  },
+  "meaning_analysis": {
+    "declared_vs_lived": "2-3 изречения — съпостави на какво казва, че разчита (от СМИСЪЛ въпрос 1) с реалните модели от областите и ситуациите. Конкретно, без съд.",
+    "where_it_points": "2-3 изречения — покажи конкретно накъде сочи тази разлика, базирано на отговора за болезненото (въпрос 2) и поведенческите модели. Като наблюдение, не поука.",
+    "the_giving_moment": "2 изречения. Ако в уроците, гордостта или ситуациите има конкретен момент на безусловно даване — отрази го и покажи защо е по-близо до истинския смисъл. Ако няма — 'Помисли за последния път, когато си дал нещо — време, внимание, помощ — без да очакваш нищо обратно. Това усещане е по-близо до истинския смисъл от всяко постижение.'",
+    "current_anchor": "На какво стои в момента, базирано директно на отговора от въпрос 1. Описано просто и директно към него.",
+    "anchor_honesty": "Едно честно, но не присъдно изречение — дали тази опора издържа с времето или се изтощава, конкретно спрямо неговия избор.",
+    "life_stage_reflection": "2 изречения директно базирани на отговора от въпрос 4. Покажи, че независимо от позицията, въпросът е същият — търсене на смисъл.",
+    "quiet_door": "Едно тихо изречение. БЕЗ думите духовност, религия, вяра, практика, медитация. Загатва нещо по-голямо от себе си като универсален принцип потвърден в цялата човешка история. Тон: топъл, без натиск, като посочване към звезда. Регистър: 'Забелязваш ли — почти всичко, на което разчиташ, може да се изтощи. Има нещо, на което хората са се опирали когато всичко друго е изчезвало — нарекли са го с различни имена, но е bilo едно и също.'",
+    "the_real_question": "Един личен въпрос за носене — изграден от конкретните му отговори на четирите въпроса, не общ."
   }
 }
-КРИТИЧНО: Второ лице. Чист български. Max 2 изречения на поле. JSON завършен.`;
+КРИТИЧНО: Второ лице. Чист български. Max 2-3 изречения на поле. JSON завършен.`;
 }
 
 // ─── ПРОМПТ 2: ОБЛАСТИ, РУТИНИ, ВЪПРОСИ ─────────────────────────────────────
@@ -965,6 +1102,10 @@ function renderResults(d) {
     html += '</ul></div>';
   }
 
+  if (d.meaning_analysis) {
+    html += renderMeaningAnalysis(d.meaning_analysis);
+  }
+
   // Личен кодекс
   if (d.principles && d.principles.length) {
     html += '<div class="card" style="border:2px solid #1a1a1a;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);color:#fff;">';
@@ -1066,6 +1207,58 @@ function renderPrinciples(principles) {
   html += '</div>';
   const el = document.getElementById('principles-loading');
   if (el) el.outerHTML = html;
+}
+
+// ─── СМИСЪЛ — РЕНДИРАНЕ ──────────────────────────────────────────────────────
+function renderMeaningAnalysis(ma) {
+  if (!ma) return '';
+  let h = '<div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,var(--gold-light) 0%,#fff 100%);margin-top:1.5rem;">';
+  h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Последният слой</div>';
+  h += '<div style="font-family:\'Playfair Display\',serif;font-size:1.3rem;font-weight:500;color:var(--gold-dark);margin-bottom:20px;">Смисъл</div>';
+
+  if (ma.declared_vs_lived) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Казано срещу живяното</div>';
+    h += '<div class="card-text">' + ma.declared_vs_lived + '</div></div>';
+  }
+  if (ma.where_it_points) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Накъде сочи</div>';
+    h += '<div class="card-text">' + ma.where_it_points + '</div></div>';
+  }
+  if (ma.the_giving_moment) {
+    h += '<div style="background:rgba(176,141,87,0.08);border-radius:10px;padding:14px 16px;margin-bottom:16px;">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Моментът на даването</div>';
+    h += '<div class="card-text">' + ma.the_giving_moment + '</div></div>';
+  }
+  if (ma.current_anchor || ma.anchor_honesty) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    if (ma.current_anchor) {
+      h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">На какво стоиш сега</div>';
+      h += '<div class="card-text" style="margin-bottom:10px;">' + ma.current_anchor + '</div>';
+    }
+    if (ma.anchor_honesty) {
+      h += '<div class="card-text" style="font-style:italic;color:var(--text-tertiary);">' + ma.anchor_honesty + '</div>';
+    }
+    h += '</div>';
+  }
+  if (ma.life_stage_reflection) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Където се намираш сега</div>';
+    h += '<div class="card-text">' + ma.life_stage_reflection + '</div></div>';
+  }
+  if (ma.quiet_door) {
+    h += '<div style="border-left:3px solid var(--gold);padding:12px 16px;margin-bottom:16px;background:rgba(176,141,87,0.05);border-radius:0 10px 10px 0;">';
+    h += '<div class="card-text" style="font-style:italic;color:var(--gold-dark);">' + ma.quiet_door + '</div></div>';
+  }
+  if (ma.the_real_question) {
+    h += '<div style="background:var(--gold-dark);border-radius:12px;padding:20px 22px;text-align:center;">';
+    h += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Въпросът за носене с теб</div>';
+    h += '<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;color:#fff;line-height:1.6;font-style:italic;">' + ma.the_real_question + '</div>';
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
 }
 
 function copyShareLink(btn) {
@@ -1456,6 +1649,21 @@ async function sendEmail() {
       if (d.morning_routines?.length) emailHtml += '<h2>Сутрешни рутини</h2><ul>' + d.morning_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
       if (d.evening_routines?.length) emailHtml += '<h2>Вечерни рутини</h2><ul>' + d.evening_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
       if (d.daily_questions?.length) emailHtml += '<h2>Въпроси за всеки ден</h2><ol>' + d.daily_questions.map(q => `<li>${q}</li>`).join('') + '</ol>';
+      if (d.meaning_analysis) {
+        const ma = d.meaning_analysis;
+        emailHtml += '<div style="margin-top:28px;padding:24px;border:2px solid #B08D57;border-radius:14px;background:#FDF6EC;">';
+        emailHtml += '<div style="font-size:11px;font-weight:600;color:#B08D57;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Последният слой</div>';
+        emailHtml += '<h2 style="color:#7A5E2F;font-size:18px;margin:0 0 16px;">Смисъл</h2>';
+        if (ma.declared_vs_lived) emailHtml += `<p><strong style="color:#B08D57;">Казано срещу живяното:</strong> ${ma.declared_vs_lived}</p>`;
+        if (ma.where_it_points) emailHtml += `<p><strong style="color:#B08D57;">Накъде сочи:</strong> ${ma.where_it_points}</p>`;
+        if (ma.the_giving_moment) emailHtml += `<p><strong style="color:#B08D57;">Моментът на даването:</strong> ${ma.the_giving_moment}</p>`;
+        if (ma.current_anchor) emailHtml += `<p><strong style="color:#B08D57;">На какво стоиш сега:</strong> ${ma.current_anchor}</p>`;
+        if (ma.anchor_honesty) emailHtml += `<p style="color:#666;font-style:italic;">${ma.anchor_honesty}</p>`;
+        if (ma.life_stage_reflection) emailHtml += `<p>${ma.life_stage_reflection}</p>`;
+        if (ma.quiet_door) emailHtml += `<blockquote style="border-left:3px solid #B08D57;margin:12px 0;padding:8px 16px;font-style:italic;color:#7A5E2F;">${ma.quiet_door}</blockquote>`;
+        if (ma.the_real_question) emailHtml += `<div style="background:#7A5E2F;border-radius:10px;padding:16px;text-align:center;margin-top:14px;"><p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;">Въпросът за носене с теб</p><p style="color:#fff;font-style:italic;margin:0;">${ma.the_real_question}</p></div>`;
+        emailHtml += '</div>';
+      }
       if (d.principles?.length) {
         emailHtml += '<div style="margin-top:28px;padding:28px;background:#1a1a1a;border-radius:14px;">';
         emailHtml += '<h2 style="color:#fff;font-size:18px;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</h2>';
