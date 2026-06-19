@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ДАВАЙ! — Личен одит на живота</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #0F6E56; --green-deep: #085041;
+    --gold: #B08D57; --gold-dark: #7A5E2F; --gold-light: #FDF6EC;
+    --amber: #FAEEDA; --amber-text: #854F0B;
+    --red-light: #FCEBEB; --red-text: #A32D2D;
+    --purple-light: #F0EFFE; --purple-text: #4A3BAA;
+    --text: #1a1a1a; --text-secondary: #555; --text-tertiary: #999;
+    --border: rgba(0,0,0,0.1); --bg: #FAFAF8; --card: #fff; --radius: 14px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .container { max-width: 640px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .brand { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 600; color: var(--text); letter-spacing: -0.02em; line-height: 1; margin-bottom: 4px; }
+  .brand-accent { color: var(--green); }
+  .brand-sub { font-size: 14px; color: var(--text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2.5rem; }
+  .intro-text { font-size: 15px; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.5rem; }
+
+  .phase-chips { display: flex; gap: 8px; margin-bottom: 2rem; flex-wrap: wrap; }
+  .phase-chip { font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); color: var(--text-tertiary); background: var(--card); }
+  .phase-chip.active { background: var(--green); color: white; border-color: var(--green); }
+  .phase-chip.done { border-color: var(--green); color: var(--green-dark); background: var(--green-light); }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 28px; border-radius: 50px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); margin-right: 10px; }
+  .btn-secondary:hover { background: var(--card); }
+  .btn-ghost { background: transparent; color: var(--green); border: 1px solid var(--green); }
+  .btn-ghost:hover { background: var(--green-light); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .progress-line { height: 2px; background: var(--border); border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.4s ease; }
+  .progress-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px; display: flex; justify-content: space-between; }
+
+  .area-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .area-question { font-size: 14px; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+  .field-label { font-size: 12px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+  .rating-grid { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .rating-btn { width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--card); font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+  .rating-btn:hover { border-color: var(--green); color: var(--green); }
+  .rating-btn.selected { background: var(--green); border-color: var(--green); color: white; transform: scale(1.1); }
+  textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--card); resize: vertical; min-height: 120px; line-height: 1.7; margin-bottom: 1.5rem; transition: border-color 0.2s; }
+  textarea:focus { outline: none; border-color: var(--green); }
+  textarea::placeholder { color: var(--text-tertiary); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 14px; }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .card-text { font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; }
+  .tag-red { background: var(--red-light); color: var(--red-text); }
+  .tag-amber { background: var(--amber); color: var(--amber-text); }
+  .tag-green { background: var(--green-light); color: var(--green-dark); }
+
+  .score-badge { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; }
+  .score-high { background: var(--green-light); color: var(--green-dark); }
+  .score-mid { background: var(--amber); color: var(--amber-text); }
+  .score-low { background: var(--red-light); color: var(--red-text); }
+  .avg-score { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 600; color: var(--green); line-height: 1; }
+  .avg-label { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
+
+  .area-result { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 10px; }
+  .area-result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .area-result-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .area-insight { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; font-style: italic; }
+  .action-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .action-num { width: 22px; height: 22px; border-radius: 50%; background: var(--green-light); color: var(--green-dark); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .action-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+  .routine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+  .routine-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .routine-card-title { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .routine-card-title.morning { color: var(--amber-text); }
+  .routine-card-title.evening { color: var(--purple-text); }
+  .routine-item { font-size: 13px; color: var(--text-secondary); line-height: 1.6; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .routine-item:last-child { border-bottom: none; }
+
+  .daily-q-list { list-style: none; }
+  .daily-q-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .daily-q-item:last-child { border-bottom: none; }
+  .daily-q-num { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--green); font-weight: 600; flex-shrink: 0; line-height: 1.4; }
+  .daily-q-text { font-size: 14px; color: var(--text); line-height: 1.7; }
+
+  .summary-block { border-left: 3px solid var(--green); padding-left: 16px; margin-bottom: 16px; }
+  .summary-label { font-size: 11px; font-weight: 500; color: var(--green-dark); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .sit-block { margin-bottom: 1.2rem; }
+  .sit-label { font-size: 11px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+
+  /* PAYMENT SCREEN */
+  .price-tag { font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 600; color: var(--text); line-height: 1; margin-bottom: 4px; }
+  .price-currency { font-size: 1.5rem; vertical-align: super; color: var(--text-secondary); }
+  .price-note { font-size: 13px; color: var(--text-tertiary); margin-bottom: 2rem; }
+  .feature-list { list-style: none; margin-bottom: 2rem; }
+  .feature-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+  .feature-item:last-child { border-bottom: none; }
+  .feature-check { color: var(--green); font-weight: 500; flex-shrink: 0; }
+  .secure-note { font-size: 12px; color: var(--text-tertiary); text-align: center; margin-top: 12px; }
+
+  /* UPSELL */
+  .upsell { border: 2px solid var(--green); border-radius: var(--radius); padding: 22px; margin-top: 1.5rem; background: var(--green-light); }
+  .upsell-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--green-deep); margin-bottom: 8px; }
+  .upsell-text { font-size: 13px; color: var(--green-dark); line-height: 1.7; margin-bottom: 14px; }
+
+  /* EMAIL MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-overlay.hidden { display: none; }
+  .modal { background: var(--card); border-radius: var(--radius); padding: 28px; max-width: 420px; width: 100%; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 8px; }
+  .modal-text { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
+  .input-field { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--bg); margin-bottom: 14px; transition: border-color 0.2s; }
+  .input-field:focus { outline: none; border-color: var(--green); }
+
+  /* LOADING */
+  .loading-wrap { padding: 3rem 0; text-align: center; }
+  .loading-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--text); margin-bottom: 8px; }
+  .loading-sub { font-size: 13px; color: var(--text-tertiary); margin-bottom: 2rem; }
+  .loading-steps { text-align: left; max-width: 300px; margin: 0 auto 2rem; }
+  .loading-step { font-size: 13px; color: var(--text-tertiary); padding: 6px 0; display: flex; align-items: center; gap: 10px; }
+  .loading-step.active { color: var(--green); font-weight: 500; }
+  .loading-step.done { color: var(--text-secondary); }
+  .step-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: background 0.3s; }
+  .loading-step.active .step-dot { background: var(--green); }
+  .loading-step.done .step-dot { background: var(--green-dark); }
+  .dots { display: flex; gap: 8px; justify-content: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.2s ease-in-out infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%,80%,100%{opacity:0.2;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  @media print {
+    .no-print { display: none !important; }
+    #screen-intro,#screen-payment,#screen-areas,#screen-situations,#screen-lessons,#screen-meaning,#screen-loading { display: none !important; }
+    #screen-results { display: block !important; }
+    body { background: white !important; }
+    .container { padding: 0 !important; max-width: 100% !important; }
+    .card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; margin-bottom: 12px !important; }
+    .brand { font-size: 2rem !important; }
+    .share-block { border: 2px solid #1D9E75 !important; }
+    #natal-results.loaded, #perplexity-results.loaded { display: block !important; }
+    @page { margin: 20mm; }
+  }
+  @media (max-width: 480px) {
+    .rating-btn { width: 40px; height: 40px; font-size: 13px; }
+    .brand { font-size: 2.2rem; }
+    .routine-grid { grid-template-columns: 1fr; }
+    .price-tag { font-size: 2.8rem; }
+  }
+
+  /* ── ГЛАСОВО ВЪВЕЖДАНЕ ── */
+  .voice-btn-wrap { margin: -6px 0 1.5rem; }
+  .voice-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 7px 16px; color: var(--text-tertiary); border: 1px solid var(--border); background: transparent; border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .voice-btn:hover { color: var(--green); border-color: var(--green); background: var(--green-light); }
+  .voice-message { font-size: 13px; color: var(--green-dark); background: var(--green-light); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; line-height: 1.6; }
+  .voice-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .voice-timer-wrap { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+  .voice-timer-svg { width: 52px; height: 52px; transform: rotate(-90deg); }
+  .voice-timer-bg { fill: none; stroke: var(--border); stroke-width: 3; }
+  .voice-timer-fill { fill: none; stroke: var(--green); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 119.4; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
+  .voice-timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 10px; font-weight: 600; color: var(--green); font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .voice-stop-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 7px 14px; background: var(--red-light); color: var(--red-text); border: 1px solid var(--red-text); border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .voice-add-btn { font-size: 12px; padding: 6px 12px; background: var(--amber); color: var(--amber-text); border: 1px solid var(--amber-text); border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  /* ── СМИСЪЛ — ИЗБОР ── */
+  .choices-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
+  .choice-btn { padding: 10px 18px; border-radius: 50px; border: 1.5px solid var(--border); background: var(--card); font-size: 14px; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; line-height: 1.4; }
+  .choice-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+  .choice-btn.selected { background: var(--green); border-color: var(--green); color: white; }
+</style>
+</head>
+<body>
+
+<!-- EMAIL MODAL -->
+<div class="modal-overlay hidden" id="email-modal">
+  <div class="modal">
+    <div class="modal-title">Изпрати резултата на мейла</div>
+    <p class="modal-text">Въведи имейл адреса си и ще получиш пълния анализ, рутините и дневните въпроси.</p>
+    <input type="email" class="input-field" id="email-input" placeholder="твоят@имейл.com">
+    <div id="email-error" style="font-size:13px;color:var(--red-text);margin-bottom:12px;display:none;">Моля, въведи валиден имейл адрес.</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary" onclick="closeEmailModal()">Отказ</button>
+      <button class="btn btn-primary" id="send-email-btn" onclick="sendEmail()">Изпрати →</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div id="screen-intro" class="screen active">
+    <div class="brand">ДА<span class="brand-accent">ВАЙ</span><span style="color:var(--green)">!</span></div>
+    <div class="brand-sub">Личен жизнен отчет</div>
+    <p class="intro-text">Честна оценка на седем области от живота ти. Задълбочен анализ на поведенческите модели, персонални рутини и ключови въпроси за всеки ден.</p>
+    <div class="card" style="background:var(--amber);border-color:transparent;margin-bottom:1rem;">
+      <div class="card-text" style="color:var(--amber-text);font-size:13px;">⏱ Около 15–20 минути. Колкото по-честен си, толкова по-точен е анализът.</div>
+    </div>
+    <div class="card" style="border-color:var(--border);margin-bottom:2rem;padding:14px 18px;">
+      <div class="card-text" style="font-size:13px;line-height:1.7;">🔒 Изследването е напълно <strong style="color:var(--green);">анонимно</strong>. Данните, които предоставяш, <em>не се запазват</em> при нас.</div>
+    </div>
+    <button class="btn btn-primary" onclick="startAudit()">Започни одита →</button>
+  </div>
+
+  <!-- PAYMENT -->
+  <div id="screen-payment" class="screen">
+    <div class="brand" style="margin-bottom:4px;">ДА<span class="brand-accent">ВАЙ</span><span style="color:var(--green)">!</span></div>
+    <div class="brand-sub">Личен жизнен отчет</div>
+
+    <div class="price-tag"><span class="price-currency">€</span>14.60</div>
+    <div class="price-note">≈ 28.55 лв · еднократно плащане · незабавен достъп</div>
+
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-check">✓</span>Задълбочен анализ на 7 области от живота ти</li>
+      <li class="feature-item"><span class="feature-check">✓</span>Идентификация на поведенческите модели и самозаблудите</li>
+      <li class="feature-item"><span class="feature-check">✓</span>3 конкретни действия за всяка от 7-те области</li>
+      <li class="feature-item"><span class="feature-check">✓</span>Персонални сутрешни и вечерни рутини, съобразени с теб</li>
+      <li class="feature-item"><span class="feature-check">✓</span>3–5 ключови въпроса за ежедневна рефлексия</li>
+      <li class="feature-item"><span class="feature-check">✓</span>Резултатът на мейла + PDF за сваляне</li>
+    </ul>
+
+    <button class="btn btn-primary" id="checkout-btn" onclick="startCheckout()" style="width:100%;justify-content:center;padding:16px;">
+      Започни одита →
+    </button>
+    <div class="secure-note">🔒 Плащането е обработено от Stripe. Картовите данни не достигат до нас.</div>
+
+    <div style="margin-top:16px;text-align:center;">
+      <button class="btn btn-secondary" onclick="showScreen('intro')" style="font-size:13px;padding:10px 20px;">← Назад</button>
+    </div>
+  </div>
+
+  <!-- AREAS -->
+  <div id="screen-areas" class="screen">
+    <div class="phase-chips">
+      <div class="phase-chip done">1. Одит</div>
+      <div class="phase-chip">2. Ситуации</div>
+      <div class="phase-chip">3. Уроци</div>
+      <div class="phase-chip">4. Смисъл</div>
+    </div>
+    <div class="progress-label">
+      <span id="area-progress-text">1 от 7</span>
+      <span id="area-progress-pct">14%</span>
+    </div>
+    <div class="progress-line"><div class="progress-fill" id="progress-fill" style="width:14%"></div></div>
+    <div class="area-title" id="area-name"></div>
+    <div class="area-question" id="area-question"></div>
+    <div class="field-label">Оценка от 1 до 10</div>
+    <div class="rating-grid" id="rating-grid"></div>
+    <div class="field-label">Опиши честно</div>
+    <textarea id="area-desc" placeholder="Бъди конкретен. Детайлите правят анализа точен..."></textarea>
+    <div>
+      <button class="btn btn-secondary" id="btn-back" onclick="prevArea()">Назад</button>
+      <button class="btn btn-primary" onclick="nextArea()">Напред →</button>
+    </div>
+  </div>
+
+  <!-- SITUATIONS -->
+  <div id="screen-situations" class="screen">
+    <div class="phase-chips">
+      <div class="phase-chip done">1. Одит</div>
+      <div class="phase-chip active">2. Ситуации</div>
+      <div class="phase-chip">3. Уроци</div>
+      <div class="phase-chip">4. Смисъл</div>
+    </div>
+    <div class="area-title" style="margin-bottom:8px;">Петте ситуации</div>
+    <p class="card-text" style="margin-bottom:1.5rem;">Опиши пет момента, когато си се чувствал заседнал, провалил се или саботирал себе си. Конкретно — какво се случи, как реагира, какъв беше резултатът.</p>
+    <div id="situations-container"></div>
+    <div>
+      <button class="btn btn-secondary" onclick="goToLastArea()">Назад</button>
+      <button class="btn btn-primary" onclick="nextToLessons()">Напред →</button>
+    </div>
+  </div>
+
+  <!-- LESSONS -->
+  <div id="screen-lessons" class="screen">
+    <div class="phase-chips">
+      <div class="phase-chip done">1. Одит</div>
+      <div class="phase-chip done">2. Ситуации</div>
+      <div class="phase-chip active">3. Уроци</div>
+      <div class="phase-chip">4. Смисъл</div>
+    </div>
+    <div class="area-title" style="margin-bottom:1.5rem;">Съжаления, Гордост и Уроци</div>
+    <div class="sit-block">
+      <div class="sit-label">Нещата, за които най-много съжаляваш до момента</div>
+      <textarea id="regrets" placeholder="Какво би направил по различен начин? Кое те измъчва когато се сетиш за него?"></textarea>
+    </div>
+    <div class="sit-block">
+      <div class="sit-label">Най-гордите ти моменти</div>
+      <textarea id="proud" placeholder="Кога си бил най-добрата версия на себе си?"></textarea>
+    </div>
+    <div class="sit-block">
+      <div class="sit-label">Уроците по трудния начин</div>
+      <textarea id="lessons-text" placeholder="Какво разбра за живота, за себе си, за другите — по начин, който само преживяването може да научи?"></textarea>
+    </div>
+    <div>
+      <button class="btn btn-secondary" onclick="showScreen('situations')">Назад</button>
+      <button class="btn btn-primary" onclick="goToMeaning()">Напред →</button>
+    </div>
+  </div>
+
+  <!-- MEANING -->
+  <div id="screen-meaning" class="screen">
+    <div class="phase-chips">
+      <div class="phase-chip done">1. Одит</div>
+      <div class="phase-chip done">2. Ситуации</div>
+      <div class="phase-chip done">3. Уроци</div>
+      <div class="phase-chip active">4. Смисъл</div>
+    </div>
+    <div class="area-title" style="margin-bottom:6px;">Смисъл</div>
+    <p class="area-question" style="margin-bottom:2rem;">Последният въпрос — не какво правиш, а на какво стъпваш, докато го правиш.</p>
+
+    <div class="sit-block">
+      <div class="sit-label">Когато всичко се обърка, на какво разчиташ най-много? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери до 2)</span></div>
+      <div class="choices-grid" id="m-q1">
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Контрол</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Другите хора</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Работата</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Парите</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Вътрешните си принципи</button>
+      </div>
+    </div>
+
+    <div class="sit-block">
+      <div class="sit-label">Кое е по-болезнено за теб? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери до 2)</span></div>
+      <div class="choices-grid" id="m-q2">
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да загубя пари</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да загубя репутация</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да загубя връзка</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да изгубя себе си</button>
+      </div>
+    </div>
+
+    <div class="sit-block">
+      <div class="sit-label">Кога се чувстваш най-истински жив? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери до 2)</span></div>
+      <div class="choices-grid" id="m-q3">
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато постигам</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато помагам</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато съм свободен</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато съм свързан с нещо по-голямо от мен</button>
+      </div>
+    </div>
+
+    <div class="sit-block">
+      <div class="sit-label">Кое от изреченията най-точно те описва в момента? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери 1)</span></div>
+      <div class="choices-grid" id="m-q4" style="flex-direction:column;">
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Още не съм постигнал това, което искам — и не съм сигурен как</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Постигнах това, което исках — но щастието не дойде с него</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Чувствам се уморен, но не знам точно защо</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Имам добър живот, но се питам — това ли е всичко?</button>
+      </div>
+    </div>
+
+    <div id="meaning-error" style="display:none;font-size:13px;color:var(--red-text);background:var(--red-light);padding:10px 14px;border-radius:10px;margin-bottom:14px;"></div>
+    <div>
+      <button class="btn btn-secondary" onclick="showScreen('lessons')">Назад</button>
+      <button class="btn btn-primary" onclick="validateAndGenerateAnalysis()">Виж пълния анализ →</button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="screen-loading" class="screen">
+    <div class="loading-wrap">
+      <div class="loading-title">Анализираме...</div>
+      <div class="loading-sub">Определяме моделите в отговорите ти.</div>
+      <div class="loading-steps">
+        <div class="loading-step active" id="lstep-1"><div class="step-dot"></div>Идентифициране на поведенчески модели</div>
+        <div class="loading-step" id="lstep-2"><div class="step-dot"></div>Анализ на самозаблудите</div>
+        <div class="loading-step" id="lstep-3"><div class="step-dot"></div>Изграждане на персонални рутини</div>
+        <div class="loading-step" id="lstep-4"><div class="step-dot"></div>Формулиране на дневните въпроси</div>
+        <div class="loading-step" id="lstep-5"><div class="step-dot"></div>Финализиране на препоръките</div>
+      </div>
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="screen">
+    <div class="brand" style="margin-bottom:4px;">Готово<span class="brand-accent">.</span></div>
+    <p class="card-text" style="margin-bottom:2rem;">Ето честната картина. Не удобна — вярна.</p>
+    <div id="results-content"></div>
+
+    <div class="card no-print" style="margin-top:1.5rem;">
+      <div class="card-title" style="margin-bottom:12px;">Запази резултата</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="openEmailModal()">📧 Изпрати на мейл</button>
+        <button class="btn btn-ghost" onclick="window.print()">⬇ Свали като PDF</button>
+      </div>
+    </div>
+
+    <div class="upsell no-print" id="natal-upsell">
+      <div class="upsell-title">Задълбочен анализ с натална карта</div>
+      <div class="upsell-text">Одитът показва поведенческите модели. Наталната карта показва архетипните — вродените сили и предизвикателства. Заедно дават пълна картина на кой си и защо реагираш така.</div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="payForNatal()">Добави натална карта →</button>
+        <div style="font-size:13px;color:var(--green-dark);"><span style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;">€8,90</span> · еднократно</div>
+      </div>
+
+      <div id="natal-form" style="display:none;margin-top:1.5rem;text-align:left;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <div class="field-label">Дата на раждане</div>
+            <input type="date" id="natal-date" class="textarea" style="padding:10px 12px;height:auto;" max="2010-12-31" min="1930-01-01">
+          </div>
+          <div>
+            <div class="field-label">Час на раждане</div>
+            <input type="time" id="natal-time" class="textarea" style="padding:10px 12px;height:auto;" value="12:00">
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div class="field-label">Град на раждане</div>
+          <input type="text" id="natal-city" class="textarea" style="padding:10px 12px;height:auto;" placeholder="напр. Sofia или London">
+        </div>
+        <div style="margin-bottom:10px;">
+          <div class="field-label">Часова зона (UTC офсет)</div>
+          <select id="natal-tzone" class="textarea" style="padding:10px 12px;height:auto;">
+            <option value="2" selected>UTC+2 (България, Гърция)</option>
+            <option value="1">UTC+1 (Германия, Франция)</option>
+            <option value="0">UTC+0 (Великобритания)</option>
+            <option value="3">UTC+3 (Турция, Русия-Москва)</option>
+            <option value="-5">UTC-5 (Ню Йорк)</option>
+            <option value="-8">UTC-8 (Лос Анджелис)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="natal-submit-btn" onclick="fetchNatalChart()" style="width:100%;">Изчисли натална карта →</button>
+        <div id="natal-error" style="display:none;color:#A32D2D;font-size:13px;margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div id="natal-results" style="display:none;margin-top:1rem;"></div>
+
+    <!-- PERPLEXITY DEEP ANALYSIS -->
+    <div class="upsell no-print" id="perplexity-upsell" style="display:none;">
+      <div class="upsell-title">🎯 Конкретни техники от науката</div>
+      <div class="upsell-text">Търсим в реални изследвания, книги и подкасти конкретни техники за твоите поведенчески модели. Три действия, приложими още днес — плюс библиотека с източници, синтезирана специално за теб.</div>
+      <div style="font-size:13px;color:var(--green-dark);font-weight:500;margin-bottom:14px;">🎁 Даваме ги като <strong>БОНУС</strong> за теб — <em>ДАВАЙ напред и ти!</em></div>
+      <button class="btn btn-primary" id="perplexity-btn" onclick="fetchPerplexityAnalysis()">Вземи техниките →</button>
+      <div id="perplexity-error" style="display:none;color:#A32D2D;font-size:13px;margin-top:8px;"></div>
+    </div>
+
+    <div id="perplexity-results" style="display:none;margin-top:1rem;"></div>
+
+    <div class="divider no-print"></div>
+    <button class="btn btn-secondary no-print" onclick="location.reload()">Нов одит →</button>
+  </div>
+
+</div>
+
+<script>
+// ─── КОНФИГУРАЦИЯ ────────────────────────────────────────────────────────────
+const CONFIG = {
+  stripePublicKey: 'pk_test_51T5Lz2GlIluEKXB5DzV8meplRSdBN1y0EQWlzj4eVxdYkTZcZr04nZTgHVHY9R1YFvDo7aHKp8xno1Op5cbbf9t300aVJS2CXZ',
+  paymentLink: 'https://buy.stripe.com/test_3cI5kDdqEgXA6hAeps7Vm00',
+  natalPaymentLink: 'NATAL_PAYMENT_LINK_HERE', // → Stripe link €8,90, success URL: https://davai.v.bg?natal=success
+  priceId: 'price_1TX1AQGlIluEKXB5cEyepYhd',
+  workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev',
+  siteUrl: 'https://odit.davai.v.bg'
+};
+
+
+
+// ─── ДАННИ ───────────────────────────────────────────────────────────────────
+const AREAS = [
+  { key: 'physical', name: 'Физическо здраве',
+    q: 'Как е физическото ти здраве в момента? Опиши енергийното си ниво, съня, движението, болките и навиците около тялото си.' },
+  { key: 'mental', name: 'Психическо здраве',
+    q: 'Как е психическото ти здраве? Опиши тревожността, настроението, стреса, как се справяш с трудните емоции.' },
+  { key: 'relationship', name: 'Романтична връзка',
+    q: 'Как е романтичната ти връзка? Ако нямаш такава, опиши защо и какво чувстваш. Ако имаш — какво работи, какво не работи, и какво избягваш да казваш.' },
+  { key: 'friendships', name: 'Приятелства',
+    q: 'Как са приятелствата ти? С кого прекарваш времето, колко дълбоки са тези връзки, издигат ли те или те дърпат надолу?' },
+  { key: 'career', name: 'Кариерно удовлетворение',
+    q: 'Как е кариерното ти удовлетворение? Опиши смисъла, ростежа, парите, отношенията с колеги. Кое те мотивира и кое те изтощава?' },
+  { key: 'finances', name: 'Финанси',
+    q: 'Как са финансите ти? Опиши доходите, разходите, спестяванията, дълговете и страховете около парите.' },
+  { key: 'fun', name: 'Забавление и радост',
+    q: 'Колко радост и забавление имаш? Кога последно си се смял от сърце? Какво те зарежда и колко често го правиш?' }
+];
+
+let current = 0;
+let answers = {};
+let paymentVerified = false;
+let analysisResult = null;
+let natalEmailHTML = '';    // Съхранява натален анализ за имейл
+let perplexityEmailHTML = ''; // Съхранява техниките за имейл
+
+// ─── СМИСЪЛ — МНОГОКРАТЕН ИЗБОР ─────────────────────────────────────────────
+function toggleChoice(groupId, btn, maxSelect) {
+  const group = document.getElementById(groupId);
+  if (btn.classList.contains('selected')) {
+    btn.classList.remove('selected');
+    return;
+  }
+  if (maxSelect === 1) {
+    group.querySelectorAll('.choice-btn.selected').forEach(function(b) { b.classList.remove('selected'); });
+  } else if (group.querySelectorAll('.choice-btn.selected').length >= maxSelect) {
+    return;
+  }
+  btn.classList.add('selected');
+}
+
+function goToMeaning() {
+  const reg = document.getElementById('regrets').value.trim();
+  const pr = document.getElementById('proud').value.trim();
+  const ls = document.getElementById('lessons-text').value.trim();
+  if (reg.length < 10 || pr.length < 10 || ls.length < 10) {
+    alert('Моля, попълни и трите полета.');
+    return;
+  }
+  answers.regrets = reg; answers.proud = pr; answers.lessons = ls;
+  showScreen('meaning');
+}
+
+function validateAndGenerateAnalysis() {
+  const errEl = document.getElementById('meaning-error');
+  const q1 = document.querySelectorAll('#m-q1 .choice-btn.selected');
+  const q2 = document.querySelectorAll('#m-q2 .choice-btn.selected');
+  const q3 = document.querySelectorAll('#m-q3 .choice-btn.selected');
+  const q4 = document.querySelectorAll('#m-q4 .choice-btn.selected');
+  if (q1.length < 1 || q2.length < 1 || q3.length < 1 || q4.length !== 1) {
+    errEl.textContent = 'Моля, отговори на всичките четири въпроса.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  answers.meaning = {
+    q1: Array.from(q1).map(function(b) { return b.textContent; }),
+    q2: Array.from(q2).map(function(b) { return b.textContent; }),
+    q3: Array.from(q3).map(function(b) { return b.textContent; }),
+    q4: q4[0].textContent
+  };
+  generateAnalysis();
+}
+
+// ─── НАВИГАЦИЯ ───────────────────────────────────────────────────────────────
+function showScreen(id) {
+  stopVoice();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+  setTimeout(initVoiceInputs, 50);
+}
+
+// ─── СТАРТ НА ОДИТА (без предварително плащане) ──────────────────────────────
+function startAudit() {
+  buildSituations();
+  showScreen('areas');
+  renderArea();
+}
+
+// ─── ПЛАЩАНЕ ЗА ПЪЛНИ РЕЗУЛТАТИ ──────────────────────────────────────────────
+function payForFullResults() {
+  try {
+    sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
+    sessionStorage.setItem('davai_answers', JSON.stringify(answers));
+  } catch(e) {}
+  window.location.href = CONFIG.paymentLink;
+}
+
+// ─── ПРОВЕРКА НА ПЛАЩАНЕТО СЛЕД REDIRECT ─────────────────────────────────────
+async function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get('payment');
+
+  if (status === 'success') {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    const saved = sessionStorage.getItem('davai_analysis');
+    if (saved) {
+      // Плащане след анализ → разкрий пълните резултати
+      analysisResult = JSON.parse(saved);
+      answers = JSON.parse(sessionStorage.getItem('davai_answers') || '{}');
+      sessionStorage.removeItem('davai_analysis');
+      sessionStorage.removeItem('davai_answers');
+      paymentVerified = true;
+      renderResults(analysisResult);
+      fetchPrinciples();
+    } else {
+      showScreen('intro');
+    }
+  } else if (status === 'cancelled') {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    showScreen('intro');
+  } else if (params.get('natal') === 'success') {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    try {
+      const savedResult = sessionStorage.getItem('davai_analysis');
+      const savedAnswers = sessionStorage.getItem('davai_answers');
+      if (savedResult) {
+        analysisResult = JSON.parse(savedResult);
+        answers = JSON.parse(savedAnswers || '{}');
+        paymentVerified = true;
+        renderResults(analysisResult);
+        setTimeout(function() {
+          const upsell = document.getElementById('natal-upsell');
+          if (upsell) { upsell.style.display = 'block'; }
+          toggleNatalForm();
+          document.getElementById('natal-upsell').scrollIntoView({ behavior: 'smooth' });
+        }, 400);
+      } else {
+        showScreen('intro');
+      }
+    } catch(e) { showScreen('intro'); }
+  }
+}
+
+
+// ─── НАТАЛНА КАРТА — ПЛАЩАНЕ ─────────────────────────────────────────────────
+function payForNatal() {
+  if (!CONFIG.natalPaymentLink || CONFIG.natalPaymentLink === 'NATAL_PAYMENT_LINK_HERE') {
+    // Без конфигуриран линк — показва формата директно (за тест)
+    toggleNatalForm();
+    return;
+  }
+  try {
+    sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
+    sessionStorage.setItem('davai_answers', JSON.stringify(answers));
+  } catch(e) {}
+  window.location.href = CONFIG.natalPaymentLink;
+}
+
+// ─── ОБЛАСТИ ─────────────────────────────────────────────────────────────────
+function buildSituations() {
+  const c = document.getElementById('situations-container');
+  c.innerHTML = [1,2,3,4,5].map(n =>
+    '<div class="sit-block"><div class="sit-label">Ситуация ' + n + '</div>' +
+    '<textarea id="sit-' + n + '" placeholder="Опиши конкретно — какво се случи, как реагира, какъв беше резултатът..."></textarea></div>'
+  ).join('');
+}
+
+function renderArea() {
+  const a = AREAS[current];
+  const pct = Math.round(((current + 1) / AREAS.length) * 100);
+  document.getElementById('area-progress-text').textContent = (current + 1) + ' от ' + AREAS.length;
+  document.getElementById('area-progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('area-name').textContent = a.name;
+  document.getElementById('area-question').textContent = a.q;
+  document.getElementById('area-desc').value = answers[a.key]?.desc || '';
+  const saved = answers[a.key]?.rating || null;
+  document.getElementById('rating-grid').innerHTML = [1,2,3,4,5,6,7,8,9,10].map(n =>
+    '<button class="rating-btn' + (saved === n ? ' selected' : '') + '" onclick="selectRating(' + n + ')">' + n + '</button>'
+  ).join('');
+  document.getElementById('btn-back').style.visibility = current === 0 ? 'hidden' : 'visible';
+  setTimeout(initVoiceInputs, 50);
+}
+
+function selectRating(n) {
+  if (!answers[AREAS[current].key]) answers[AREAS[current].key] = {};
+  answers[AREAS[current].key].rating = n;
+  document.querySelectorAll('.rating-btn').forEach((b, i) => b.classList.toggle('selected', i + 1 === n));
+}
+
+function saveCurrentArea() {
+  const a = AREAS[current];
+  if (!answers[a.key]) answers[a.key] = {};
+  answers[a.key].desc = document.getElementById('area-desc').value.trim();
+}
+
+function nextArea() {
+  const a = AREAS[current];
+  saveCurrentArea();
+  if (!answers[a.key]?.rating) { alert('Моля, дай оценка от 1 до 10.'); return; }
+  if ((answers[a.key]?.desc || '').length < 20) { alert('Моля, опиши ситуацията с поне няколко думи.'); return; }
+  if (current < AREAS.length - 1) { current++; renderArea(); }
+  else { showScreen('situations'); }
+}
+
+function prevArea() { saveCurrentArea(); if (current > 0) { current--; renderArea(); } }
+function goToLastArea() { current = AREAS.length - 1; showScreen('areas'); renderArea(); }
+
+function nextToLessons() {
+  const filled = [1,2,3,4,5].filter(n => (document.getElementById('sit-' + n).value.trim().length > 10));
+  if (filled.length < 3) { alert('Моля, опиши поне три ситуации.'); return; }
+  answers.situations = [1,2,3,4,5].map(n => document.getElementById('sit-' + n).value.trim());
+  showScreen('lessons');
+}
+
+// ─── LOADING ─────────────────────────────────────────────────────────────────
+function animateLoadingSteps() {
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i > 0) {
+      document.getElementById('lstep-' + i).classList.remove('active');
+      document.getElementById('lstep-' + i).classList.add('done');
+    }
+    i++;
+    if (i <= 5) document.getElementById('lstep-' + i).classList.add('active');
+    else clearInterval(interval);
+  }, 4500);
+  return interval;
+}
+
+// ─── AI АНАЛИЗ (две заявки — избягва Cloudflare timeout) ────────────────────
+async function generateAnalysis() {
+  const reg = document.getElementById('regrets').value.trim();
+  const pr = document.getElementById('proud').value.trim();
+  const ls = document.getElementById('lessons-text').value.trim();
+  if (reg.length < 10 || pr.length < 10 || ls.length < 10) { alert('Моля, попълни и трите полета.'); return; }
+  answers.regrets = reg; answers.proud = pr; answers.lessons = ls;
+  showScreen('loading');
+  const loadingTimer = animateLoadingSteps();
+
+  const aSum = AREAS.map(a => a.name + ' [' + (answers[a.key]?.rating || '?') + '/10]: ' + (answers[a.key]?.desc || '')).join('\n\n');
+  const sSum = (answers.situations || []).filter(s => s.length > 5).map((s, i) => 'Ситуация ' + (i+1) + ': ' + s).join('\n\n');
+  const m = answers.meaning || {};
+  const mSum = [
+    'На какво разчита най-много: ' + (m.q1 || []).join(' и '),
+    'Кое е по-болезнено: ' + (m.q2 || []).join(' и '),
+    'Кога се чувства най-жив: ' + (m.q3 || []).join(' и '),
+    'Жизнен етап (самоописание): ' + (m.q4 || '')
+  ].filter(function(l) { return !l.endsWith(': '); }).join('\n');
+
+  try {
+    // Заявка 1: Психологически профил, модели, слепи зони (~3500 токена, ~35 сек)
+    const res1 = await fetch(CONFIG.workerUrl + '/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: buildPromptCore(aSum, sSum, mSum), max_tokens: 4500 })
+    });
+    const data1 = await res1.json();
+    if (data1.error) throw new Error(data1.error);
+    const core = repairAndParseJSON(data1.content);
+    if (!core) throw new Error('Неуспешен анализ — опитай отново.');
+
+    // Заявка 2: Области, рутини, въпроси (~2500 токена, ~25 сек)
+    const res2 = await fetch(CONFIG.workerUrl + '/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: buildPromptAreas(aSum, sSum), max_tokens: 3500 })
+    });
+    const data2 = await res2.json();
+    if (!data2.error) {
+      const areas = repairAndParseJSON(data2.content);
+      if (areas) Object.assign(core, areas);
+    }
+
+    clearInterval(loadingTimer);
+    analysisResult = core;
+    renderPreview(core);
+  } catch(e) {
+    clearInterval(loadingTimer);
+    showScreen('results');
+    document.getElementById('results-content').innerHTML =
+      '<div class="card"><div class="card-title">Грешка</div><div class="card-text">Нещо се обърка: ' + e.message + '</div></div>';
+  }
+}
+
+// ─── JSON REPAIR ─────────────────────────────────────────────────────────────
+function repairAndParseJSON(txt) {
+  txt = txt.replace(/```json\n?|```\n?/g, '').trim();
+  // Опит 1: директно парсване
+  try { return JSON.parse(txt); } catch(e) {}
+  // Опит 2: намери последния затворен root обект { }
+  let depth = 0, inStr = false, escaped = false, lastClose = -1;
+  const start = txt.indexOf('{');
+  if (start === -1) return null;
+  for (let i = start; i < txt.length; i++) {
+    const c = txt[i];
+    if (escaped) { escaped = false; continue; }
+    if (c === '\\' && inStr) { escaped = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) lastClose = i; }
+  }
+  if (lastClose > start) {
+    try { return JSON.parse(txt.slice(start, lastClose + 1)); } catch(e) {}
+  }
+  return null;
+}
+
+// ─── ПРОМПТ 1: ПСИХОЛОГИЧЕСКИ ПРОФИЛ, МОДЕЛИ, СЛЕПИ ЗОНИ ────────────────────
+function buildPromptCore(aSum, sSum, mSum) {
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  return `Днешна дата: ${today}.
+
+Ти си личен одитор — говориш ДИРЕКТНО към човека (второ лице: "Ти...", "Плащаш...", "Виждам в теб..."). Никога трето лице. Чист БЪЛГАРСКИ — без "локус", "schema", "pattern", "attachment". Използвай: "начин на свързване", "основното убеждение", "откъде даваш".
+
+ДАННИ:
+${aSum}
+
+СИТУАЦИИ: ${sSum}
+
+СЪЖАЛЕНИЯ: ${answers.regrets}
+ГОРДОСТ: ${answers.proud}
+УРОЦИ: ${answers.lessons}
+
+СМИСЪЛ (четири избора на клиента):
+${mSum}
+
+АНАЛИЗИРАЙ ПРЕЗ 4 ЛЕЩИ:
+1. НАЧИН НА СВЪРЗВАНЕ: Сигурен/Тревожен/Избягващ/Объркан — конкретно от отговорите.
+2. ЧИЕ ВЛИЯНИЕ: Собственото/На другите/Смесено — конкретен пример.
+3. ОТКЪДЕ ДАВА: От страх/дълг/изтощение/пълнота — каква цена плаща.
+4. ОСНОВНО УБЕЖДЕНИЕ: Прекален контрол, Самосаботаж, Чувство на измама, Бягство от конфликти, Нужда от одобрение, Отлагане, Черно-бяло мислене.
+
+ВЪРНИ САМО ВАЛИДЕН JSON:
+{
+  "summary": "4 изречения директно: кой си, основната тема, каква цена плащаш, от каква позиция даваш.",
+  "summary_actions": ["Действие 1 с дата след ${today}", "Действие 2", "Действие 3"],
+  "top_pattern": "1 изречение — най-силният модел директно към него",
+  "psychological_profile": {
+    "attachment_style": "1-2 изречения с пример от отговорите. Без термини.",
+    "locus_of_control": "1-2 изречения с конкретен пример.",
+    "giving_schema": "1-2 изречения — откъде даваш и каква цена плащаш.",
+    "core_schema": "1-2 изречения с прости думи."
+  },
+  "patterns": [{"title": "Заглавие", "description": "2 изречения директно: 'Когато X, ти правиш Y...', 'Цената е...'", "severity": "high или medium", "psychological_root": "1 изречение."}],
+  "blind_spots": [{"area": "Областта", "insight": "2 изречения: 'Разказваш си, че...', 'Реалността е...'"}],
+  "giving_analysis": {
+    "current_giving": "1-2 изречения — как даваш и на кого.",
+    "giving_cost": "1 изречение.",
+    "giving_invitation": "2 изречения — даването от пълнота за теб конкретно."
+  },
+  "meaning_analysis": {
+    "declared_vs_lived": "2-3 изречения — съпостави на какво казва, че разчита (от СМИСЪЛ въпрос 1) с реалните модели от областите и ситуациите. Конкретно, без съд.",
+    "where_it_points": "2-3 изречения — покажи конкретно накъде сочи тази разлика, базирано на отговора за болезненото (въпрос 2) и поведенческите модели. Като наблюдение, не поука.",
+    "the_giving_moment": "2 изречения. Ако в уроците, гордостта или ситуациите има конкретен момент на безусловно даване — отрази го и покажи защо е по-близо до истинския смисъл. Ако няма — 'Помисли за последния път, когато си дал нещо — време, внимание, помощ — без да очакваш нищо обратно. Това усещане е по-близо до истинския смисъл от всяко постижение.'",
+    "current_anchor": "На какво стои в момента, базирано директно на отговора от въпрос 1. Описано просто и директно към него.",
+    "anchor_honesty": "Едно честно, но не присъдно изречение — дали тази опора издържа с времето или се изтощава, конкретно спрямо неговия избор.",
+    "life_stage_reflection": "2 изречения директно базирани на отговора от въпрос 4. Покажи, че независимо от позицията, въпросът е същият — търсене на смисъл.",
+    "quiet_door": "Едно тихо изречение. БЕЗ думите духовност, религия, вяра, практика, медитация. Загатва нещо по-голямо от себе си като универсален принцип потвърден в цялата човешка история. Тон: топъл, без натиск, като посочване към звезда. Регистър: 'Забелязваш ли — почти всичко, на което разчиташ, може да се изтощи. Има нещо, на което хората са се опирали когато всичко друго е изчезвало — нарекли са го с различни имена, но е bilo едно и също.'",
+    "the_real_question": "Един личен въпрос за носене — изграден от конкретните му отговори на четирите въпроса, не общ."
+  }
+}
+КРИТИЧНО: Второ лице. Чист български. Max 2-3 изречения на поле. JSON завършен.`;
+}
+
+// ─── ПРОМПТ 2: ОБЛАСТИ, РУТИНИ, ВЪПРОСИ ─────────────────────────────────────
+function buildPromptAreas(aSum, sSum) {
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  return `Днешна дата: ${today}.
+
+Ти си личен одитор — говориш ДИРЕКТНО (второ лице). Чист БЪЛГАРСКИ.
+
+ДАННИ (включва самооценката на клиента):
+${aSum}
+
+СЪЖАЛЕНИЯ: ${answers.regrets}
+ГОРДОСТ: ${answers.proud}
+УРОЦИ: ${answers.lessons}
+
+ВАЖНО — РЕАЛНА ОЦЕНКА: За всяка от 7-те области прецени обективно дали описанието оправдава по-висока оценка от дадената. Ако клиентът се е подценил с 2 или повече точки — вписвай "assessed_score" и "encouragement". Прави го САМО при съществена разлика и САМО ако реалната е по-висока. Ако разликата е под 2 точки или реалната е по-ниска — assessed_score: null.
+
+ВЪРНИ САМО ВАЛИДЕН JSON:
+{
+  "areas": [
+    {
+      "name": "Точното ime на областта",
+      "score": числото_на_клиента,
+      "assessed_score": числото_от_анализа_ако_е_с_2+_точки_по-голямо (иначе null),
+      "encouragement": "1-2 изречения директно: 'Виждам, че се оцени на X, но реалността показва...' Окуражи го да види постиженията си. САМО ако assessed_score съществува, иначе null.",
+      "insight": "2 изречения директно.",
+      "actions": ["Действие 1 с дата след ${today}", "Действие 2", "Действие 3"]
+    }
+  ],
+  "morning_routines": ["Рутина 1 — конкретна за теб", "Рутина 2", "Рутина 3"],
+  "evening_routines": ["Рутина 1 — за твоите нужди", "Рутина 2", "Рутина 3"],
+  "daily_questions": ["Въпрос 1 — свързан с основния ти модел", "Въпрос 2", "Въпрос 3", "Въпрос 4", "Въпрос 5"]
+}
+Включи ВСИЧКИТЕ 7 области. Max 2 изречения на поле. JSON завършен.`;
+}
+
+// ─── ТРИТЕ ОГЛЕДАЛА — ПОМОЩНИ ФУНКЦИИ ────────────────────────────────────────
+function scoreClass(n) { return n >= 7 ? 'score-high' : n >= 4 ? 'score-mid' : 'score-low'; }
+
+function lockedCard(title, placeholder) {
+  return '<div class="card" style="position:relative;overflow:hidden;">' +
+    '<div class="card-title" style="color:var(--text-tertiary);">🔒 ' + title + '</div>' +
+    '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">' + placeholder + '</div>' +
+    '<div style="position:absolute;inset:0;background:rgba(250,250,248,0.15);"></div>' +
+    '</div>';
+}
+
+function mirrorSeparator(numLabel, colorHex, title, intro) {
+  return '<div style="margin:2.5rem 0 1.5rem;">' +
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">' +
+      '<div style="height:1px;flex:1;background:var(--border);"></div>' +
+      '<div style="font-size:11px;font-weight:600;color:' + colorHex + ';text-transform:uppercase;letter-spacing:0.12em;white-space:nowrap;padding:5px 16px;border:1px solid ' + colorHex + ';border-radius:20px;background:white;">' + numLabel + '</div>' +
+      '<div style="height:1px;flex:1;background:var(--border);"></div>' +
+    '</div>' +
+    '<div style="font-family:\'Playfair Display\',serif;font-size:1.35rem;font-weight:500;color:var(--text);margin-bottom:10px;">' + title + '</div>' +
+    '<div style="font-size:14px;color:var(--text-secondary);line-height:1.7;font-style:italic;">' + intro + '</div>' +
+  '</div>';
+}
+
+// ─── ЕДИННА РЕНДИРАЩА ФУНКЦИЯ — следва структурата на Трите Огледала ─────────
+function renderAnalysis(d, isPaid) {
+  const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
+  let html = '';
+
+  // Средна оценка
+  html += '<div class="card">';
+  html += '<div style="display:flex;align-items:baseline;gap:8px;">';
+  html += '<div class="avg-score">' + avg + '</div><div class="avg-label">/10 средна оценка</div></div>';
+  html += '</div>';
+
+  // ═══════════════════════════════════════════════════════════════
+  // ОГЛЕДАЛО №1 — НАВИЦИ
+  // ═══════════════════════════════════════════════════════════════
+  html += mirrorSeparator('ОГЛЕДАЛО №1', '#1D9E75', 'Навици — Как живееш днес',
+    'Това огледало показва реалното състояние на живота ти в 7 ключови области. Не как би искал да бъде. Как е в действителност.');
+
+  // FREE: Обобщение
+  if (d.summary) {
+    html += '<div class="card">';
+    html += '<div class="summary-block"><div class="summary-label">Обобщение</div>';
+    html += '<div class="card-text">' + d.summary + '</div></div>';
+    html += '</div>';
+  }
+
+  // FREE: Основен модел
+  if (d.top_pattern) {
+    html += '<div class="card" style="border-left:3px solid var(--green);">';
+    html += '<div class="card-title">Основният модел</div>';
+    html += '<div class="card-text" style="font-style:italic;font-size:15px;">"' + d.top_pattern + '"</div>';
+    html += '</div>';
+  }
+
+  // FREE: 7 области — само оценки (числа)
+  if (d.areas && d.areas.length) {
+    html += '<div class="card">';
+    html += '<div class="card-title" style="margin-bottom:14px;">7 области — текущи оценки</div>';
+    d.areas.forEach(function(a) {
+      const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">';
+      html += '<div style="font-size:14px;font-weight:500;color:var(--text);">' + a.name + '</div>';
+      if (hasGap) {
+        html += '<div style="display:flex;align-items:center;gap:8px;">';
+        html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score||0) + '/10</span>';
+        html += '<span class="score-badge score-high">▲ ' + a.assessed_score + '/10</span>';
+        html += '</div>';
+      } else {
+        html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // PAID: Прозрения + действия за всяка област
+  if (isPaid) {
+    if (d.areas && d.areas.length) {
+      html += '<div class="card"><div class="card-title">Анализ по области</div>';
+      d.areas.forEach(function(a) {
+        const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
+        html += '<div class="area-result"><div class="area-result-header">';
+        html += '<div class="area-result-name">' + a.name + '</div>';
+        if (hasGap) {
+          html += '<div style="display:flex;align-items:center;gap:8px;">';
+          html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score||0) + '/10</span>';
+          html += '<span class="score-badge score-high" style="font-size:13px;padding:5px 14px;">▲ ' + a.assessed_score + '/10</span>';
+          html += '</div>';
+        } else {
+          html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
+        }
+        html += '</div>';
+        if (hasGap && a.encouragement) {
+          html += '<div style="background:var(--green-light);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:10px;">';
+          html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Реалната картина</div>';
+          html += '<div style="font-size:13px;color:var(--green-dark);line-height:1.6;">' + a.encouragement + '</div>';
+          html += '</div>';
+        }
+        if (a.insight) html += '<div class="area-insight">' + a.insight + '</div>';
+        (a.actions || []).forEach(function(act, i) {
+          html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div><div class="action-text">' + act + '</div></div>';
+        });
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    if (d.summary_actions && d.summary_actions.length) {
+      html += '<div class="card">';
+      html += '<div class="field-label" style="margin-bottom:10px;">Три стъпки към основната промяна</div>';
+      d.summary_actions.forEach(function(a, i) {
+        html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div>';
+        html += '<div class="action-text" style="font-size:14px;color:var(--text);">' + a + '</div></div>';
+      });
+      html += '</div>';
+    }
+  } else {
+    html += lockedCard('Прозрения и действия за всяка от 7-те области',
+      'Защо е точно тази оценка, какво стои зад нея — и три конкретни стъпки за всяка от областите.');
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // ОГЛЕДАЛО №2 — БЛОКАЖИ
+  // ═══════════════════════════════════════════════════════════════
+  html += mirrorSeparator('ОГЛЕДАЛО №2', '#4A3BAA', 'Блокажи — Какво те спира',
+    'Тук започват истинските прозрения. Повтарящи се модели, самосаботаж, ограничения, които сам си изградил.');
+
+  // FREE: Психологически профил
+  if (d.psychological_profile) {
+    const pp = d.psychological_profile;
+    html += '<div class="card" style="border:2px solid var(--purple-light);">';
+    html += '<div class="card-title" style="color:var(--purple-text);margin-bottom:16px;">🧠 Психологически профил</div>';
+    [
+      { label: 'Стил на привързаност', value: pp.attachment_style },
+      { label: 'Локус на контрол',     value: pp.locus_of_control },
+      { label: 'Схема на даване',      value: pp.giving_schema },
+      { label: 'Основна схема',        value: pp.core_schema }
+    ].forEach(function(item) {
+      if (!item.value) return;
+      html += '<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--purple-text);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + item.label + '</div>';
+      html += '<div class="card-text">' + item.value + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  // PAID: Поведенчески модели, слепи зони, схема на даване
+  if (isPaid) {
+    if (d.patterns && d.patterns.length) {
+      html += '<div class="card"><div class="card-title">Поведенческите модели</div>';
+      d.patterns.forEach(function(p) {
+        html += '<div style="margin-bottom:18px;">';
+        html += '<span class="tag ' + (p.severity === 'high' ? 'tag-red' : 'tag-amber') + '">' + p.title + '</span>';
+        html += '<div class="card-text" style="margin-bottom:8px;">' + p.description + '</div>';
+        if (p.psychological_root) {
+          html += '<div style="font-size:12px;color:var(--purple-text);background:var(--purple-light);border-radius:8px;padding:6px 10px;display:inline-block;">🔍 ' + p.psychological_root + '</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    if (d.blind_spots && d.blind_spots.length) {
+      html += '<div class="card"><div class="card-title">Където се лъжеш</div>';
+      d.blind_spots.forEach(function(b) {
+        html += '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">' + b.area + '</div>';
+        html += '<div class="card-text">' + b.insight + '</div></div>';
+      });
+      html += '</div>';
+    }
+    if (d.giving_analysis) {
+      const ga = d.giving_analysis;
+      html += '<div class="card" style="border-left:3px solid var(--green);">';
+      html += '<div class="card-title" style="margin-bottom:16px;">🤲 Твоята схема на даване</div>';
+      if (ga.current_giving) {
+        html += '<div class="summary-block" style="margin-bottom:14px;">';
+        html += '<div class="summary-label">Как даваш сега</div>';
+        html += '<div class="card-text">' + ga.current_giving + '</div></div>';
+      }
+      if (ga.giving_cost) {
+        html += '<div style="background:var(--red-light);border-radius:10px;padding:12px 14px;margin-bottom:14px;">';
+        html += '<div style="font-size:11px;font-weight:500;color:var(--red-text);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Цената, която плащаш</div>';
+        html += '<div class="card-text">' + ga.giving_cost + '</div></div>';
+      }
+      if (ga.giving_invitation) {
+        html += '<div style="background:var(--green-light);border-radius:10px;padding:12px 14px;">';
+        html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Даването от пълнота — как би изглеждало</div>';
+        html += '<div class="card-text">' + ga.giving_invitation + '</div></div>';
+      }
+      html += '</div>';
+    }
+  } else {
+    html += lockedCard('Поведенчески модели',
+      (d.patterns ? d.patterns.length : 3) + ' идентифицирани модела с психологически корен и конкретна цена.');
+    html += lockedCard('Слепи зони · Схема на даване',
+      'Историите, които си разказваш, и реалността зад тях. Схемата на даване и цената, която плащаш.');
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // ОГЛЕДАЛО №3 — УРОЦИ
+  // ═══════════════════════════════════════════════════════════════
+  html += mirrorSeparator('ОГЛЕДАЛО №3', '#854F0B', 'Уроци — Какво животът се опитва да ти покаже',
+    'Всяка трудност носи урок. Това огледало показва кои уроци вече си научил, кои избягваш, и къде животът те кани да пораснеш.');
+
+  if (isPaid) {
+    if (d.morning_routines || d.evening_routines) {
+      html += '<div class="card"><div class="card-title">Твоите персонални рутини</div>';
+      html += '<div class="routine-grid">';
+      html += '<div class="routine-card"><div class="routine-card-title morning">☀ Сутрин</div>';
+      (d.morning_routines || []).forEach(function(r) { html += '<div class="routine-item">→ ' + r + '</div>'; });
+      html += '</div>';
+      html += '<div class="routine-card"><div class="routine-card-title evening">🌙 Вечер</div>';
+      (d.evening_routines || []).forEach(function(r) { html += '<div class="routine-item">→ ' + r + '</div>'; });
+      html += '</div></div></div>';
+    }
+    if (d.daily_questions && d.daily_questions.length) {
+      html += '<div class="card"><div class="card-title">Въпроси за всеки ден</div>';
+      html += '<div class="card-text" style="margin-bottom:14px;font-size:13px;">Задавай си тези въпроси сутрин или вечер. Нека работят в теб.</div>';
+      html += '<ul class="daily-q-list">';
+      d.daily_questions.forEach(function(q, i) {
+        html += '<li class="daily-q-item"><div class="daily-q-num">' + (i+1) + '</div><div class="daily-q-text">' + q + '</div></li>';
+      });
+      html += '</ul></div>';
+    }
+    // Meaning — след трите огледала, златист акцент
+    if (d.meaning_analysis) {
+      html += renderMeaningAnalysis(d.meaning_analysis);
+    }
+    // Share block (fetchPrinciples() вмъква личния кодекс преди него)
+    html += '<div class="card share-block" style="margin-top:1rem;border:2px solid var(--green-light);background:linear-gradient(135deg,#f0fef8 0%,#fff 100%);">';
+    html += '<div class="card-title" style="margin-bottom:6px;">Знаеш ли някой, на когото би помогнало?</div>';
+    html += '<div class="card-text" style="margin-bottom:14px;">Сподели одита с приятел или близък.</div>';
+    html += '<div style="padding:10px 14px;background:#f5f5f3;border-radius:8px;font-size:13px;color:#444;word-break:break-all;margin-bottom:12px;"><strong>🔗</strong> ' + CONFIG.siteUrl + '</div>';
+    html += '<div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;">';
+    html += '<a class="btn btn-primary" href="' + CONFIG.siteUrl + '" target="_blank">Вземи твоя одит →</a>';
+    html += '<button class="btn btn-ghost" onclick="copyShareLink(this)">Копирай линка</button>';
+    html += '</div></div>';
+  } else {
+    html += lockedCard('Персонални рутини · Дневни въпроси · Личен кодекс',
+      'Сутрешни и вечерни рутини · 5 ключови въпроса · 5-7 лични принципа извлечени от твоите думи.');
+    // Смисъл — заключен, златист акцент
+    html += '<div class="card" style="position:relative;overflow:hidden;border:1px solid var(--gold);">' +
+      '<div class="card-title" style="color:var(--gold);">🔒 Смисъл</div>' +
+      '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">Четирите избора разкриват разликата между казаното и живяното — и въпросът за носене с теб.</div>' +
+      '<div style="position:absolute;inset:0;background:rgba(250,250,248,0.15);"></div>' +
+    '</div>';
+    // Payment CTA
+    html += '<div style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:16px;padding:32px 28px;text-align:center;color:white;margin:1.5rem 0;">';
+    html += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px;">Пълният анализ е готов</div>';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-size:2.6rem;font-weight:600;color:white;line-height:1;margin-bottom:4px;">';
+    html += '<span style="font-size:1.3rem;vertical-align:super;color:rgba(255,255,255,0.6);">€</span>14,60</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:22px;">Еднократно · Незабавен достъп · PDF + имейл</div>';
+    html += '<button onclick="payForFullResults()" style="background:#1D9E75;color:white;border:none;padding:15px 36px;border-radius:50px;font-size:15px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;letter-spacing:0.01em;">Отключи пълния анализ — €14.60 →</button>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.25);margin-top:14px;">🔒 Обработено от Stripe · Криптирано и сигурно</div>';
+    html += '</div>';
+  }
+
+  return html;
+}
+
+// ─── PREVIEW (преди плащане) ──────────────────────────────────────────────────
+function renderPreview(d) {
+  showScreen('results');
+  var saveCard = document.querySelector('#screen-results .card.no-print');
+  if (saveCard) saveCard.style.display = 'none';
+  document.getElementById('natal-upsell').style.display = 'none';
+  document.getElementById('perplexity-upsell').style.display = 'none';
+  document.getElementById('results-content').innerHTML = renderAnalysis(d, false);
+}
+
+function renderResults(d) {
+  showScreen('results');
+  var saveCard = document.querySelector('#screen-results .card.no-print');
+  if (saveCard) saveCard.style.display = '';
+  document.getElementById('results-content').innerHTML = renderAnalysis(d, true);
+  if (d.patterns && d.patterns.length > 0) {
+    document.getElementById('perplexity-upsell').style.display = 'block';
+  }
+  fetchPrinciples();
+}
+
+function renderResults_UNUSED_v3_START(d) {
+  const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
+  let html = '';
+
+  html += '<div class="card">';
+  html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:16px;">';
+  html += '<div class="avg-score">' + avg + '</div><div class="avg-label">/10 средна оценка</div></div>';
+  if (d.summary) {
+    html += '<div class="summary-block"><div class="summary-label">Обобщение</div>';
+    html += '<div class="card-text">' + d.summary + '</div></div>';
+  }
+  if (d.summary_actions?.length) {
+    html += '<div style="margin-top:16px;"><div class="field-label" style="margin-bottom:10px;">Три стъпки към основната промяна</div>';
+    d.summary_actions.forEach((a, i) => {
+      html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div>';
+      html += '<div class="action-text" style="font-size:14px;color:var(--text);">' + a + '</div></div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  if (d.top_pattern) {
+    html += '<div class="card" style="border-left:3px solid var(--green);">';
+    html += '<div class="card-title">Основният модел</div>';
+    html += '<div class="card-text" style="font-style:italic;font-size:15px;">"' + d.top_pattern + '"</div></div>';
+  }
+
+  // Психологически профил (нов)
+  if (d.psychological_profile) {
+    const pp = d.psychological_profile;
+    html += '<div class="card" style="border:2px solid var(--purple-light);">';
+    html += '<div class="card-title" style="color:var(--purple-text);margin-bottom:16px;">🧠 Психологически профил</div>';
+    const profileItems = [
+      { label: 'Стил на привързаност', value: pp.attachment_style },
+      { label: 'Локус на контрол', value: pp.locus_of_control },
+      { label: 'Схема на даване', value: pp.giving_schema },
+      { label: 'Основна схема', value: pp.core_schema }
+    ];
+    profileItems.forEach(function(item) {
+      if (!item.value) return;
+      html += '<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--purple-text);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + item.label + '</div>';
+      html += '<div class="card-text">' + item.value + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  if (d.patterns?.length) {
+    html += '<div class="card"><div class="card-title">Поведенческите модели</div>';
+    d.patterns.forEach(p => {
+      html += '<div style="margin-bottom:18px;">';
+      html += '<span class="tag ' + (p.severity === 'high' ? 'tag-red' : 'tag-amber') + '">' + p.title + '</span>';
+      html += '<div class="card-text" style="margin-bottom:8px;">' + p.description + '</div>';
+      if (p.psychological_root) {
+        html += '<div style="font-size:12px;color:var(--purple-text);background:var(--purple-light);border-radius:8px;padding:6px 10px;display:inline-block;">🔍 ' + p.psychological_root + '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (d.blind_spots?.length) {
+    html += '<div class="card"><div class="card-title">Където се лъжеш</div>';
+    d.blind_spots.forEach(b => {
+      html += '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">' + b.area + '</div>';
+      html += '<div class="card-text">' + b.insight + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  // Анализ на даването (нов)
+  if (d.giving_analysis) {
+    const ga = d.giving_analysis;
+    html += '<div class="card" style="border-left:3px solid var(--green);">';
+    html += '<div class="card-title" style="margin-bottom:16px;">🤲 Твоята схема на даване</div>';
+    if (ga.current_giving) {
+      html += '<div class="summary-block" style="margin-bottom:14px;">';
+      html += '<div class="summary-label">Как даваш сега</div>';
+      html += '<div class="card-text">' + ga.current_giving + '</div></div>';
+    }
+    if (ga.giving_cost) {
+      html += '<div style="background:var(--red-light);border-radius:10px;padding:12px 14px;margin-bottom:14px;">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--red-text);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Цената, която плащаш</div>';
+      html += '<div class="card-text">' + ga.giving_cost + '</div></div>';
+    }
+    if (ga.giving_invitation) {
+      html += '<div style="background:var(--green-light);border-radius:10px;padding:12px 14px;">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Даването от пълнота — как би изглеждало</div>';
+      html += '<div class="card-text">' + ga.giving_invitation + '</div></div>';
+    }
+    html += '</div>';
+  }
+
+  if (d.areas?.length) {
+    html += '<div class="card"><div class="card-title">Анализ по области</div>';
+    d.areas.forEach(a => {
+      const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
+      html += '<div class="area-result"><div class="area-result-header">';
+      html += '<div class="area-result-name">' + a.name + '</div>';
+      if (hasGap) {
+        html += '<div style="display:flex;align-items:center;gap:8px;">';
+        html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score || 0) + '/10</span>';
+        html += '<span class="score-badge score-high" style="font-size:13px;padding:5px 14px;">▲ ' + a.assessed_score + '/10</span>';
+        html += '</div>';
+      } else {
+        html += '<span class="score-badge ' + scoreClass(a.score || 0) + '">' + (a.score || 0) + '/10</span>';
+      }
+      html += '</div>';
+      if (hasGap && a.encouragement) {
+        html += '<div style="background:var(--green-light);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:10px;">';
+        html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Реалната картина</div>';
+        html += '<div style="font-size:13px;color:var(--green-dark);line-height:1.6;">' + a.encouragement + '</div>';
+        html += '</div>';
+      }
+      if (a.insight) html += '<div class="area-insight">' + a.insight + '</div>';
+      (a.actions || []).forEach((act, i) => {
+        html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div><div class="action-text">' + act + '</div></div>';
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (d.morning_routines?.length || d.evening_routines?.length) {
+    html += '<div class="card"><div class="card-title">Твоите персонални рутини</div>';
+    html += '<div class="routine-grid">';
+    html += '<div class="routine-card"><div class="routine-card-title morning">☀ Сутрин</div>';
+    (d.morning_routines || []).forEach(r => { html += '<div class="routine-item">→ ' + r + '</div>'; });
+    html += '</div>';
+    html += '<div class="routine-card"><div class="routine-card-title evening">🌙 Вечер</div>';
+    (d.evening_routines || []).forEach(r => { html += '<div class="routine-item">→ ' + r + '</div>'; });
+    html += '</div></div></div>';
+  }
+
+  if (d.daily_questions?.length) {
+    html += '<div class="card"><div class="card-title">Въпроси за всеки ден</div>';
+    html += '<div class="card-text" style="margin-bottom:14px;font-size:13px;">Задавай си тези въпроси сутрин или вечер. Нека работят в теб.</div>';
+    html += '<ul class="daily-q-list">';
+    d.daily_questions.forEach((q, i) => {
+      html += '<li class="daily-q-item"><div class="daily-q-num">' + (i+1) + '</div><div class="daily-q-text">' + q + '</div></li>';
+    });
+    html += '</ul></div>';
+  }
+
+  if (d.meaning_analysis) {
+    html += renderMeaningAnalysis(d.meaning_analysis);
+  }
+
+  // Личен кодекс
+  if (d.principles && d.principles.length) {
+    html += '<div class="card" style="border:2px solid #1a1a1a;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);color:#fff;">';
+    html += '<div class="card-title" style="color:#fff;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:24px;text-transform:uppercase;letter-spacing:0.06em;">Принципите, открити чрез твоя живот</div>';
+    d.principles.forEach(function(p) {
+      html += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:20px 0;">';
+      html += '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:10px;">';
+      html += '<div style="font-family:\'Playfair Display\',serif;font-size:2rem;font-weight:600;color:var(--green);line-height:1;flex-shrink:0;">' + p.number + '</div>';
+      html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;font-weight:500;color:#fff;line-height:1.3;">' + p.title + '</div>';
+      html += '</div>';
+      html += '<div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.7;margin-bottom:10px;font-style:italic;">' + p.statement + '</div>';
+      html += '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;">Откъде идва</div>';
+      html += '<div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:12px;">' + p.origin + '</div>';
+      html += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;">';
+      html += '<div style="font-size:11px;color:var(--green);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Сутрешен въпрос</div>';
+      html += '<div style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;">' + p.morning_question + '</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+}
+
+// ─── ЛИЧЕН КОДЕКС (отделна заявка — избягва 524 timeout) ─────────────────────
+async function fetchPrinciples() {
+  // Добавяме loading placeholder в резултатите
+  const placeholder = document.createElement('div');
+  placeholder.id = 'principles-loading';
+  placeholder.className = 'card';
+  placeholder.style.cssText = 'border:2px solid #2d2d2d;background:#1a1a1a;text-align:center;padding:24px;margin-bottom:14px;';
+  placeholder.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Извличаме личния ти кодекс...</div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+
+  // Вмъкваме преди share блока
+  const shareBlock = document.querySelector('.share-block');
+  if (shareBlock) shareBlock.parentNode.insertBefore(placeholder, shareBlock);
+
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  const prompt = 'Днешна дата: ' + today + '.\n\nТи си психолог и лайф коуч. Имаш следните лични данни на човек:\n\nСЪЖАЛЕНИЯ: ' + answers.regrets + '\n\nГОРДОСТ: ' + answers.proud + '\n\nУРОЦИ ПО ТРУДНИЯ НАЧИН: ' + answers.lessons + '\n\nИзвлечи 5-7 лични принципа, САМО от неговите собствени думи — не общи принципи от книги. Търси убежденията, които той вече е открил чрез опит, но никога не е формулирал официално. Всеки принцип трябва да звучи като негов — с неговия глас, свързан с реален момент.\n\nВърни САМО валиден JSON на БЪЛГАРСКИ:\n{"principles":[{"number":1,"title":"Кратко заглавие (3-5 думи)","statement":"Аз... — формулировка в първо лице","origin":"От кой точен опит или урок идва — 1 изречение","morning_question":"Въпрос за сутринта, директно свързан с принципа"}]}';
+
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt, max_tokens: 3000 })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const parsed = JSON.parse(data.content.replace(/```json\n?|```\n?/g, '').trim());
+    renderPrinciples(parsed.principles || []);
+  } catch(e) {
+    const el = document.getElementById('principles-loading');
+    if (el) el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;">Личният кодекс не успя да се зареди.</div>';
+  }
+}
+
+function renderPrinciples(principles) {
+  if (!principles || !principles.length) {
+    const el = document.getElementById('principles-loading');
+    if (el) el.remove();
+    return;
+  }
+  let html = '<div class="card" style="border:2px solid #1a1a1a;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);color:#fff;">';
+  html += '<div class="card-title" style="color:#fff;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</div>';
+  html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:24px;text-transform:uppercase;letter-spacing:0.06em;">Принципите, открити чрез твоя живот</div>';
+  principles.forEach(function(p) {
+    html += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:20px 0;">';
+    html += '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:10px;">';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-size:2rem;font-weight:600;color:var(--green);line-height:1;flex-shrink:0;">' + p.number + '</div>';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;font-weight:500;color:#fff;line-height:1.3;">' + p.title + '</div>';
+    html += '</div>';
+    html += '<div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.7;margin-bottom:10px;font-style:italic;">' + p.statement + '</div>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Откъде идва</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:12px;">' + p.origin + '</div>';
+    html += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;">';
+    html += '<div style="font-size:11px;color:var(--green);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Сутрешен въпрос</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;">' + p.morning_question + '</div>';
+    html += '</div></div>';
+  });
+  html += '</div>';
+  const el = document.getElementById('principles-loading');
+  if (el) el.outerHTML = html;
+}
+
+// ─── СМИСЪЛ — РЕНДИРАНЕ ──────────────────────────────────────────────────────
+function renderMeaningAnalysis(ma) {
+  if (!ma) return '';
+  let h = '<div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,var(--gold-light) 0%,#fff 100%);margin-top:1.5rem;">';
+  h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Последният слой</div>';
+  h += '<div style="font-family:\'Playfair Display\',serif;font-size:1.3rem;font-weight:500;color:var(--gold-dark);margin-bottom:20px;">Смисъл</div>';
+
+  if (ma.declared_vs_lived) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Казано срещу живяното</div>';
+    h += '<div class="card-text">' + ma.declared_vs_lived + '</div></div>';
+  }
+  if (ma.where_it_points) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Накъде сочи</div>';
+    h += '<div class="card-text">' + ma.where_it_points + '</div></div>';
+  }
+  if (ma.the_giving_moment) {
+    h += '<div style="background:rgba(176,141,87,0.08);border-radius:10px;padding:14px 16px;margin-bottom:16px;">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Моментът на даването</div>';
+    h += '<div class="card-text">' + ma.the_giving_moment + '</div></div>';
+  }
+  if (ma.current_anchor || ma.anchor_honesty) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    if (ma.current_anchor) {
+      h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">На какво стоиш сега</div>';
+      h += '<div class="card-text" style="margin-bottom:10px;">' + ma.current_anchor + '</div>';
+    }
+    if (ma.anchor_honesty) {
+      h += '<div class="card-text" style="font-style:italic;color:var(--text-tertiary);">' + ma.anchor_honesty + '</div>';
+    }
+    h += '</div>';
+  }
+  if (ma.life_stage_reflection) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Където се намираш сега</div>';
+    h += '<div class="card-text">' + ma.life_stage_reflection + '</div></div>';
+  }
+  if (ma.quiet_door) {
+    h += '<div style="border-left:3px solid var(--gold);padding:12px 16px;margin-bottom:16px;background:rgba(176,141,87,0.05);border-radius:0 10px 10px 0;">';
+    h += '<div class="card-text" style="font-style:italic;color:var(--gold-dark);">' + ma.quiet_door + '</div></div>';
+  }
+  if (ma.the_real_question) {
+    h += '<div style="background:var(--gold-dark);border-radius:12px;padding:20px 22px;text-align:center;">';
+    h += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Въпросът за носене с теб</div>';
+    h += '<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;color:#fff;line-height:1.6;font-style:italic;">' + ma.the_real_question + '</div>';
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function copyShareLink(btn) {
+  navigator.clipboard.writeText(CONFIG.siteUrl).then(function() {
+    btn.textContent = '✓ Копирано!';
+    setTimeout(function() { btn.textContent = 'Копирай линка'; }, 2000);
+  });
+}
+
+// ─── PERPLEXITY АНАЛИЗ ───────────────────────────────────────────────────────
+async function fetchPerplexityAnalysis() {
+  const btn = document.getElementById('perplexity-btn');
+  const errEl = document.getElementById('perplexity-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '🔍 Търсим в реални източници...';
+
+  try {
+    const d = analysisResult;
+    if (!d || !d.patterns) throw new Error('Няма анализ');
+
+    const res = await fetch(CONFIG.workerUrl + '/perplexity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patterns: d.patterns,
+        blind_spots: d.blind_spots || [],
+        top_pattern: d.top_pattern || ''
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderPerplexityResults(data.result);
+    document.getElementById('perplexity-upsell').style.display = 'none';
+  } catch(e) {
+    errEl.textContent = 'Грешка: ' + e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Намери техниките →';
+  }
+}
+
+function renderPerplexityResults(data) {
+  const container = document.getElementById('perplexity-results');
+  if (!data) { container.innerHTML = '<div class="card"><p>Няма резултати.</p></div>'; container.style.display = 'block'; return; }
+
+  let html = '';
+
+  // Техники по модел
+  if (data.techniques_by_pattern?.length) {
+    html += '<div class="card" style="border:2px solid var(--amber);background:linear-gradient(135deg,#fffbf2,#fff);">';
+    html += '<div class="card-title" style="margin-bottom:4px;">🎯 Техники за твоите модели</div>';
+    html += '<div class="card-text" style="margin-bottom:20px;color:var(--amber-text);">Три действия, приложими още днес — от реални изследвания.</div>';
+
+    data.techniques_by_pattern.forEach(function(item) {
+      html += '<div style="margin-bottom:20px;">';
+      html += '<div style="font-weight:600;font-size:15px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">📌 ' + item.pattern + '</div>';
+
+      (item.techniques || []).forEach(function(t, i) {
+        html += '<div style="background:var(--amber);border-radius:12px;padding:14px 16px;margin-bottom:10px;">';
+        html += '<div style="font-weight:600;font-size:14px;margin-bottom:6px;">' + (i+1) + '. ' + t.name + '</div>';
+        html += '<div style="font-size:14px;color:var(--amber-text);margin-bottom:8px;line-height:1.6;">' + t.action + '</div>';
+        html += '<div style="font-style:italic;font-size:13px;color:#6b4c12;margin-bottom:10px;padding:8px;background:rgba(255,255,255,0.5);border-radius:8px;">"' + t.sentence + '"</div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+        html += '<div style="font-size:12px;background:rgba(255,255,255,0.6);border-radius:8px;padding:8px;"><span style="color:#A32D2D;font-weight:600;">✗ Губиш:</span> ' + t.cost + '</div>';
+        html += '<div style="font-size:12px;background:rgba(255,255,255,0.6);border-radius:8px;padding:8px;"><span style="color:#0F6E56;font-weight:600;">✓ Печелиш:</span> ' + t.gain + '</div>';
+        html += '</div></div>';
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Източници
+  if (data.library?.length) {
+    html += '<div class="card" style="margin-top:1rem;">';
+    html += '<div class="card-title" style="margin-bottom:4px;">📚 Препоръчани източници за самостоятелна работа</div>';
+    html += '<div class="card-text" style="margin-bottom:16px;">На база на твоя профил и поведенческите модели, предлагаме следните източници — ключовото е синтезирано за теб.</div>';
+
+    data.library.forEach(function(src) {
+      const typeIcon = src.type === 'книга' ? '📖' : src.type === 'подкаст' ? '🎙️' : '📄';
+      html += '<div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;">';
+      html += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:2px;">';
+      html += '<div style="font-weight:600;font-size:14px;">' + typeIcon + ' ' + src.source + '</div>';
+      if (src.lang) html += '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:' + (src.lang === 'БГ' ? 'var(--green-light)' : 'var(--amber)') + ';color:' + (src.lang === 'БГ' ? 'var(--green-dark)' : 'var(--amber-text)') + ';">' + src.lang + '</span>';
+      html += '</div>';
+      if (src.author) html += '<div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px;">' + src.author + '</div>';
+      html += '<ul style="margin:0 0 10px 16px;font-size:13px;color:var(--text-secondary);line-height:1.7;">';
+      (src.techniques || []).forEach(function(t) { html += '<li>' + t + '</li>'; });
+      html += '</ul>';
+      if (src.sentence) html += '<div style="font-style:italic;font-size:13px;color:var(--text-secondary);padding:8px 12px;background:var(--bg);border-radius:8px;">"' + src.sentence + '"</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+  container.style.display = 'block';
+  container.classList.add('loaded');
+  perplexityEmailHTML = buildPerplexityEmailSection(data);
+  container.scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildPerplexityEmailSection(data) {
+  if (!data) return '';
+  var h = '<div style="margin-top:20px;padding:20px;border:1px solid #f0d898;border-radius:12px;background:#fffbf2;">';
+  h += '<h2 style="color:#854F0B;font-size:15px;margin:0 0 14px;">🎯 Конкретни техники и препоръчани източници</h2>';
+  if (data.techniques_by_pattern && data.techniques_by_pattern.length) {
+    data.techniques_by_pattern.forEach(function(item) {
+      h += '<h3 style="font-size:14px;color:#333;margin:14px 0 8px;">📌 ' + item.pattern + '</h3>';
+      (item.techniques || []).forEach(function(t, i) {
+        h += '<div style="background:#fff;border-radius:8px;padding:10px;margin-bottom:8px;border:1px solid #f0d898;">';
+        h += '<strong>' + (i+1) + '. ' + t.name + '</strong><br>';
+        h += '<p style="margin:4px 0;font-size:13px;">' + t.action + '</p>';
+        h += '<p style="margin:4px 0;font-size:12px;font-style:italic;color:#6b4c12;">"' + t.sentence + '"</p>';
+        h += '<p style="font-size:12px;color:#A32D2D;margin:2px 0;">✗ ' + t.cost + '</p>';
+        h += '<p style="font-size:12px;color:#0F6E56;margin:2px 0;">✓ ' + t.gain + '</p>';
+        h += '</div>';
+      });
+    });
+  }
+  if (data.library && data.library.length) {
+    h += '<h3 style="font-size:14px;color:#333;margin:16px 0 8px;">📚 Препоръчани източници</h3>';
+    data.library.forEach(function(src) {
+      h += '<div style="border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:8px;">';
+      h += '<strong>' + src.source + '</strong>';
+      if (src.lang) h += ' <span style="font-size:11px;background:#E1F5EE;color:#0F6E56;padding:1px 6px;border-radius:8px;">' + src.lang + '</span>';
+      if (src.author) h += '<br><span style="font-size:12px;color:#999;">' + src.author + '</span>';
+      if (src.techniques && src.techniques.length) h += '<ul style="font-size:12px;margin:6px 0 0 16px;">' + src.techniques.map(function(t){return '<li>' + t + '</li>';}).join('') + '</ul>';
+      if (src.sentence) h += '<p style="font-size:12px;font-style:italic;color:#555;margin:4px 0 0;">"' + src.sentence + '"</p>';
+      h += '</div>';
+    });
+  }
+  h += '</div>';
+  return h;
+}
+
+// ─── НАТАЛНА КАРТА ───────────────────────────────────────────────────────────
+function toggleNatalForm() {
+  const form = document.getElementById('natal-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function fetchNatalChart() {
+  const dateVal = document.getElementById('natal-date').value;
+  const timeVal = document.getElementById('natal-time').value;
+  const city = document.getElementById('natal-city').value.trim();
+  const tzone = document.getElementById('natal-tzone').value;
+  const errEl = document.getElementById('natal-error');
+  errEl.style.display = 'none';
+
+  if (!dateVal || !city) {
+    errEl.textContent = 'Моля въведи дата и град на раждане.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const [year, month, day] = dateVal.split('-').map(Number);
+  const [hour, min] = (timeVal || '12:00').split(':').map(Number);
+
+  const btn = document.getElementById('natal-submit-btn');
+  btn.disabled = true; btn.textContent = 'Изчислява се...';
+
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/natal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ day, month, year, hour, min, city, tzone })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderNatalResults(data.planets);
+    document.getElementById('natal-upsell').style.display = 'none';
+    fetchNatalAnalysis(data.planets);
+  } catch(e) {
+    errEl.textContent = 'Грешка: ' + e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Изчисли натална карта →';
+  }
+}
+
+const SIGN_BG = {
+  Aries:'Овен', Taurus:'Телец', Gemini:'Близнаци', Cancer:'Рак',
+  Leo:'Лъв', Virgo:'Дева', Libra:'Везни', Scorpio:'Скорпион',
+  Sagittarius:'Стрелец', Capricorn:'Козирог', Aquarius:'Водолей', Pisces:'Риби'
+};
+const PLANET_BG = {
+  Sun:'☀️ Слънце', Moon:'🌙 Луна', Mercury:'☿ Меркурий', Venus:'♀️ Венера',
+  Mars:'♂️ Марс', Jupiter:'♃ Юпитер', Saturn:'♄ Сатурн', Ascendant:'⬆️ Асцендент'
+};
+
+const SIGNS_ORDER = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+const MAIN_PLANETS = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+
+function degToSign(deg) {
+  return SIGNS_ORDER[Math.floor((deg % 360) / 30)];
+}
+
+function renderNatalResults(data) {
+  const container = document.getElementById('natal-results');
+  // API response: { planets: [...], houses: [...], ascendant: 198.92 (degree), midheaven: ... }
+  const allPlanets = (data.planets || []).filter(function(p) { return MAIN_PLANETS.includes(p.name); });
+  const ascDeg = data.ascendant;
+  const mcDeg = data.midheaven;
+
+  let html = '<div class="card" style="border:2px solid var(--purple-light);">';
+  html += '<div class="card-title" style="margin-bottom:4px;">Натална карта</div>';
+  html += '<div class="card-text" style="margin-bottom:16px;color:var(--purple-text);">Планетите в момента на твоето раждане</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+
+  // Ascendant & Midheaven
+  if (ascDeg !== undefined) {
+    const aSign = SIGN_BG[degToSign(ascDeg)] || degToSign(ascDeg);
+    html += '<div style="background:var(--purple-light);border-radius:10px;padding:10px 12px;">';
+    html += '<div style="font-size:12px;color:var(--purple-text);font-weight:500;">⬆️ Асцендент</div>';
+    html += '<div style="font-size:15px;font-weight:600;margin-top:2px;">' + aSign + '</div></div>';
+  }
+  if (mcDeg !== undefined) {
+    const mcSign = SIGN_BG[degToSign(mcDeg)] || degToSign(mcDeg);
+    html += '<div style="background:var(--purple-light);border-radius:10px;padding:10px 12px;">';
+    html += '<div style="font-size:12px;color:var(--purple-text);font-weight:500;">☝️ Среднонебие (MC)</div>';
+    html += '<div style="font-size:15px;font-weight:600;margin-top:2px;">' + mcSign + '</div></div>';
+  }
+
+  allPlanets.forEach(function(p) {
+    const name = PLANET_BG[p.name] || p.name;
+    const sign = SIGN_BG[p.sign] || p.sign;
+    const deg = Math.floor(p.norm_degree) + '°';
+    const retro = p.is_retro === 'true' ? ' ℞' : '';
+    html += '<div style="background:var(--purple-light);border-radius:10px;padding:10px 12px;">';
+    html += '<div style="font-size:12px;color:var(--purple-text);font-weight:500;">' + name + retro + '</div>';
+    html += '<div style="font-size:15px;font-weight:600;margin-top:2px;">' + sign + ' ' + deg + '</div>';
+    html += '</div>';
+  });
+
+  html += '</div></div>';
+  container.innerHTML = html;
+  container.style.display = 'block';
+  container.classList.add('loaded');
+  container.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─── AI АНАЛИЗ НА НАТАЛНАТА КАРТА ────────────────────────────────────────────
+async function fetchNatalAnalysis(planetsData) {
+  const container = document.getElementById('natal-results');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'natal-ai-loading';
+  loadingDiv.className = 'card';
+  loadingDiv.style.cssText = 'border:2px solid var(--purple-light);margin-top:1rem;text-align:center;padding:24px;';
+  loadingDiv.innerHTML = '<div class="card-text" style="color:var(--purple-text);margin-bottom:14px;">🔮 Анализираме наталната карта.</div><div class="dots"><div class="dot" style="background:var(--purple-text)"></div><div class="dot" style="background:var(--purple-text)"></div><div class="dot" style="background:var(--purple-text)"></div></div>';
+  container.appendChild(loadingDiv);
+
+  const allPlanets = (planetsData.planets || []).filter(function(p) { return MAIN_PLANETS.includes(p.name); });
+  const ascDeg = planetsData.ascendant;
+  const mcDeg = planetsData.midheaven;
+  const ascSign = SIGN_BG[degToSign(ascDeg)] || degToSign(ascDeg);
+  const mcSign = SIGN_BG[degToSign(mcDeg)] || degToSign(mcDeg);
+  const planetsText = allPlanets.map(function(p) {
+    return (PLANET_BG[p.name] || p.name).replace(/[^\w\sА-я]/gu,'').trim() + ' в ' + (SIGN_BG[p.sign] || p.sign) + (p.is_retro === 'true' ? ' (ретроградна)' : '');
+  }).join(', ');
+
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  const auditCtx = analysisResult ? '\nОдитът идентифицира основен модел: "' + (analysisResult.top_pattern || '') + '"' : '';
+
+  const prompt = 'Днешна дата: ' + today + '. Ти си астролог-психолог. Анализирай тази натална карта и обясни архетипните сили и предизвикателства на човека.\n\nНАТАЛНА КАРТА:\nАсцендент: ' + ascSign + '\nСреднонебие (MC): ' + mcSign + '\nПланети: ' + planetsText + auditCtx + '\n\nВърни САМО валиден JSON на БЪЛГАРСКИ:\n{\n  "asc_meaning": "2-3 изречения — какво казва асцендентът за личността и начина на представяне пред света",\n  "sun_moon": "2-3 изречения — динамиката между Слънце и Луна — съзнателно и несъзнателно",\n  "key_themes": ["Тема 1 — конкретна сила или предизвикателство", "Тема 2", "Тема 3"],\n  "life_mission": "2-3 изречения — MC и жизненото призвание",\n  "shadow": "2 изречения — какво е в сянката, какво трябва да се интегрира",\n  "practical": "2-3 конкретни съвета как тази карта да се използва като ресурс"\n}';
+
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt, max_tokens: 2000 })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const parsed = JSON.parse(data.content.replace(/```json\n?|```\n?/g, '').trim());
+    renderNatalAnalysis(parsed);
+  } catch(e) {
+    const el = document.getElementById('natal-ai-loading');
+    if (el) el.innerHTML = '<div class="card-text" style="color:var(--red-text);">Грешка при астрологичния анализ: ' + e.message + '</div>';
+  }
+}
+
+function renderNatalAnalysis(d) {
+  let html = '<div class="card" style="border:2px solid var(--purple-light);background:linear-gradient(135deg,#f5f3ff 0%,#fff 100%);margin-top:1rem;">';
+  html += '<div class="card-title" style="color:var(--purple-text);margin-bottom:4px;">🔮 Астрологичен психоанализ</div>';
+  html += '<div class="card-text" style="margin-bottom:18px;color:var(--purple-text);">Архетипните сили и предизвикателства на твоята карта</div>';
+
+  if (d.asc_meaning) {
+    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
+    html += '<div class="summary-label" style="color:var(--purple-text);">Асцендент — как те виждат</div>';
+    html += '<div class="card-text">' + d.asc_meaning + '</div></div>';
+  }
+  if (d.sun_moon) {
+    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
+    html += '<div class="summary-label" style="color:var(--purple-text);">Слънце &amp; Луна — вътрешната динамика</div>';
+    html += '<div class="card-text">' + d.sun_moon + '</div></div>';
+  }
+  if (d.key_themes && d.key_themes.length) {
+    html += '<div style="margin-bottom:16px;"><div class="field-label" style="color:var(--purple-text);margin-bottom:10px;">Ключови теми в картата</div>';
+    d.key_themes.forEach(function(t, i) {
+      html += '<div class="action-item"><div class="action-num" style="background:var(--purple-light);color:var(--purple-text);">' + (i+1) + '</div><div class="action-text">' + t + '</div></div>';
+    });
+    html += '</div>';
+  }
+  if (d.life_mission) {
+    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
+    html += '<div class="summary-label" style="color:var(--purple-text);">Жизнено призвание (MC)</div>';
+    html += '<div class="card-text">' + d.life_mission + '</div></div>';
+  }
+  if (d.shadow) {
+    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
+    html += '<div class="summary-label" style="color:var(--purple-text);">Сянката — за интегриране</div>';
+    html += '<div class="card-text" style="font-style:italic;">' + d.shadow + '</div></div>';
+  }
+  if (d.practical) {
+    html += '<div style="background:var(--purple-light);border-radius:10px;padding:14px 16px;">';
+    html += '<div class="field-label" style="color:var(--purple-text);margin-bottom:8px;">Практически насоки</div>';
+    html += '<div class="card-text">' + d.practical + '</div></div>';
+  }
+  html += '</div>';
+
+  const el = document.getElementById('natal-ai-loading');
+  if (el) el.outerHTML = html;
+  // Съхрани за имейл (inline styles за email клиенти)
+  natalEmailHTML = buildNatalEmailSection(d);
+  // Обнови #natal-results с loaded клас
+  var nr = document.getElementById('natal-results');
+  if (nr) { nr.classList.add('loaded'); nr.style.display = 'block'; }
+}
+
+function buildNatalEmailSection(d) {
+  if (!d) return '';
+  var h = '<div style="margin-top:20px;padding:20px;border:1px solid #d0c8f8;border-radius:12px;background:#f8f6ff;">';
+  h += '<h2 style="color:#4A3BAA;font-size:15px;margin:0 0 14px;">🔮 Астрологичен психоанализ</h2>';
+  if (d.asc_meaning) h += '<p><strong>Асцендент:</strong> ' + d.asc_meaning + '</p>';
+  if (d.sun_moon) h += '<p><strong>Слънце &amp; Луна:</strong> ' + d.sun_moon + '</p>';
+  if (d.key_themes && d.key_themes.length) h += '<p><strong>Ключови теми:</strong></p><ul>' + d.key_themes.map(function(t){return '<li>' + t + '</li>';}).join('') + '</ul>';
+  if (d.life_mission) h += '<p><strong>Жизнено призвание:</strong> ' + d.life_mission + '</p>';
+  if (d.shadow) h += '<p><strong>Сянката:</strong> <em>' + d.shadow + '</em></p>';
+  if (d.practical) h += '<p><strong>Практически насоки:</strong> ' + d.practical + '</p>';
+  h += '</div>';
+  return h;
+}
+
+// ─── ИМЕЙЛ ───────────────────────────────────────────────────────────────────
+function openEmailModal() { document.getElementById('email-modal').classList.remove('hidden'); }
+function closeEmailModal() {
+  document.getElementById('email-modal').classList.add('hidden');
+  document.getElementById('email-error').style.display = 'none';
+}
+
+async function sendEmail() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('email-error').style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('send-email-btn');
+  btn.disabled = true; btn.textContent = 'Изпращане...';
+
+  try {
+    const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
+    // Build compact email HTML from analysisResult (avoids sending heavy DOM innerHTML)
+    let emailHtml = '';
+    if (analysisResult) {
+      const d = analysisResult;
+      if (d.summary) emailHtml += `<h2>Обобщение</h2><p>${d.summary}</p>`;
+      if (d.top_pattern) emailHtml += `<h2>Основен модел</h2><p><em>"${d.top_pattern}"</em></p>`;
+      if (d.summary_actions?.length) emailHtml += '<h2>Три стъпки</h2><ol>' + d.summary_actions.map(a => `<li>${a}</li>`).join('') + '</ol>';
+      if (d.psychological_profile) {
+        const pp = d.psychological_profile;
+        emailHtml += '<h2>Психологически профил</h2>';
+        if (pp.attachment_style) emailHtml += `<p><strong>Стил на привързаност:</strong> ${pp.attachment_style}</p>`;
+        if (pp.locus_of_control) emailHtml += `<p><strong>Локус на контрол:</strong> ${pp.locus_of_control}</p>`;
+        if (pp.giving_schema) emailHtml += `<p><strong>Схема на даване:</strong> ${pp.giving_schema}</p>`;
+        if (pp.core_schema) emailHtml += `<p><strong>Основна схема:</strong> ${pp.core_schema}</p>`;
+      }
+      if (d.patterns?.length) { emailHtml += '<h2>Поведенчески модели</h2>'; d.patterns.forEach(p => { emailHtml += `<h3>${p.title}</h3><p>${p.description}</p>`; if (p.psychological_root) emailHtml += `<p><em>Корен: ${p.psychological_root}</em></p>`; }); }
+      if (d.blind_spots?.length) { emailHtml += '<h2>Където се лъжеш</h2>'; d.blind_spots.forEach(b => { emailHtml += `<h3>${b.area}</h3><p>${b.insight}</p>`; }); }
+      if (d.giving_analysis) {
+        const ga = d.giving_analysis;
+        emailHtml += '<h2>Твоята схема на даване</h2>';
+        if (ga.current_giving) emailHtml += `<p><strong>Как даваш сега:</strong> ${ga.current_giving}</p>`;
+        if (ga.giving_cost) emailHtml += `<p><strong>Цената:</strong> ${ga.giving_cost}</p>`;
+        if (ga.giving_invitation) emailHtml += `<p><strong>Даването от пълнота:</strong> ${ga.giving_invitation}</p>`;
+      }
+      if (d.areas?.length) { emailHtml += '<h2>Анализ по области</h2>'; d.areas.forEach(a => { emailHtml += `<h3>${a.name} — ${a.score}/10</h3><p>${a.insight}</p>`; if (a.actions?.length) emailHtml += '<ul>' + a.actions.map(x => `<li>${x}</li>`).join('') + '</ul>'; }); }
+      if (d.morning_routines?.length) emailHtml += '<h2>Сутрешни рутини</h2><ul>' + d.morning_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
+      if (d.evening_routines?.length) emailHtml += '<h2>Вечерни рутини</h2><ul>' + d.evening_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
+      if (d.daily_questions?.length) emailHtml += '<h2>Въпроси за всеки ден</h2><ol>' + d.daily_questions.map(q => `<li>${q}</li>`).join('') + '</ol>';
+      if (d.meaning_analysis) {
+        const ma = d.meaning_analysis;
+        emailHtml += '<div style="margin-top:28px;padding:24px;border:2px solid #B08D57;border-radius:14px;background:#FDF6EC;">';
+        emailHtml += '<div style="font-size:11px;font-weight:600;color:#B08D57;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Последният слой</div>';
+        emailHtml += '<h2 style="color:#7A5E2F;font-size:18px;margin:0 0 16px;">Смисъл</h2>';
+        if (ma.declared_vs_lived) emailHtml += `<p><strong style="color:#B08D57;">Казано срещу живяното:</strong> ${ma.declared_vs_lived}</p>`;
+        if (ma.where_it_points) emailHtml += `<p><strong style="color:#B08D57;">Накъде сочи:</strong> ${ma.where_it_points}</p>`;
+        if (ma.the_giving_moment) emailHtml += `<p><strong style="color:#B08D57;">Моментът на даването:</strong> ${ma.the_giving_moment}</p>`;
+        if (ma.current_anchor) emailHtml += `<p><strong style="color:#B08D57;">На какво стоиш сега:</strong> ${ma.current_anchor}</p>`;
+        if (ma.anchor_honesty) emailHtml += `<p style="color:#666;font-style:italic;">${ma.anchor_honesty}</p>`;
+        if (ma.life_stage_reflection) emailHtml += `<p>${ma.life_stage_reflection}</p>`;
+        if (ma.quiet_door) emailHtml += `<blockquote style="border-left:3px solid #B08D57;margin:12px 0;padding:8px 16px;font-style:italic;color:#7A5E2F;">${ma.quiet_door}</blockquote>`;
+        if (ma.the_real_question) emailHtml += `<div style="background:#7A5E2F;border-radius:10px;padding:16px;text-align:center;margin-top:14px;"><p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;">Въпросът за носене с теб</p><p style="color:#fff;font-style:italic;margin:0;">${ma.the_real_question}</p></div>`;
+        emailHtml += '</div>';
+      }
+      if (d.principles?.length) {
+        emailHtml += '<div style="margin-top:28px;padding:28px;background:#1a1a1a;border-radius:14px;">';
+        emailHtml += '<h2 style="color:#fff;font-size:18px;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</h2>';
+        emailHtml += '<p style="color:rgba(255,255,255,0.4);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:20px;">Принципите, открити чрез твоя живот</p>';
+        d.principles.forEach(function(p) {
+          emailHtml += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:18px 0;">';
+          emailHtml += '<div style="display:flex;gap:14px;align-items:baseline;margin-bottom:8px;">';
+          emailHtml += '<span style="font-size:1.8rem;font-weight:600;color:#1D9E75;line-height:1;">' + p.number + '</span>';
+          emailHtml += '<strong style="font-size:15px;color:#fff;">' + p.title + '</strong></div>';
+          emailHtml += '<p style="font-size:14px;color:rgba(255,255,255,0.85);font-style:italic;margin-bottom:8px;">' + p.statement + '</p>';
+          emailHtml += '<p style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:10px;">' + p.origin + '</p>';
+          emailHtml += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid #1D9E75;padding:8px 12px;border-radius:0 6px 6px 0;">';
+          emailHtml += '<p style="font-size:11px;color:#1D9E75;font-weight:600;text-transform:uppercase;margin-bottom:3px;">Сутрешен въпрос</p>';
+          emailHtml += '<p style="font-size:13px;color:rgba(255,255,255,0.75);">' + p.morning_question + '</p></div></div>';
+        });
+        emailHtml += '</div>';
+      }
+    }
+    // Натален анализ в имейла (от съхранен HTML)
+    if (natalEmailHTML) emailHtml += natalEmailHTML;
+    // Техники в имейла (от съхранен HTML)
+    if (perplexityEmailHTML) emailHtml += perplexityEmailHTML;
+    // Referral block се генерира от Worker-а — не добавяме share block тук
+    const res = await fetch(CONFIG.workerUrl + '/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, resultsHtml: emailHtml, avg })
+    });
+    const data = await res.json();
+    btn.textContent = data.ok ? '✓ Изпратено!' : 'Грешка — опитай пак';
+    if (data.ok) setTimeout(closeEmailModal, 2000);
+    else btn.disabled = false;
+  } catch(e) {
+    btn.textContent = 'Грешка — опитай пак';
+    btn.disabled = false;
+  }
+}
+
+// ─── ГЛАСОВО ВЪВЕЖДАНЕ ───────────────────────────────────────────────────────
+const VOICE_DURATIONS = {
+  'area-desc': 120,
+  'sit-1': 180, 'sit-2': 180, 'sit-3': 180, 'sit-4': 180, 'sit-5': 180,
+  'regrets': 180, 'proud': 120, 'lessons-text': 180
+};
+const VOICE_CIRC = 119.4;
+let voiceRec = null, voiceTimerInt = null;
+let voiceSecondsLeft = 0, voiceTotal = 0, voiceOrigDur = 0;
+let voiceTargetId = null, voiceFinal = '';
+
+function initVoiceInputs() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  Object.keys(VOICE_DURATIONS).forEach(function(id) {
+    const ta = document.getElementById(id);
+    if (!ta) return;
+    if (document.getElementById('voice-wrap-' + id)) return;
+    const dur = VOICE_DURATIONS[id];
+    const wrap = document.createElement('div');
+    wrap.className = 'voice-btn-wrap';
+    wrap.id = 'voice-wrap-' + id;
+    wrap.innerHTML = '<button class="voice-btn" onclick="startVoice(\'' + id + '\',' + dur + ')">🎙 Говори</button>';
+    ta.insertAdjacentElement('afterend', wrap);
+  });
+}
+
+function startVoice(id, dur) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Гласовото въвеждане работи в Chrome и Edge.'); return; }
+  if (voiceRec) { stopVoice(); return; }
+
+  voiceTargetId = id;
+  voiceOrigDur = dur;
+  voiceTotal = dur;
+  voiceSecondsLeft = dur;
+  voiceFinal = document.getElementById(id).value || '';
+
+  const mins = Math.floor(dur / 60);
+  const wrap = document.getElementById('voice-wrap-' + id);
+  if (!wrap) return;
+  wrap.innerHTML =
+    '<div class="voice-message">Имаш ' + mins + ' минути. Говори конкретно с факти, истории и събития — не какво мислиш за това.</div>' +
+    '<div class="voice-controls">' +
+      '<div class="voice-timer-wrap">' +
+        '<svg class="voice-timer-svg" viewBox="0 0 44 44">' +
+          '<circle class="voice-timer-bg" cx="22" cy="22" r="19"/>' +
+          '<circle class="voice-timer-fill" id="vtc" cx="22" cy="22" r="19"/>' +
+        '</svg>' +
+        '<div class="voice-timer-text" id="vtt">' + fmtTime(voiceSecondsLeft) + '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;">' +
+        '<button class="voice-stop-btn" onclick="stopVoice()">⏹ Спри записа</button>' +
+        '<button class="voice-add-btn" id="vadd" style="display:none;" onclick="addVoiceMin()">+1 минута</button>' +
+      '</div>' +
+    '</div>';
+
+  voiceRec = new SR();
+  voiceRec.lang = 'bg-BG';
+  voiceRec.continuous = true;
+  voiceRec.interimResults = true;
+  voiceRec.onresult = function(e) {
+    var fin = '', intr = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) fin += e.results[i][0].transcript + ' ';
+      else intr += e.results[i][0].transcript;
+    }
+    if (fin) voiceFinal += fin;
+    var ta = document.getElementById(id);
+    if (ta) ta.value = voiceFinal + intr;
+  };
+  voiceRec.onend = function() {
+    if (voiceSecondsLeft > 0 && voiceRec) { try { voiceRec.start(); } catch(e){} }
+  };
+  voiceRec.onerror = function(e) { if (e.error !== 'no-speech') stopVoice(); };
+  try { voiceRec.start(); } catch(e) { stopVoice(); return; }
+
+  voiceTimerInt = setInterval(function() {
+    voiceSecondsLeft--;
+    var tEl = document.getElementById('vtt');
+    var cEl = document.getElementById('vtc');
+    var aEl = document.getElementById('vadd');
+    if (tEl) tEl.textContent = fmtTime(voiceSecondsLeft);
+    if (cEl) cEl.style.strokeDashoffset = VOICE_CIRC * (1 - voiceSecondsLeft / voiceTotal);
+    if (aEl && voiceSecondsLeft <= 30 && voiceSecondsLeft > 0) aEl.style.display = 'inline-flex';
+    if (voiceSecondsLeft <= 0) stopVoice();
+  }, 1000);
+}
+
+function addVoiceMin() {
+  voiceSecondsLeft += 60; voiceTotal += 60;
+  var el = document.getElementById('vadd');
+  if (el) el.style.display = 'none';
+}
+
+function stopVoice() {
+  if (voiceTimerInt) { clearInterval(voiceTimerInt); voiceTimerInt = null; }
+  if (voiceRec) { voiceRec.onend = null; try { voiceRec.stop(); } catch(e){} voiceRec = null; }
+  if (voiceTargetId) {
+    var wrap = document.getElementById('voice-wrap-' + voiceTargetId);
+    var savedId = voiceTargetId, savedDur = voiceOrigDur;
+    voiceTargetId = null;
+    if (wrap) wrap.innerHTML = '<button class="voice-btn" onclick="startVoice(\'' + savedId + '\',' + savedDur + ')">🎙 Говори</button>';
+  }
+}
+
+function fmtTime(s) {
+  return Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60);
+}
+
+// ─── СТАРТ ───────────────────────────────────────────────────────────────────
+checkPaymentReturn();
+</script>
+
+<!--
+════════════════════════════════════════════════════════════════
+CLOUDFLARE WORKER (deploy на workers.cloudflare.com)
+Копирай кода долу в нов Worker.
+Environment variables (Settings → Variables → Add):
+  ANTHROPIC_API_KEY  = sk-ant-...
+  RESEND_API_KEY     = re_...
+  STRIPE_SECRET_KEY  = sk_live_...
+════════════════════════════════════════════════════════════════
+
+export default {
+  async fetch(request, env) {
+    const cors = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
+    if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+
+    const url = new URL(request.url);
+    const json = (data, status = 200) =>
+      new Response(JSON.stringify(data), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
+
+    // POST /verify — верифицира Stripe session
+    if (url.pathname === '/verify') {
+      const { sessionId } = await request.json();
+      const res = await fetch('https://api.stripe.com/v1/checkout/sessions/' + sessionId, {
+        headers: { 'Authorization': 'Bearer ' + env.STRIPE_SECRET_KEY }
+      });
+      const session = await res.json();
+      return json({ paid: session.payment_status === 'paid' });
+    }
+
+    // POST /analyze — изпраща до Claude
+    if (url.pathname === '/analyze') {
+      const { prompt, max_tokens } = await request.json();
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: max_tokens || 3000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      const content = data.content.filter(i => i.type === 'text').map(i => i.text).join('');
+      return json({ content });
+    }
+
+    // POST /email — изпраща резултата чрез Resend
+    if (url.pathname === '/email') {
+      const { email, resultsHtml, avg } = await request.json();
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + env.RESEND_API_KEY },
+        body: JSON.stringify({
+          from: 'ДАВАЙ! <audit@yourdomain.com>',
+          to: email,
+          subject: 'Твоят личен одит на живота · ' + avg + '/10',
+          html: `<!DOCTYPE html><html lang="bg"><head><meta charset="UTF-8">
+            <style>body{font-family:-apple-system,sans-serif;background:#FAFAF8;color:#1a1a1a;margin:0;padding:20px}
+            .wrap{max-width:600px;margin:0 auto;background:white;border-radius:14px;padding:32px}
+            h1{font-size:28px;margin-bottom:4px}.green{color:#1D9E75}
+            .sub{font-size:13px;color:#999;letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px}
+            .card{border:1px solid rgba(0,0,0,.1);border-radius:14px;padding:20px;margin-bottom:14px}
+            .footer{font-size:13px;color:#999;margin-top:24px;border-top:1px solid rgba(0,0,0,.1);padding-top:16px}
+            </style></head><body><div class="wrap">
+            <h1>ДА<span class="green">ВАЙ</span><span class="green">!</span></h1>
+            <div class="sub">Личен одит на живота · Средна оценка: ${avg}/10</div>
+            ${resultsHtml}
+            <div class="footer">Одитът е личен документ. Запази го на сигурно място.</div>
+            </div></body></html>`
+        })
+      });
+      return json({ ok: res.ok });
+    }
+
+    return new Response('Not found', { status: 404 });
+  }
+}
+-->
+
+</body>
+</html>
