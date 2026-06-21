@@ -560,11 +560,27 @@ function startAudit() {
 }
 
 // ─── ПЛАЩАНЕ ЗА ПЪЛНИ РЕЗУЛТАТИ ──────────────────────────────────────────────
-function payForFullResults() {
+async function payForFullResults() {
   try {
     sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
     sessionStorage.setItem('davai_answers', JSON.stringify(answers));
   } catch(e) {}
+
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        priceId: CONFIG.priceId,
+        successUrl: CONFIG.siteUrl + '?payment=success',
+        cancelUrl: CONFIG.siteUrl
+      })
+    });
+    const data = await res.json();
+    if (data.url) { window.location.href = data.url; return; }
+  } catch(e) {}
+
+  // Fallback ако Worker не отговори
   window.location.href = CONFIG.paymentLink;
 }
 
