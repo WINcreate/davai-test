@@ -834,10 +834,20 @@ ${mSum}
   },
   "patterns": [{"title": "Заглавие", "description": "2 изречения директно: 'Когато X, ти правиш Y...', 'Цената е...'", "severity": "high или medium", "psychological_root": "1 изречение."}],
   "blind_spots": [{"area": "Областта", "insight": "2 изречения: 'Разказваш си, че...', 'Реалността е...'"}],
+  "blind_spot_teaser": "Едно завършено изречение — самостоятелна мисъл за основната слепа зона. Не отрязано наполовина.",
   "giving_analysis": {
     "current_giving": "1-2 изречения — как даваш и на кого.",
     "giving_cost": "1 изречение.",
     "giving_invitation": "2 изречения — даването от пълнота за теб конкретно."
+  },
+  "central_diagnosis": {
+    "price_statement": "В момента плащаш цената на [конкретното — контрол/страх/саможертва/...]. Едно директно твърдение — НЕ 'защо', а 'какво коства'.",
+    "cost_areas": [
+      { "area": "Отношения", "description": "1-2 изречения конкретно как моделът те ограничава с хората." },
+      { "area": "Пари и кариера", "description": "1-2 изречения конкретно финансово и в работата." },
+      { "area": "Спокойствие", "description": "1-2 изречения какво коства на вътрешния ресурс." },
+      { "area": "Тяло и здраве", "description": "1-2 изречения как се проявява физически." }
+    ]
   },
   "meaning_analysis": {
     "declared_vs_lived": "2-3 изречения — съпостави на какво казва, че разчита (от СМИСЪЛ въпрос 1) с реалните модели от областите и ситуациите. Конкретно, без съд.",
@@ -850,6 +860,7 @@ ${mSum}
     "the_real_question": "Един личен въпрос за носене — изграден от конкретните му отговори на четирите въпроса, не общ."
   }
 }
+ЦЕНТРАЛНА ДИАГНОЗА: Синтезирай top_pattern + psychological_profile → намери ЦЕНАТА в реалния живот. НЕ обяснявай защо е такъв (вече казано). Само какво коства — конкретно в отношения, пари, спокойствие, тяло.
 КРИТИЧНО: Второ лице. Чист български. Max 2-3 изречения на поле. JSON завършен.`;
 }
 
@@ -944,31 +955,9 @@ function renderAnalysis(d, isPaid) {
     html += '</div>';
   }
 
-  // FREE: 7 области — само оценки (числа)
+  // Области: платена → интегриран изглед (оценка + прозрение + действия); безплатна → оценка + blurred preview
   if (d.areas && d.areas.length) {
-    html += '<div class="card">';
-    html += '<div class="card-title" style="margin-bottom:14px;">7 области — текущи оценки</div>';
-    d.areas.forEach(function(a) {
-      const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
-      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">';
-      html += '<div style="font-size:14px;font-weight:500;color:var(--text);">' + a.name + '</div>';
-      if (hasGap) {
-        html += '<div style="display:flex;align-items:center;gap:8px;">';
-        html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score||0) + '/10</span>';
-        html += '<span class="score-badge score-high">▲ ' + a.assessed_score + '/10</span>';
-        html += '</div>';
-      } else {
-        html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
-      }
-      html += '</div>';
-    });
-    html += '</div>';
-  }
-
-  // PAID: Прозрения + действия за всяка област
-  if (isPaid) {
-    if (d.areas && d.areas.length) {
-      html += '<div class="card"><div class="card-title">Анализ по области</div>';
+    if (isPaid) {
       d.areas.forEach(function(a) {
         const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
         html += '<div class="area-result"><div class="area-result-header">';
@@ -994,20 +983,42 @@ function renderAnalysis(d, isPaid) {
         });
         html += '</div>';
       });
-      html += '</div>';
-    }
-    if (d.summary_actions && d.summary_actions.length) {
+      if (d.summary_actions && d.summary_actions.length) {
+        html += '<div class="card">';
+        html += '<div class="field-label" style="margin-bottom:10px;">Три стъпки към основната промяна</div>';
+        d.summary_actions.forEach(function(a, i) {
+          html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div>';
+          html += '<div class="action-text" style="font-size:14px;color:var(--text);">' + a + '</div></div>';
+        });
+        html += '</div>';
+      }
+    } else {
       html += '<div class="card">';
-      html += '<div class="field-label" style="margin-bottom:10px;">Три стъпки към основната промяна</div>';
-      d.summary_actions.forEach(function(a, i) {
-        html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div>';
-        html += '<div class="action-text" style="font-size:14px;color:var(--text);">' + a + '</div></div>';
+      html += '<div class="card-title" style="margin-bottom:14px;">7 области — текущи оценки</div>';
+      d.areas.forEach(function(a) {
+        const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
+        html += '<div style="padding:10px 0;border-bottom:1px solid var(--border);">';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;">';
+        html += '<div style="font-size:14px;font-weight:500;color:var(--text);">' + a.name + '</div>';
+        if (hasGap) {
+          html += '<div style="display:flex;align-items:center;gap:8px;">';
+          html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score||0) + '/10</span>';
+          html += '<span class="score-badge score-high">▲ ' + a.assessed_score + '/10</span>';
+          html += '</div>';
+        } else {
+          html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
+        }
+        html += '</div>';
+        html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;margin-top:8px;">';
+        html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;font-style:italic;margin-bottom:6px;">' + (a.insight || 'Конкретен анализ за тази област — какво стои зад оценката.') + '</div>';
+        (a.actions && a.actions.length ? a.actions : ['Конкретна стъпка', 'Второ действие', 'Трето действие']).forEach(function(act) {
+          html += '<div style="font-size:12px;color:var(--text-secondary);padding:2px 0;">→ ' + act + '</div>';
+        });
+        html += '</div>';
+        html += '</div>';
       });
       html += '</div>';
     }
-  } else {
-    html += lockedCard('Прозрения и действия за всяка от 7-те области',
-      'Защо е точно тази оценка, какво стои зад нея — и три конкретни стъпки за всяка от областите.');
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -1082,8 +1093,41 @@ function renderAnalysis(d, isPaid) {
   } else {
     html += lockedCard('Поведенчески модели',
       (d.patterns ? d.patterns.length : 3) + ' идентифицирани модела с психологически корен и конкретна цена.');
-    html += lockedCard('Слепи зони · Схема на даване',
-      'Историите, които си разказваш, и реалността зад тях. Схемата на даване и цената, която плащаш.');
+
+    // Слепи зони: teaser отворен + пълно съдържание заключено
+    html += '<div class="card">';
+    html += '<div class="card-title">Слепи зони</div>';
+    if (d.blind_spot_teaser) {
+      html += '<div class="card-text" style="margin-bottom:12px;">' + d.blind_spot_teaser + '</div>';
+    }
+    html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;">';
+    if (d.blind_spots && d.blind_spots.length) {
+      d.blind_spots.forEach(function(b) {
+        html += '<div style="margin-bottom:10px;"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;">' + b.area + '</div>';
+        html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">' + b.insight + '</div></div>';
+      });
+    } else {
+      html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.8;">Разказваш си, че правиш всичко необходимо. Реалността е различна.</div>';
+    }
+    html += '</div></div>';
+
+    html += lockedCard('Схема на даване',
+      'Откъде даваш и каква цена плащаш. Даването от пълнота — как би изглеждало за теб конкретно.');
+  }
+
+  // ЦЕНТРАЛНА ДИАГНОЗА (само платена версия, между Огледало 2 и Огледало 3)
+  if (isPaid && d.central_diagnosis) {
+    var cd = d.central_diagnosis;
+    html += '<div style="margin:2.5rem 0;padding:28px 24px;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:16px;">';
+    html += '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:14px;">Централна диагноза</div>';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.35rem;color:white;line-height:1.4;margin-bottom:22px;">' + cd.price_statement + '</div>';
+    (cd.cost_areas || []).forEach(function(ca, i) {
+      html += '<div style="' + (i > 0 ? 'border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;' : '') + 'margin-bottom:12px;">';
+      html += '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">' + ca.area + '</div>';
+      html += '<div style="font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6;">' + ca.description + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
   }
 
   // ═══════════════════════════════════════════════════════════════
