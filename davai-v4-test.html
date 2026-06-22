@@ -465,7 +465,7 @@ const CONFIG = {
   natalPaymentLink: 'NATAL_PAYMENT_LINK_HERE', // → Stripe link €8,90, success URL: https://davai.v.bg?natal=success
   priceId: 'price_1TX1AQGlIluEKXB5cEyepYhd',
   workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev',
-  siteUrl: 'https://odit.davai.v.bg'
+  siteUrl: 'https://odit.davai.v.bg/davai-v4-test.html'
 };
 
 
@@ -1009,8 +1009,10 @@ function renderAnalysis(d, isPaid) {
           html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
         }
         html += '</div>';
-        html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;margin-top:8px;">';
-        html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;font-style:italic;margin-bottom:6px;">' + (a.insight || 'Конкретен анализ за тази област — какво стои зад оценката.') + '</div>';
+        if (a.insight) {
+          html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;font-style:italic;margin-top:8px;margin-bottom:6px;">' + a.insight + '</div>';
+        }
+        html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;">';
         (a.actions && a.actions.length ? a.actions : ['Конкретна стъпка', 'Второ действие', 'Трето действие']).forEach(function(act) {
           html += '<div style="font-size:12px;color:var(--text-secondary);padding:2px 0;">→ ' + act + '</div>';
         });
@@ -1091,8 +1093,10 @@ function renderAnalysis(d, isPaid) {
       html += '</div>';
     }
   } else {
-    html += lockedCard('Поведенчески модели',
-      (d.patterns ? d.patterns.length : 3) + ' идентифицирани модела с психологически корен и конкретна цена.');
+    html += '<div class="card"><div class="card-title">Поведенчески модели</div>';
+    html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">';
+    html += (d.patterns ? d.patterns.length : 3) + ' идентифицирани модела с психологически корен и конкретна цена. Всеки съдържа конкретен пример от твоите отговори и психологическия корен зад него.';
+    html += '</div></div>';
 
     // Слепи зони: teaser отворен + пълно съдържание заключено
     html += '<div class="card">';
@@ -1100,16 +1104,17 @@ function renderAnalysis(d, isPaid) {
     if (d.blind_spot_teaser) {
       html += '<div class="card-text" style="margin-bottom:12px;">' + d.blind_spot_teaser + '</div>';
     }
-    html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;">';
     if (d.blind_spots && d.blind_spots.length) {
       d.blind_spots.forEach(function(b) {
-        html += '<div style="margin-bottom:10px;"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;">' + b.area + '</div>';
-        html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">' + b.insight + '</div></div>';
+        html += '<div style="margin-bottom:12px;">';
+        html += '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;">' + b.area + '</div>';
+        html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.6;">' + b.insight + '</div>';
+        html += '</div>';
       });
     } else {
-      html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.8;">Разказваш си, че правиш всичко необходимо. Реалността е различна.</div>';
+      html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">Разказваш си, че правиш всичко необходимо. Реалността е различна.</div>';
     }
-    html += '</div></div>';
+    html += '</div>';
 
     html += lockedCard('Схема на даване',
       'Откъде даваш и каква цена плащаш. Даването от пълнота — как би изглеждало за теб конкретно.');
@@ -1856,63 +1861,121 @@ async function sendEmail() {
 
   try {
     const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
-    // Build compact email HTML from analysisResult (avoids sending heavy DOM innerHTML)
+    // Build email HTML with Three Mirrors structure and inline styles
+    var emailMirror = function(num, color, title) {
+      return '<div style="margin:32px 0 16px;padding:14px 20px;background:#f8f8f6;border-radius:8px;border-left:4px solid ' + color + ';">' +
+        '<div style="font-size:10px;font-weight:700;color:' + color + ';text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">' + num + '</div>' +
+        '<div style="font-size:17px;font-family:Georgia,serif;font-weight:500;color:#1a1a1a;">' + title + '</div>' +
+        '</div>';
+    };
+    var h2 = function(t) { return '<h2 style="font-size:15px;color:#1a1a1a;margin:16px 0 8px;font-family:sans-serif;">' + t + '</h2>'; };
+    var p = function(t) { return '<p style="color:#555;line-height:1.7;margin:0 0 8px;font-size:14px;">' + t + '</p>'; };
+
     let emailHtml = '';
     if (analysisResult) {
       const d = analysisResult;
-      if (d.summary) emailHtml += `<h2>Обобщение</h2><p>${d.summary}</p>`;
-      if (d.top_pattern) emailHtml += `<h2>Основен модел</h2><p><em>"${d.top_pattern}"</em></p>`;
-      if (d.summary_actions?.length) emailHtml += '<h2>Три стъпки</h2><ol>' + d.summary_actions.map(a => `<li>${a}</li>`).join('') + '</ol>';
+
+      // ── ОГЛЕДАЛО №1 — НАВИЦИ ──
+      emailHtml += emailMirror('ОГЛЕДАЛО №1', '#1D9E75', 'Навици — Как живееш днес');
+      if (d.summary) emailHtml += h2('Обобщение') + p(d.summary);
+      if (d.top_pattern) emailHtml += h2('Основен модел') + '<p style="color:#555;line-height:1.7;font-style:italic;font-size:14px;">"' + d.top_pattern + '"</p>';
+      if (d.summary_actions && d.summary_actions.length) emailHtml += h2('Три стъпки') + '<ol style="color:#555;padding-left:20px;line-height:1.7;">' + d.summary_actions.map(function(a) { return '<li style="margin-bottom:6px;">' + a + '</li>'; }).join('') + '</ol>';
+      if (d.areas && d.areas.length) {
+        emailHtml += h2('Анализ по области');
+        d.areas.forEach(function(a) {
+          emailHtml += '<div style="margin-bottom:14px;padding:12px 16px;background:#f5f5f3;border-radius:8px;">';
+          emailHtml += '<div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:6px;">' + a.name + ' — ' + (a.score || 0) + '/10</div>';
+          if (a.insight) emailHtml += '<p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 8px;">' + a.insight + '</p>';
+          if (a.actions && a.actions.length) emailHtml += '<ul style="color:#555;padding-left:16px;margin:0;">' + a.actions.map(function(x) { return '<li style="font-size:13px;margin-bottom:4px;">' + x + '</li>'; }).join('') + '</ul>';
+          emailHtml += '</div>';
+        });
+      }
+
+      // ── ОГЛЕДАЛО №2 — БЛОКАЖИ ──
+      emailHtml += emailMirror('ОГЛЕДАЛО №2', '#4A3BAA', 'Блокажи — Какво те спира');
       if (d.psychological_profile) {
         const pp = d.psychological_profile;
-        emailHtml += '<h2>Психологически профил</h2>';
-        if (pp.attachment_style) emailHtml += `<p><strong>Стил на привързаност:</strong> ${pp.attachment_style}</p>`;
-        if (pp.locus_of_control) emailHtml += `<p><strong>Локус на контрол:</strong> ${pp.locus_of_control}</p>`;
-        if (pp.giving_schema) emailHtml += `<p><strong>Схема на даване:</strong> ${pp.giving_schema}</p>`;
-        if (pp.core_schema) emailHtml += `<p><strong>Основна схема:</strong> ${pp.core_schema}</p>`;
+        emailHtml += h2('🧠 Психологически профил');
+        if (pp.attachment_style) emailHtml += p('<strong>Начин на свързване:</strong> ' + pp.attachment_style);
+        if (pp.locus_of_control) emailHtml += p('<strong>Чие влияние:</strong> ' + pp.locus_of_control);
+        if (pp.giving_schema) emailHtml += p('<strong>Откъде даваш:</strong> ' + pp.giving_schema);
+        if (pp.core_schema) emailHtml += p('<strong>Основно убеждение:</strong> ' + pp.core_schema);
       }
-      if (d.patterns?.length) { emailHtml += '<h2>Поведенчески модели</h2>'; d.patterns.forEach(p => { emailHtml += `<h3>${p.title}</h3><p>${p.description}</p>`; if (p.psychological_root) emailHtml += `<p><em>Корен: ${p.psychological_root}</em></p>`; }); }
-      if (d.blind_spots?.length) { emailHtml += '<h2>Където се лъжеш</h2>'; d.blind_spots.forEach(b => { emailHtml += `<h3>${b.area}</h3><p>${b.insight}</p>`; }); }
+      if (d.patterns && d.patterns.length) {
+        emailHtml += h2('Поведенчески модели');
+        d.patterns.forEach(function(pt) {
+          emailHtml += '<div style="margin-bottom:12px;">';
+          emailHtml += '<strong style="color:#1a1a1a;">' + pt.title + '</strong>';
+          emailHtml += p(pt.description);
+          if (pt.psychological_root) emailHtml += '<p style="font-size:12px;color:#4A3BAA;font-style:italic;margin:4px 0;">' + pt.psychological_root + '</p>';
+          emailHtml += '</div>';
+        });
+      }
+      if (d.blind_spots && d.blind_spots.length) {
+        emailHtml += h2('Слепи зони');
+        d.blind_spots.forEach(function(b) {
+          emailHtml += '<div style="margin-bottom:10px;"><strong style="color:#1a1a1a;">' + b.area + '</strong>' + p(b.insight) + '</div>';
+        });
+      }
       if (d.giving_analysis) {
         const ga = d.giving_analysis;
-        emailHtml += '<h2>Твоята схема на даване</h2>';
-        if (ga.current_giving) emailHtml += `<p><strong>Как даваш сега:</strong> ${ga.current_giving}</p>`;
-        if (ga.giving_cost) emailHtml += `<p><strong>Цената:</strong> ${ga.giving_cost}</p>`;
-        if (ga.giving_invitation) emailHtml += `<p><strong>Даването от пълнота:</strong> ${ga.giving_invitation}</p>`;
+        emailHtml += h2('🤲 Схема на даване');
+        if (ga.current_giving) emailHtml += p('<strong>Как даваш сега:</strong> ' + ga.current_giving);
+        if (ga.giving_cost) emailHtml += p('<strong>Цената:</strong> ' + ga.giving_cost);
+        if (ga.giving_invitation) emailHtml += p('<strong>Даването от пълнота:</strong> ' + ga.giving_invitation);
       }
-      if (d.areas?.length) { emailHtml += '<h2>Анализ по области</h2>'; d.areas.forEach(a => { emailHtml += `<h3>${a.name} — ${a.score}/10</h3><p>${a.insight}</p>`; if (a.actions?.length) emailHtml += '<ul>' + a.actions.map(x => `<li>${x}</li>`).join('') + '</ul>'; }); }
-      if (d.morning_routines?.length) emailHtml += '<h2>Сутрешни рутини</h2><ul>' + d.morning_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
-      if (d.evening_routines?.length) emailHtml += '<h2>Вечерни рутини</h2><ul>' + d.evening_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
-      if (d.daily_questions?.length) emailHtml += '<h2>Въпроси за всеки ден</h2><ol>' + d.daily_questions.map(q => `<li>${q}</li>`).join('') + '</ol>';
-      if (d.meaning_analysis) {
-        const ma = d.meaning_analysis;
-        emailHtml += '<div style="margin-top:28px;padding:24px;border:2px solid #B08D57;border-radius:14px;background:#FDF6EC;">';
-        emailHtml += '<div style="font-size:11px;font-weight:600;color:#B08D57;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Последният слой</div>';
-        emailHtml += '<h2 style="color:#7A5E2F;font-size:18px;margin:0 0 16px;">Смисъл</h2>';
-        if (ma.declared_vs_lived) emailHtml += `<p><strong style="color:#B08D57;">Казано срещу живяното:</strong> ${ma.declared_vs_lived}</p>`;
-        if (ma.where_it_points) emailHtml += `<p><strong style="color:#B08D57;">Накъде сочи:</strong> ${ma.where_it_points}</p>`;
-        if (ma.the_giving_moment) emailHtml += `<p><strong style="color:#B08D57;">Моментът на даването:</strong> ${ma.the_giving_moment}</p>`;
-        if (ma.current_anchor) emailHtml += `<p><strong style="color:#B08D57;">На какво стоиш сега:</strong> ${ma.current_anchor}</p>`;
-        if (ma.anchor_honesty) emailHtml += `<p style="color:#666;font-style:italic;">${ma.anchor_honesty}</p>`;
-        if (ma.life_stage_reflection) emailHtml += `<p>${ma.life_stage_reflection}</p>`;
-        if (ma.quiet_door) emailHtml += `<blockquote style="border-left:3px solid #B08D57;margin:12px 0;padding:8px 16px;font-style:italic;color:#7A5E2F;">${ma.quiet_door}</blockquote>`;
-        if (ma.the_real_question) emailHtml += `<div style="background:#7A5E2F;border-radius:10px;padding:16px;text-align:center;margin-top:14px;"><p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;">Въпросът за носене с теб</p><p style="color:#fff;font-style:italic;margin:0;">${ma.the_real_question}</p></div>`;
+
+      // ── ЦЕНТРАЛНА ДИАГНОЗА ──
+      if (d.central_diagnosis) {
+        const cd = d.central_diagnosis;
+        emailHtml += '<div style="margin:32px 0 16px;padding:24px;background:#1a1a1a;border-radius:10px;">';
+        emailHtml += '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:10px;">ЦЕНТРАЛНА ДИАГНОЗА</div>';
+        if (cd.price_statement) emailHtml += '<p style="font-family:Georgia,serif;font-size:17px;color:white;line-height:1.5;margin:0 0 16px;">' + cd.price_statement + '</p>';
+        (cd.cost_areas || []).forEach(function(ca) {
+          emailHtml += '<div style="margin-bottom:10px;border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;">';
+          emailHtml += '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:4px;">' + ca.area + '</div>';
+          emailHtml += '<p style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;margin:0;">' + ca.description + '</p>';
+          emailHtml += '</div>';
+        });
         emailHtml += '</div>';
       }
-      if (d.principles?.length) {
+
+      // ── ОГЛЕДАЛО №3 — УРОЦИ ──
+      emailHtml += emailMirror('ОГЛЕДАЛО №3', '#854F0B', 'Уроци — Какво животът се опитва да ти покаже');
+      if (d.morning_routines && d.morning_routines.length) emailHtml += h2('☀ Сутрешни рутини') + '<ul style="color:#555;padding-left:20px;line-height:1.7;">' + d.morning_routines.map(function(r) { return '<li style="margin-bottom:4px;">' + r + '</li>'; }).join('') + '</ul>';
+      if (d.evening_routines && d.evening_routines.length) emailHtml += h2('🌙 Вечерни рутини') + '<ul style="color:#555;padding-left:20px;line-height:1.7;">' + d.evening_routines.map(function(r) { return '<li style="margin-bottom:4px;">' + r + '</li>'; }).join('') + '</ul>';
+      if (d.daily_questions && d.daily_questions.length) emailHtml += h2('Въпроси за всеки ден') + '<ol style="color:#555;padding-left:20px;line-height:1.7;">' + d.daily_questions.map(function(q) { return '<li style="margin-bottom:6px;">' + q + '</li>'; }).join('') + '</ol>';
+
+      // ── СМИСЪЛ ──
+      if (d.meaning_analysis) {
+        const ma = d.meaning_analysis;
+        emailHtml += '<div style="margin:32px 0 16px;padding:14px 20px;background:#FDF6EC;border-radius:8px;border-left:4px solid #B08D57;">';
+        emailHtml += '<div style="font-size:10px;font-weight:700;color:#B08D57;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">ПОСЛЕДНИЯТ СЛОЙ</div>';
+        emailHtml += '<div style="font-size:17px;font-family:Georgia,serif;font-weight:500;color:#7A5E2F;">Смисъл</div>';
+        emailHtml += '</div>';
+        if (ma.declared_vs_lived) emailHtml += p('<strong style="color:#B08D57;">Казано срещу живяното:</strong> ' + ma.declared_vs_lived);
+        if (ma.where_it_points) emailHtml += p('<strong style="color:#B08D57;">Накъде сочи:</strong> ' + ma.where_it_points);
+        if (ma.the_giving_moment) emailHtml += p('<strong style="color:#B08D57;">Моментът на даването:</strong> ' + ma.the_giving_moment);
+        if (ma.current_anchor) emailHtml += p('<strong style="color:#B08D57;">На какво стоиш сега:</strong> ' + ma.current_anchor);
+        if (ma.anchor_honesty) emailHtml += '<p style="color:#666;font-style:italic;line-height:1.7;font-size:14px;">' + ma.anchor_honesty + '</p>';
+        if (ma.life_stage_reflection) emailHtml += p(ma.life_stage_reflection);
+        if (ma.quiet_door) emailHtml += '<blockquote style="border-left:3px solid #B08D57;margin:12px 0;padding:8px 16px;font-style:italic;color:#7A5E2F;">' + ma.quiet_door + '</blockquote>';
+        if (ma.the_real_question) emailHtml += '<div style="background:#7A5E2F;border-radius:10px;padding:16px;text-align:center;margin-top:14px;"><p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;">Въпросът за носене с теб</p><p style="color:#fff;font-style:italic;margin:0;">' + ma.the_real_question + '</p></div>';
+      }
+
+      // ── ЛИЧЕН КОДЕКС ──
+      if (d.principles && d.principles.length) {
         emailHtml += '<div style="margin-top:28px;padding:28px;background:#1a1a1a;border-radius:14px;">';
-        emailHtml += '<h2 style="color:#fff;font-size:18px;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</h2>';
-        emailHtml += '<p style="color:rgba(255,255,255,0.4);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:20px;">Принципите, открити чрез твоя живот</p>';
-        d.principles.forEach(function(p) {
+        emailHtml += '<h2 style="color:#fff;font-size:18px;letter-spacing:0.08em;margin:0 0 4px;">ЛИЧЕН КОДЕКС</h2>';
+        emailHtml += '<p style="color:rgba(255,255,255,0.4);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 20px;">Принципите, открити чрез твоя живот</p>';
+        d.principles.forEach(function(pr) {
           emailHtml += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:18px 0;">';
-          emailHtml += '<div style="display:flex;gap:14px;align-items:baseline;margin-bottom:8px;">';
-          emailHtml += '<span style="font-size:1.8rem;font-weight:600;color:#1D9E75;line-height:1;">' + p.number + '</span>';
-          emailHtml += '<strong style="font-size:15px;color:#fff;">' + p.title + '</strong></div>';
-          emailHtml += '<p style="font-size:14px;color:rgba(255,255,255,0.85);font-style:italic;margin-bottom:8px;">' + p.statement + '</p>';
-          emailHtml += '<p style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:10px;">' + p.origin + '</p>';
+          emailHtml += '<div style="margin-bottom:8px;"><span style="font-size:1.8rem;font-weight:600;color:#1D9E75;line-height:1;">' + pr.number + '</span> <strong style="font-size:15px;color:#fff;">' + pr.title + '</strong></div>';
+          emailHtml += '<p style="font-size:14px;color:rgba(255,255,255,0.85);font-style:italic;margin-bottom:8px;">' + pr.statement + '</p>';
+          emailHtml += '<p style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:10px;">' + pr.origin + '</p>';
           emailHtml += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid #1D9E75;padding:8px 12px;border-radius:0 6px 6px 0;">';
-          emailHtml += '<p style="font-size:11px;color:#1D9E75;font-weight:600;text-transform:uppercase;margin-bottom:3px;">Сутрешен въпрос</p>';
-          emailHtml += '<p style="font-size:13px;color:rgba(255,255,255,0.75);">' + p.morning_question + '</p></div></div>';
+          emailHtml += '<p style="font-size:11px;color:#1D9E75;font-weight:600;text-transform:uppercase;margin:0 0 3px;">Сутрешен въпрос</p>';
+          emailHtml += '<p style="font-size:13px;color:rgba(255,255,255,0.75);margin:0;">' + pr.morning_question + '</p></div></div>';
         });
         emailHtml += '</div>';
       }
@@ -2137,6 +2200,9 @@ export default {
   }
 }
 -->
+
+</body>
+</html>
 
 </body>
 </html>
