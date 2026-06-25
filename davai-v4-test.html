@@ -1169,18 +1169,18 @@ function renderAnalysis(d, isPaid) {
     html += '<div class="card share-block" style="margin-top:1rem;background:var(--green-light);border:2px solid rgba(29,158,117,0.25);padding:24px;">';
     html += '<div class="card-title" style="margin-bottom:4px;">Знаеш ли някой, на когото би помогнало?</div>';
     html += '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">Въведи имейла си за да получиш личния си реферален код:</div>';
-    html += '<div class="no-print" style="display:flex;gap:8px;margin-bottom:14px;">';
-    html += '<input type="email" id="ref-email-input" placeholder="твоят@имейл.com" oninput="previewRefCode(this.value)" style="flex:1;border:1px solid rgba(0,0,0,0.15);border-radius:10px;padding:10px 14px;font-size:14px;font-family:\'DM Sans\',sans-serif;background:white;color:var(--text);">';
+    html += '<div class="no-print" style="margin-bottom:14px;">';
+    html += '<input type="email" id="ref-email-input" placeholder="твоят@имейл.com" oninput="previewRefCode(this.value)" style="width:100%;border:1px solid rgba(0,0,0,0.15);border-radius:10px;padding:10px 14px;font-size:14px;font-family:\'DM Sans\',sans-serif;background:white;color:var(--text);">';
     html += '</div>';
-    html += '<div id="ref-code-wrap" style="display:none;margin-bottom:14px;">';
-    html += '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px;">Твоят личен реферален код:</div>';
-    html += '<div id="ref-code-chip" style="font-family:monospace;font-size:20px;font-weight:700;color:var(--green);background:white;padding:10px 22px;border-radius:10px;display:inline-block;letter-spacing:0.05em;margin-bottom:10px;"></div>';
+    html += '<div id="ref-code-wrap" style="display:none;margin-bottom:12px;">';
+    html += '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:6px;">Твоят личен реферален код:</div>';
+    html += '<div id="ref-code-chip" style="font-family:monospace;font-size:20px;font-weight:700;color:var(--green);background:white;padding:10px 22px;border-radius:10px;display:inline-block;letter-spacing:0.05em;"></div>';
+    html += '</div>';
     html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:10px;">Приятелят получава <strong>25% отстъпка</strong>.<br>На всеки 5 успешни препоръки ти получаваш <strong>безплатен одит</strong>.</div>';
-    html += '<div id="ref-url-display" style="padding:8px 12px;background:rgba(0,0,0,0.05);border-radius:8px;font-size:12px;color:var(--text-secondary);word-break:break-all;margin-bottom:12px;"></div>';
+    html += '<div id="ref-url-display" style="padding:8px 12px;background:rgba(0,0,0,0.05);border-radius:8px;font-size:12px;color:var(--text-secondary);word-break:break-all;margin-bottom:12px;">' + _baseUrl + '</div>';
     html += '<div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;">';
     html += '<a id="ref-share-link" class="btn btn-primary" href="' + _baseUrl + '" target="_blank">Сподели одита →</a>';
     html += '<button class="btn btn-ghost" onclick="copyShareLink(this)">Копирай линка</button>';
-    html += '</div>';
     html += '</div></div>';
   } else {
     html += lockedCard('Персонални рутини · Дневни въпроси · Личен кодекс',
