@@ -856,8 +856,7 @@ ${mSum}
     "current_anchor": "На какво стои в момента, базирано директно на отговора от въпрос 1. Описано просто и директно към него.",
     "anchor_honesty": "Едно честно, но не присъдно изречение — дали тази опора издържа с времето или се изтощава, конкретно спрямо неговия избор.",
     "life_stage_reflection": "2 изречения директно базирани на отговора от въпрос 4. Покажи, че независимо от позицията, въпросът е същият — търсене на смисъл.",
-    "quiet_door": "Едно тихо изречение. БЕЗ думите духовност, религия, вяра, практика, медитация. Загатва нещо по-голямо от себе си като универсален принцип потвърден в цялата човешка история. Тон: топъл, без натиск, като посочване към звезда. Регистър: 'Забелязваш ли — почти всичко, на което разчиташ, може да се изтощи. Има нещо, на което хората са се опирали когато всичко друго е изчезвало — нарекли са го с различни имена, но е bilo едно и също.'",
-    "the_real_question": "Един личен въпрос за носене — изграден от конкретните му отговори на четирите въпроса, не общ."
+    "the_real_question": "Генерирай финален персонализиран въпрос по следната формула, в бавен, контемплативен тон с кратки изречения: 1. Подканващо изречение — въпрос или мека покана да остави основния си блокаж/модел (от Огледало 2) за момент, НЕ директно твърдение 'представи си че утре изчезва'. 2. Кратко уточнение: 'Не утре. Сега, само за момент.' или еквивалент. 3. 1-2 кратки изречения с конкретни елементи от живота му (от данните — бизнес, дете, връзка, каквото е релевантно), потвърждаващи че остават непокътнати. 4. 'Само [блокажа] — го няма.' 5. 'Кой остава?' Запази изреченията кратки. Тонът е бавен — всяко изречение е отделна мисъл."
   }
 }
 ЦЕНТРАЛНА ДИАГНОЗА: Синтезирай top_pattern + psychological_profile → намери ЦЕНАТА в реалния живот. НЕ обяснявай защо е такъв (вече казано). Само какво коства — конкретно в отношения, пари, спокойствие, тяло.
@@ -1165,13 +1164,16 @@ function renderAnalysis(d, isPaid) {
     if (d.meaning_analysis) {
       html += renderMeaningAnalysis(d.meaning_analysis);
     }
-    // Share block (fetchPrinciples() вмъква личния кодекс преди него)
-    html += '<div class="card share-block" style="margin-top:1rem;border:2px solid var(--green-light);background:linear-gradient(135deg,#f0fef8 0%,#fff 100%);">';
-    html += '<div class="card-title" style="margin-bottom:6px;">Знаеш ли някой, на когото би помогнало?</div>';
-    html += '<div class="card-text" style="margin-bottom:14px;">Сподели одита с приятел или близък.</div>';
-    html += '<div style="padding:10px 14px;background:#f5f5f3;border-radius:8px;font-size:13px;color:#444;word-break:break-all;margin-bottom:12px;"><strong>🔗</strong> ' + CONFIG.siteUrl + '</div>';
+    // Share block с реферален код (fetchPrinciples() вмъква личния кодекс преди него)
+    var _baseUrl = CONFIG.siteUrl.split('?')[0];
+    html += '<div class="card share-block" style="margin-top:1rem;background:var(--green-light);border:2px solid rgba(29,158,117,0.25);padding:24px;">';
+    html += '<div class="card-title" style="margin-bottom:4px;">Знаеш ли някой, на когото би помогнало?</div>';
+    html += '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;">Твоят личен реферален код е:</div>';
+    html += '<div id="ref-code-chip" style="font-family:monospace;font-size:20px;font-weight:700;color:var(--green);background:white;padding:10px 22px;border-radius:10px;display:inline-block;letter-spacing:0.05em;margin-bottom:12px;">ДАВАЙ-????</div>';
+    html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:14px;">Приятелят получава <strong>25% отстъпка</strong>.<br>На всеки 5 успешни препоръки ти получаваш <strong>безплатен одит</strong>.</div>';
+    html += '<div id="ref-url-display" style="padding:8px 12px;background:rgba(0,0,0,0.05);border-radius:8px;font-size:12px;color:var(--text-secondary);word-break:break-all;margin-bottom:14px;">' + _baseUrl + '?ref=ДАВАЙ-????' + '</div>';
     html += '<div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;">';
-    html += '<a class="btn btn-primary" href="' + CONFIG.siteUrl + '" target="_blank">Вземи твоя одит →</a>';
+    html += '<a id="ref-share-link" class="btn btn-primary" href="' + _baseUrl + '?ref=ДАВАЙ-????" target="_blank">Сподели одита →</a>';
     html += '<button class="btn btn-ghost" onclick="copyShareLink(this)">Копирай линка</button>';
     html += '</div></div>';
   } else {
@@ -1487,10 +1489,11 @@ function renderMeaningAnalysis(ma) {
     h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Където се намираш сега</div>';
     h += '<div class="card-text">' + ma.life_stage_reflection + '</div></div>';
   }
-  if (ma.quiet_door) {
-    h += '<div style="border-left:3px solid var(--gold);padding:12px 16px;margin-bottom:16px;background:rgba(176,141,87,0.05);border-radius:0 10px 10px 0;">';
-    h += '<div class="card-text" style="font-style:italic;color:var(--gold-dark);">' + ma.quiet_door + '</div></div>';
-  }
+  h += '<div style="border-left:3px solid var(--gold);padding:14px 16px;margin-bottom:16px;background:rgba(176,141,87,0.05);border-radius:0 10px 10px 0;">';
+  h += '<div class="card-text" style="color:var(--gold-dark);line-height:1.9;margin-bottom:10px;">Забелязваш ли — почти всичко, на което разчиташ, може да се изтощи.</div>';
+  h += '<div class="card-text" style="color:var(--gold-dark);line-height:1.9;margin-bottom:10px;">Но има Нещо, на което можеш да се опреш, дори когато всичко друго изчезне. Нещо, което те носи, без да го молиш за това. Някои Го наричат Бог. Други — Творец, или просто Това, което е по-голямо от тях. Името няма значение. Важното е, че никога не си бил сам в това — само си забравил да погледнеш натам.</div>';
+  h += '<div class="card-text" style="color:var(--gold-dark);font-weight:500;">Не бързай към отговора.</div>';
+  h += '</div>';
   if (ma.the_real_question) {
     h += '<div style="background:var(--gold-dark);border-radius:12px;padding:20px 22px;text-align:center;">';
     h += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Въпросът за носене с теб</div>';
@@ -1502,7 +1505,9 @@ function renderMeaningAnalysis(ma) {
 }
 
 function copyShareLink(btn) {
-  navigator.clipboard.writeText(CONFIG.siteUrl).then(function() {
+  var link = document.getElementById('ref-share-link');
+  var urlToCopy = link ? link.href : CONFIG.siteUrl;
+  navigator.clipboard.writeText(urlToCopy).then(function() {
     btn.textContent = '✓ Копирано!';
     setTimeout(function() { btn.textContent = 'Копирай линка'; }, 2000);
   });
@@ -1959,7 +1964,11 @@ async function sendEmail() {
         if (ma.current_anchor) emailHtml += p('<strong style="color:#B08D57;">На какво стоиш сега:</strong> ' + ma.current_anchor);
         if (ma.anchor_honesty) emailHtml += '<p style="color:#666;font-style:italic;line-height:1.7;font-size:14px;">' + ma.anchor_honesty + '</p>';
         if (ma.life_stage_reflection) emailHtml += p(ma.life_stage_reflection);
-        if (ma.quiet_door) emailHtml += '<blockquote style="border-left:3px solid #B08D57;margin:12px 0;padding:8px 16px;font-style:italic;color:#7A5E2F;">' + ma.quiet_door + '</blockquote>';
+        emailHtml += '<blockquote style="border-left:3px solid #B08D57;margin:12px 0;padding:14px 16px;color:#7A5E2F;line-height:1.9;">';
+        emailHtml += '<p style="margin:0 0 10px;">Забелязваш ли — почти всичко, на което разчиташ, може да се изтощи.</p>';
+        emailHtml += '<p style="margin:0 0 10px;">Но има Нещо, на което можеш да се опреш, дори когато всичко друго изчезне. Нещо, което те носи, без да го молиш за това. Някои Го наричат Бог. Други — Творец, или просто Това, което е по-голямо от тях. Името няма значение. Важното е, че никога не си бил сам в това — само си забравил да погледнеш натам.</p>';
+        emailHtml += '<p style="margin:0;font-weight:600;">Не бързай към отговора.</p>';
+        emailHtml += '</blockquote>';
         if (ma.the_real_question) emailHtml += '<div style="background:#7A5E2F;border-radius:10px;padding:16px;text-align:center;margin-top:14px;"><p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;">Въпросът за носене с теб</p><p style="color:#fff;font-style:italic;margin:0;">' + ma.the_real_question + '</p></div>';
       }
 
@@ -1992,8 +2001,19 @@ async function sendEmail() {
     });
     const data = await res.json();
     btn.textContent = data.ok ? '✓ Изпратено!' : 'Грешка — опитай пак';
-    if (data.ok) setTimeout(closeEmailModal, 2000);
-    else btn.disabled = false;
+    if (data.ok) {
+      if (data.refCode) {
+        var _baseUrl = CONFIG.siteUrl.split('?')[0];
+        var _refUrl = _baseUrl + '?ref=' + data.refCode;
+        var _chip = document.getElementById('ref-code-chip');
+        if (_chip) _chip.textContent = data.refCode;
+        var _urlEl = document.getElementById('ref-url-display');
+        if (_urlEl) _urlEl.textContent = _refUrl;
+        var _link = document.getElementById('ref-share-link');
+        if (_link) _link.href = _refUrl;
+      }
+      setTimeout(closeEmailModal, 2000);
+    } else btn.disabled = false;
   } catch(e) {
     btn.textContent = 'Грешка — опитай пак';
     btn.disabled = false;
@@ -2200,9 +2220,6 @@ export default {
   }
 }
 -->
-
-</body>
-</html>
 
 </body>
 </html>
