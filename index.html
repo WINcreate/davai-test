@@ -189,7 +189,7 @@
   <div class="modal">
     <div class="modal-title">Изпрати резултата на мейла</div>
     <p class="modal-text">Въведи имейл адреса си и ще получиш пълния анализ, рутините и дневните въпроси.</p>
-    <input type="email" class="input-field" id="email-input" placeholder="твоят@имейл.com">
+    <input type="email" class="input-field" id="email-input" placeholder="твоят@имейл.com" oninput="previewRefCode(this.value)">
     <div id="email-error" style="font-size:13px;color:var(--red-text);margin-bottom:12px;display:none;">Моля, въведи валиден имейл адрес.</div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-secondary" onclick="closeEmailModal()">Отказ</button>
@@ -462,11 +462,12 @@
 const CONFIG = {
   stripePublicKey: 'pk_test_51T5Lz2GlIluEKXB5DzV8meplRSdBN1y0EQWlzj4eVxdYkTZcZr04nZTgHVHY9R1YFvDo7aHKp8xno1Op5cbbf9t300aVJS2CXZ',
   paymentLink: 'https://buy.stripe.com/test_3cI5kDdqEgXA6hAeps7Vm00',
-  natalPaymentLink: 'NATAL_PAYMENT_LINK_HERE', // → Stripe link €8,90, success URL: https://davai.v.bg?natal=success
+  natalPaymentLink: 'https://buy.stripe.com/9B6dR92M06iWeO6gxA7Vm01',
   priceId: 'price_1TX1AQGlIluEKXB5cEyepYhd',
   workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev',
   siteUrl: 'https://odit.davai.v.bg'
 };
+var promoCode = new URLSearchParams(window.location.search).get('promo') || null;
 
 
 
@@ -560,11 +561,28 @@ function startAudit() {
 }
 
 // ─── ПЛАЩАНЕ ЗА ПЪЛНИ РЕЗУЛТАТИ ──────────────────────────────────────────────
-function payForFullResults() {
+async function payForFullResults() {
   try {
     sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
     sessionStorage.setItem('davai_answers', JSON.stringify(answers));
   } catch(e) {}
+
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        priceId: CONFIG.priceId,
+        successUrl: CONFIG.siteUrl + '?payment=success',
+        cancelUrl: CONFIG.siteUrl,
+        voucherCode: promoCode || undefined
+      })
+    });
+    const data = await res.json();
+    if (data.url) { window.location.href = data.url; return; }
+  } catch(e) {}
+
+  // Fallback ако Worker не отговори
   window.location.href = CONFIG.paymentLink;
 }
 
@@ -818,10 +836,20 @@ ${mSum}
   },
   "patterns": [{"title": "Заглавие", "description": "2 изречения директно: 'Когато X, ти правиш Y...', 'Цената е...'", "severity": "high или medium", "psychological_root": "1 изречение."}],
   "blind_spots": [{"area": "Областта", "insight": "2 изречения: 'Разказваш си, че...', 'Реалността е...'"}],
+  "blind_spot_teaser": "Едно завършено изречение — самостоятелна мисъл за основната слепа зона. Не отрязано наполовина.",
   "giving_analysis": {
     "current_giving": "1-2 изречения — как даваш и на кого.",
     "giving_cost": "1 изречение.",
     "giving_invitation": "2 изречения — даването от пълнота за теб конкретно."
+  },
+  "central_diagnosis": {
+    "price_statement": "В момента плащаш цената на [конкретното — контрол/страх/саможертва/...]. Едно директно твърдение — НЕ 'защо', а 'какво коства'.",
+    "cost_areas": [
+      { "area": "Отношения", "description": "1-2 изречения конкретно как моделът те ограничава с хората." },
+      { "area": "Пари и кариера", "description": "1-2 изречения конкретно финансово и в работата." },
+      { "area": "Спокойствие", "description": "1-2 изречения какво коства на вътрешния ресурс." },
+      { "area": "Тяло и здраве", "description": "1-2 изречения как се проявява физически." }
+    ]
   },
   "meaning_analysis": {
     "declared_vs_lived": "2-3 изречения — съпостави на какво казва, че разчита (от СМИСЪЛ въпрос 1) с реалните модели от областите и ситуациите. Конкретно, без съд.",
@@ -830,10 +858,10 @@ ${mSum}
     "current_anchor": "На какво стои в момента, базирано директно на отговора от въпрос 1. Описано просто и директно към него.",
     "anchor_honesty": "Едно честно, но не присъдно изречение — дали тази опора издържа с времето или се изтощава, конкретно спрямо неговия избор.",
     "life_stage_reflection": "2 изречения директно базирани на отговора от въпрос 4. Покажи, че независимо от позицията, въпросът е същият — търсене на смисъл.",
-    "quiet_door": "Едно тихо изречение. БЕЗ думите духовност, религия, вяра, практика, медитация. Загатва нещо по-голямо от себе си като универсален принцип потвърден в цялата човешка история. Тон: топъл, без натиск, като посочване към звезда. Регистър: 'Забелязваш ли — почти всичко, на което разчиташ, може да се изтощи. Има нещо, на което хората са се опирали когато всичко друго е изчезвало — нарекли са го с различни имена, но е bilo едно и също.'",
-    "the_real_question": "Един личен въпрос за носене — изграден от конкретните му отговори на четирите въпроса, не общ."
+    "the_real_question": "Генерирай финален персонализиран въпрос по следната формула, в бавен, контемплативен тон с кратки изречения: 1. Подканващо изречение — въпрос или мека покана да остави основния си блокаж/модел (от Огледало 2) за момент, НЕ директно твърдение 'представи си че утре изчезва'. 2. Кратко уточнение: 'Не утре. Сега, само за момент.' или еквивалент. 3. 1-2 кратки изречения с конкретни елементи от живота му (от данните — бизнес, дете, връзка, каквото е релевантно), потвърждаващи че остават непокътнати. 4. 'Само [блокажа] — го няма.' 5. 'Кой остава?' Запази изреченията кратки. Тонът е бавен — всяко изречение е отделна мисъл."
   }
 }
+ЦЕНТРАЛНА ДИАГНОЗА: Синтезирай top_pattern + psychological_profile → намери ЦЕНАТА в реалния живот. НЕ обяснявай защо е такъв (вече казано). Само какво коства — конкретно в отношения, пари, спокойствие, тяло.
 КРИТИЧНО: Второ лице. Чист български. Max 2-3 изречения на поле. JSON завършен.`;
 }
 
@@ -872,28 +900,55 @@ ${aSum}
 Включи ВСИЧКИТЕ 7 области. Max 2 изречения на поле. JSON завършен.`;
 }
 
-// ─── PREVIEW (безплатно видимо + заключени резултати преди плащане) ──────────
-function renderPreview(d) {
-  showScreen('results');
-  var saveCard = document.querySelector('#screen-results .card.no-print');
-  if (saveCard) saveCard.style.display = 'none';
-  document.getElementById('natal-upsell').style.display = 'none';
-  document.getElementById('perplexity-upsell').style.display = 'none';
+// ─── ТРИТЕ ОГЛЕДАЛА — ПОМОЩНИ ФУНКЦИИ ────────────────────────────────────────
+function scoreClass(n) { return n >= 7 ? 'score-high' : n >= 4 ? 'score-mid' : 'score-low'; }
 
+function lockedCard(title, placeholder) {
+  return '<div class="card" style="position:relative;overflow:hidden;">' +
+    '<div class="card-title" style="color:var(--text-tertiary);">🔒 ' + title + '</div>' +
+    '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">' + placeholder + '</div>' +
+    '<div style="position:absolute;inset:0;background:rgba(250,250,248,0.15);"></div>' +
+    '</div>';
+}
+
+function mirrorSeparator(numLabel, colorHex, title, intro) {
+  return '<div style="margin:2.5rem 0 1.5rem;">' +
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">' +
+      '<div style="height:1px;flex:1;background:var(--border);"></div>' +
+      '<div style="font-size:11px;font-weight:600;color:' + colorHex + ';text-transform:uppercase;letter-spacing:0.12em;white-space:nowrap;padding:5px 16px;border:1px solid ' + colorHex + ';border-radius:20px;background:white;">' + numLabel + '</div>' +
+      '<div style="height:1px;flex:1;background:var(--border);"></div>' +
+    '</div>' +
+    '<div style="font-family:\'Playfair Display\',serif;font-size:1.35rem;font-weight:500;color:var(--text);margin-bottom:10px;">' + title + '</div>' +
+    '<div style="font-size:14px;color:var(--text-secondary);line-height:1.7;font-style:italic;">' + intro + '</div>' +
+  '</div>';
+}
+
+// ─── ЕДИННА РЕНДИРАЩА ФУНКЦИЯ — следва структурата на Трите Огледала ─────────
+function renderAnalysis(d, isPaid) {
   const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
   let html = '';
 
-  // ── БЕЗПЛАТНО: Средна оценка + пълно обобщение ──────────────────────────────
+  // Средна оценка
   html += '<div class="card">';
-  html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:20px;">';
+  html += '<div style="display:flex;align-items:baseline;gap:8px;">';
   html += '<div class="avg-score">' + avg + '</div><div class="avg-label">/10 средна оценка</div></div>';
-  if (d.summary) {
-    html += '<div class="summary-block"><div class="summary-label">Обобщение</div>';
-    html += '<div class="card-text">' + d.summary + '</div></div>';
-  }
   html += '</div>';
 
-  // ── БЕЗПЛАТНО: Основният модел ───────────────────────────────────────────────
+  // ═══════════════════════════════════════════════════════════════
+  // ОГЛЕДАЛО №1 — НАВИЦИ
+  // ═══════════════════════════════════════════════════════════════
+  html += mirrorSeparator('ОГЛЕДАЛО №1', '#1D9E75', 'Навици — Как живееш днес',
+    'Това огледало показва реалното състояние на живота ти в 7 ключови области. Не как би искал да бъде. Как е в действителност.');
+
+  // FREE: Обобщение
+  if (d.summary) {
+    html += '<div class="card">';
+    html += '<div class="summary-block"><div class="summary-label">Обобщение</div>';
+    html += '<div class="card-text">' + d.summary + '</div></div>';
+    html += '</div>';
+  }
+
+  // FREE: Основен модел
   if (d.top_pattern) {
     html += '<div class="card" style="border-left:3px solid var(--green);">';
     html += '<div class="card-title">Основният модел</div>';
@@ -901,7 +956,81 @@ function renderPreview(d) {
     html += '</div>';
   }
 
-  // ── БЕЗПЛАТНО: Психологически профил (4 лещи) ───────────────────────────────
+  // Области: платена → интегриран изглед (оценка + прозрение + действия); безплатна → оценка + blurred preview
+  if (d.areas && d.areas.length) {
+    if (isPaid) {
+      d.areas.forEach(function(a) {
+        const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
+        html += '<div class="area-result"><div class="area-result-header">';
+        html += '<div class="area-result-name">' + a.name + '</div>';
+        if (hasGap) {
+          html += '<div style="display:flex;align-items:center;gap:8px;">';
+          html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score||0) + '/10</span>';
+          html += '<span class="score-badge score-high" style="font-size:13px;padding:5px 14px;">▲ ' + a.assessed_score + '/10</span>';
+          html += '</div>';
+        } else {
+          html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
+        }
+        html += '</div>';
+        if (hasGap && a.encouragement) {
+          html += '<div style="background:var(--green-light);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:10px;">';
+          html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Реалната картина</div>';
+          html += '<div style="font-size:13px;color:var(--green-dark);line-height:1.6;">' + a.encouragement + '</div>';
+          html += '</div>';
+        }
+        if (a.insight) html += '<div class="area-insight">' + a.insight + '</div>';
+        (a.actions || []).forEach(function(act, i) {
+          html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div><div class="action-text">' + act + '</div></div>';
+        });
+        html += '</div>';
+      });
+      if (d.summary_actions && d.summary_actions.length) {
+        html += '<div class="card">';
+        html += '<div class="field-label" style="margin-bottom:10px;">Три стъпки към основната промяна</div>';
+        d.summary_actions.forEach(function(a, i) {
+          html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div>';
+          html += '<div class="action-text" style="font-size:14px;color:var(--text);">' + a + '</div></div>';
+        });
+        html += '</div>';
+      }
+    } else {
+      html += '<div class="card">';
+      html += '<div class="card-title" style="margin-bottom:14px;">7 области — текущи оценки</div>';
+      d.areas.forEach(function(a) {
+        const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
+        html += '<div style="padding:10px 0;border-bottom:1px solid var(--border);">';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;">';
+        html += '<div style="font-size:14px;font-weight:500;color:var(--text);">' + a.name + '</div>';
+        if (hasGap) {
+          html += '<div style="display:flex;align-items:center;gap:8px;">';
+          html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score||0) + '/10</span>';
+          html += '<span class="score-badge score-high">▲ ' + a.assessed_score + '/10</span>';
+          html += '</div>';
+        } else {
+          html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
+        }
+        html += '</div>';
+        if (a.insight) {
+          html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;font-style:italic;margin-top:8px;margin-bottom:6px;">' + a.insight + '</div>';
+        }
+        html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;">';
+        (a.actions && a.actions.length ? a.actions : ['Конкретна стъпка', 'Второ действие', 'Трето действие']).forEach(function(act) {
+          html += '<div style="font-size:12px;color:var(--text-secondary);padding:2px 0;">→ ' + act + '</div>';
+        });
+        html += '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // ОГЛЕДАЛО №2 — БЛОКАЖИ
+  // ═══════════════════════════════════════════════════════════════
+  html += mirrorSeparator('ОГЛЕДАЛО №2', '#4A3BAA', 'Блокажи — Какво те спира',
+    'Тук започват истинските прозрения. Повтарящи се модели, самосаботаж, ограничения, които сам си изградил.');
+
+  // FREE: Психологически профил
   if (d.psychological_profile) {
     const pp = d.psychological_profile;
     html += '<div class="card" style="border:2px solid var(--purple-light);">';
@@ -920,66 +1049,186 @@ function renderPreview(d) {
     html += '</div>';
   }
 
-  // ── ЗАКЛЮЧЕНО: останалите секции ────────────────────────────────────────────
-  function lockedCard(title, placeholder) {
-    return '<div class="card" style="position:relative;overflow:hidden;">' +
-      '<div class="card-title" style="color:var(--text-tertiary);">🔒 ' + title + '</div>' +
-      '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">' + placeholder + '</div>' +
-      '<div style="position:absolute;inset:0;background:rgba(250,250,248,0.15);"></div>' +
-      '</div>';
-  }
-
-  html += lockedCard('Поведенческите модели', (d.patterns ? d.patterns.length : 3) + ' идентифицирани модела с психологически корен и конкретна цена.');
-  html += lockedCard('Слепи зони · Схема на даване', 'Историите, които си разказваш, и реалността зад тях. Схемата на даване и нейната цена.');
-
-  // Области — имена и оценки видими, анализът заключен
-  if (d.areas && d.areas.length) {
-    html += '<div class="card"><div class="card-title" style="color:var(--text-tertiary);">🔒 Анализ по области</div>';
-    d.areas.forEach(function(a) {
-      const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
-      html += '<div class="area-result"><div class="area-result-header">';
-      html += '<div class="area-result-name">' + a.name + '</div>';
-      if (hasGap) {
-        html += '<div style="display:flex;align-items:center;gap:8px;">';
-        html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score||0) + '/10</span>';
-        html += '<span class="score-badge score-high">▲ ' + a.assessed_score + '/10</span>';
+  // PAID: Поведенчески модели, слепи зони, схема на даване
+  if (isPaid) {
+    if (d.patterns && d.patterns.length) {
+      html += '<div class="card"><div class="card-title">Поведенческите модели</div>';
+      d.patterns.forEach(function(p) {
+        html += '<div style="margin-bottom:18px;">';
+        html += '<span class="tag ' + (p.severity === 'high' ? 'tag-red' : 'tag-amber') + '">' + p.title + '</span>';
+        html += '<div class="card-text" style="margin-bottom:8px;">' + p.description + '</div>';
+        if (p.psychological_root) {
+          html += '<div style="font-size:12px;color:var(--purple-text);background:var(--purple-light);border-radius:8px;padding:6px 10px;display:inline-block;">🔍 ' + p.psychological_root + '</div>';
+        }
         html += '</div>';
-      } else {
-        html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
+      });
+      html += '</div>';
+    }
+    if (d.blind_spots && d.blind_spots.length) {
+      html += '<div class="card"><div class="card-title">Където се лъжеш</div>';
+      d.blind_spots.forEach(function(b) {
+        html += '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">' + b.area + '</div>';
+        html += '<div class="card-text">' + b.insight + '</div></div>';
+      });
+      html += '</div>';
+    }
+    if (d.giving_analysis) {
+      const ga = d.giving_analysis;
+      html += '<div class="card" style="border-left:3px solid var(--green);">';
+      html += '<div class="card-title" style="margin-bottom:16px;">🤲 Твоята схема на даване</div>';
+      if (ga.current_giving) {
+        html += '<div class="summary-block" style="margin-bottom:14px;">';
+        html += '<div class="summary-label">Как даваш сега</div>';
+        html += '<div class="card-text">' + ga.current_giving + '</div></div>';
+      }
+      if (ga.giving_cost) {
+        html += '<div style="background:var(--red-light);border-radius:10px;padding:12px 14px;margin-bottom:14px;">';
+        html += '<div style="font-size:11px;font-weight:500;color:var(--red-text);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Цената, която плащаш</div>';
+        html += '<div class="card-text">' + ga.giving_cost + '</div></div>';
+      }
+      if (ga.giving_invitation) {
+        html += '<div style="background:var(--green-light);border-radius:10px;padding:12px 14px;">';
+        html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Даването от пълнота — как би изглеждало</div>';
+        html += '<div class="card-text">' + ga.giving_invitation + '</div></div>';
       }
       html += '</div>';
-      html += '<div style="filter:blur(4px);user-select:none;font-size:13px;color:var(--text-secondary);margin-top:6px;">Задълбочен анализ и три конкретни действия за тази област...</div>';
+    }
+  } else {
+    html += '<div class="card"><div class="card-title">Поведенчески модели</div>';
+    html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">';
+    html += (d.patterns ? d.patterns.length : 3) + ' идентифицирани модела с психологически корен и конкретна цена. Всеки съдържа конкретен пример от твоите отговори и психологическия корен зад него.';
+    html += '</div></div>';
+
+    // Слепи зони: teaser отворен + пълно съдържание заключено
+    html += '<div class="card">';
+    html += '<div class="card-title">Слепи зони</div>';
+    if (d.blind_spot_teaser) {
+      html += '<div class="card-text" style="margin-bottom:12px;">' + d.blind_spot_teaser + '</div>';
+    }
+    if (d.blind_spots && d.blind_spots.length) {
+      d.blind_spots.forEach(function(b) {
+        html += '<div style="margin-bottom:12px;">';
+        html += '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;">' + b.area + '</div>';
+        html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.6;">' + b.insight + '</div>';
+        html += '</div>';
+      });
+    } else {
+      html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">Разказваш си, че правиш всичко необходимо. Реалността е различна.</div>';
+    }
+    html += '</div>';
+
+    html += lockedCard('Схема на даване',
+      'Откъде даваш и каква цена плащаш. Даването от пълнота — как би изглеждало за теб конкретно.');
+  }
+
+  // ЦЕНТРАЛНА ДИАГНОЗА (само платена версия, между Огледало 2 и Огледало 3)
+  if (isPaid && d.central_diagnosis) {
+    var cd = d.central_diagnosis;
+    html += '<div style="margin:2.5rem 0;padding:28px 24px;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:16px;">';
+    html += '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:14px;">Централна диагноза</div>';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.35rem;color:white;line-height:1.4;margin-bottom:22px;">' + cd.price_statement + '</div>';
+    (cd.cost_areas || []).forEach(function(ca, i) {
+      html += '<div style="' + (i > 0 ? 'border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;' : '') + 'margin-bottom:12px;">';
+      html += '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">' + ca.area + '</div>';
+      html += '<div style="font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6;">' + ca.description + '</div>';
       html += '</div>';
     });
     html += '</div>';
   }
 
-  html += lockedCard('Персонални рутини · Дневни въпроси · Личен кодекс',
-    'Сутрешни и вечерни рутини · 5 ключови въпроса · 5-7 лични принципа');
-  html += lockedCard('Смисъл',
-    'Четирите избора разкриват разликата между казаното и живяното — и въпросът за носене с теб.');
+  // ═══════════════════════════════════════════════════════════════
+  // ОГЛЕДАЛО №3 — УРОЦИ
+  // ═══════════════════════════════════════════════════════════════
+  html += mirrorSeparator('ОГЛЕДАЛО №3', '#854F0B', 'Уроци — Какво животът се опитва да ти покаже',
+    'Всяка трудност носи урок. Това огледало показва кои уроци вече си научил, кои избягваш, и къде животът те кани да пораснеш.');
 
-  // ── Payment CTA ─────────────────────────────────────────────────────────────
-  html += '<div style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:16px;padding:32px 28px;text-align:center;color:white;margin:1.5rem 0;">';
-  html += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px;">Пълният анализ е готов</div>';
-  html += '<div style="font-family:\'Playfair Display\',serif;font-size:2.6rem;font-weight:600;color:white;line-height:1;margin-bottom:4px;">';
-  html += '<span style="font-size:1.3rem;vertical-align:super;color:rgba(255,255,255,0.6);">€</span>14,60</div>';
-  html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:22px;">Еднократно · Незабавен достъп · PDF + имейл</div>';
-  html += '<button onclick="payForFullResults()" style="background:#1D9E75;color:white;border:none;padding:15px 36px;border-radius:50px;font-size:15px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;letter-spacing:0.01em;">Отключи пълния анализ — €14.60 →</button>';
-  html += '<div style="font-size:12px;color:rgba(255,255,255,0.25);margin-top:14px;">🔒 Обработено от Stripe · Криптирано и сигурно</div>';
-  html += '</div>';
+  if (isPaid) {
+    if (d.morning_routines || d.evening_routines) {
+      html += '<div class="card"><div class="card-title">Твоите персонални рутини</div>';
+      html += '<div class="routine-grid">';
+      html += '<div class="routine-card"><div class="routine-card-title morning">☀ Сутрин</div>';
+      (d.morning_routines || []).forEach(function(r) { html += '<div class="routine-item">→ ' + r + '</div>'; });
+      html += '</div>';
+      html += '<div class="routine-card"><div class="routine-card-title evening">🌙 Вечер</div>';
+      (d.evening_routines || []).forEach(function(r) { html += '<div class="routine-item">→ ' + r + '</div>'; });
+      html += '</div></div></div>';
+    }
+    if (d.daily_questions && d.daily_questions.length) {
+      html += '<div class="card"><div class="card-title">Въпроси за всеки ден</div>';
+      html += '<div class="card-text" style="margin-bottom:14px;font-size:13px;">Задавай си тези въпроси сутрин или вечер. Нека работят в теб.</div>';
+      html += '<ul class="daily-q-list">';
+      d.daily_questions.forEach(function(q, i) {
+        html += '<li class="daily-q-item"><div class="daily-q-num">' + (i+1) + '</div><div class="daily-q-text">' + q + '</div></li>';
+      });
+      html += '</ul></div>';
+    }
+    // Meaning — след трите огледала, златист акцент
+    if (d.meaning_analysis) {
+      html += renderMeaningAnalysis(d.meaning_analysis);
+    }
+    // Share block с реферален код (fetchPrinciples() вмъква личния кодекс преди него)
+    var _baseUrl = CONFIG.siteUrl.split('?')[0];
+    html += '<div class="card share-block" style="margin-top:1rem;background:var(--green-light);border:2px solid rgba(29,158,117,0.25);padding:24px;">';
+    html += '<div class="card-title" style="margin-bottom:4px;">Знаеш ли някой, на когото би помогнало?</div>';
+    html += '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">Въведи имейла си за да получиш личния си реферален код:</div>';
+    html += '<div class="no-print" style="margin-bottom:14px;">';
+    html += '<input type="email" id="ref-email-input" placeholder="твоят@имейл.com" oninput="previewRefCode(this.value)" style="width:100%;border:1px solid rgba(0,0,0,0.15);border-radius:10px;padding:10px 14px;font-size:14px;font-family:\'DM Sans\',sans-serif;background:white;color:var(--text);">';
+    html += '</div>';
+    html += '<div id="ref-code-wrap" style="display:none;margin-bottom:12px;">';
+    html += '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:6px;">Твоят личен реферален код:</div>';
+    html += '<div id="ref-code-chip" style="font-family:monospace;font-size:20px;font-weight:700;color:var(--green);background:white;padding:10px 22px;border-radius:10px;display:inline-block;letter-spacing:0.05em;"></div>';
+    html += '</div>';
+    html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:10px;">Приятелят получава <strong>25% отстъпка</strong>.<br>На всеки 5 успешни препоръки ти получаваш <strong>безплатен одит</strong>.</div>';
+    html += '<div id="ref-url-display" style="padding:8px 12px;background:rgba(0,0,0,0.05);border-radius:8px;font-size:12px;color:var(--text-secondary);word-break:break-all;margin-bottom:12px;">' + _baseUrl + '</div>';
+    html += '<div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;">';
+    html += '<a id="ref-share-link" class="btn btn-primary" href="' + _baseUrl + '" target="_blank">Сподели одита →</a>';
+    html += '<button class="btn btn-ghost" onclick="copyShareLink(this)">Копирай линка</button>';
+    html += '</div></div>';
+  } else {
+    html += lockedCard('Персонални рутини · Дневни въпроси · Личен кодекс',
+      'Сутрешни и вечерни рутини · 5 ключови въпроса · 5-7 лични принципа извлечени от твоите думи.');
+    // Смисъл — заключен, златист акцент
+    html += '<div class="card" style="position:relative;overflow:hidden;border:1px solid var(--gold);">' +
+      '<div class="card-title" style="color:var(--gold);">🔒 Смисъл</div>' +
+      '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">Четирите избора разкриват разликата между казаното и живяното — и въпросът за носене с теб.</div>' +
+      '<div style="position:absolute;inset:0;background:rgba(250,250,248,0.15);"></div>' +
+    '</div>';
+    // Payment CTA
+    html += '<div style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:16px;padding:32px 28px;text-align:center;color:white;margin:1.5rem 0;">';
+    html += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px;">Пълният анализ е готов</div>';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-size:2.6rem;font-weight:600;color:white;line-height:1;margin-bottom:4px;">';
+    html += '<span style="font-size:1.3rem;vertical-align:super;color:rgba(255,255,255,0.6);">€</span>14,60</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:22px;">Еднократно · Незабавен достъп · PDF + имейл</div>';
+    html += '<button onclick="payForFullResults()" style="background:#1D9E75;color:white;border:none;padding:15px 36px;border-radius:50px;font-size:15px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;letter-spacing:0.01em;">Отключи пълния анализ — €14.60 →</button>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.25);margin-top:14px;">🔒 Обработено от Stripe · Криптирано и сигурно</div>';
+    html += '</div>';
+  }
 
-  document.getElementById('results-content').innerHTML = html;
+  return html;
 }
 
-// ─── РЕНДИРАНЕ ───────────────────────────────────────────────────────────────
-function scoreClass(n) { return n >= 7 ? 'score-high' : n >= 4 ? 'score-mid' : 'score-low'; }
+// ─── PREVIEW (преди плащане) ──────────────────────────────────────────────────
+function renderPreview(d) {
+  showScreen('results');
+  var saveCard = document.querySelector('#screen-results .card.no-print');
+  if (saveCard) saveCard.style.display = 'none';
+  document.getElementById('natal-upsell').style.display = 'none';
+  document.getElementById('perplexity-upsell').style.display = 'none';
+  document.getElementById('results-content').innerHTML = renderAnalysis(d, false);
+}
 
 function renderResults(d) {
   showScreen('results');
-  // Увери се, че бутоните за запазване са видими
   var saveCard = document.querySelector('#screen-results .card.no-print');
   if (saveCard) saveCard.style.display = '';
+  document.getElementById('results-content').innerHTML = renderAnalysis(d, true);
+  if (d.patterns && d.patterns.length > 0) {
+    document.getElementById('perplexity-upsell').style.display = 'block';
+  }
+  fetchPrinciples();
+}
+
+function renderResults_UNUSED_v3_START(d) {
   const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
   let html = '';
 
@@ -1148,26 +1397,6 @@ function renderResults(d) {
     });
     html += '</div>';
   }
-
-  // Share block
-  html += '<div class="card share-block" style="margin-top:1rem;border:2px solid var(--green-light);background:linear-gradient(135deg,#f0fef8 0%,#fff 100%);">';
-  html += '<div class="card-title" style="margin-bottom:6px;">Знаеш ли някой, на когото би помогнало?</div>';
-  html += '<div class="card-text" style="margin-bottom:14px;">Сподели одита с приятел или близък. Всеки одит е напълно персонализиран и може да промени начина, по който някой вижда живота си.</div>';
-  html += '<div style="padding:10px 14px;background:#f5f5f3;border-radius:8px;font-size:13px;color:#444;word-break:break-all;margin-bottom:12px;letter-spacing:0.01em;"><strong>🔗</strong> ' + CONFIG.siteUrl + '</div>';
-  html += '<div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;">';
-  html += '<a class="btn btn-primary" href="' + CONFIG.siteUrl + '" target="_blank">Вземи твоя одит →</a>';
-  html += '<button class="btn btn-ghost" onclick="copyShareLink(this)">Копирай линка</button>';
-  html += '</div></div>';
-
-  document.getElementById('results-content').innerHTML = html;
-
-  // Покажи Perplexity бутона след Claude анализа
-  if (d.patterns && d.patterns.length > 0) {
-    document.getElementById('perplexity-upsell').style.display = 'block';
-  }
-
-  // Стартирай принципите като отделна заявка
-  fetchPrinciples();
 }
 
 // ─── ЛИЧЕН КОДЕКС (отделна заявка — избягва 524 timeout) ─────────────────────
@@ -1268,10 +1497,11 @@ function renderMeaningAnalysis(ma) {
     h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Където се намираш сега</div>';
     h += '<div class="card-text">' + ma.life_stage_reflection + '</div></div>';
   }
-  if (ma.quiet_door) {
-    h += '<div style="border-left:3px solid var(--gold);padding:12px 16px;margin-bottom:16px;background:rgba(176,141,87,0.05);border-radius:0 10px 10px 0;">';
-    h += '<div class="card-text" style="font-style:italic;color:var(--gold-dark);">' + ma.quiet_door + '</div></div>';
-  }
+  h += '<div style="border-left:3px solid var(--gold);padding:14px 16px;margin-bottom:16px;background:rgba(176,141,87,0.05);border-radius:0 10px 10px 0;">';
+  h += '<div class="card-text" style="color:var(--gold-dark);line-height:1.9;margin-bottom:10px;">Забелязваш ли — почти всичко, на което разчиташ, може да се изтощи.</div>';
+  h += '<div class="card-text" style="color:var(--gold-dark);line-height:1.9;margin-bottom:10px;">Но има Нещо, на което можеш да се опреш, дори когато всичко друго изчезне. Нещо, което те носи, без да го молиш за това. Някои Го наричат Бог. Други — Творец, или просто Това, което е по-голямо от тях. Името няма значение. Важното е, че никога не си бил сам в това — само си забравил да погледнеш натам.</div>';
+  h += '<div class="card-text" style="color:var(--gold-dark);font-weight:500;">Не бързай към отговора.</div>';
+  h += '</div>';
   if (ma.the_real_question) {
     h += '<div style="background:var(--gold-dark);border-radius:12px;padding:20px 22px;text-align:center;">';
     h += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Въпросът за носене с теб</div>';
@@ -1282,8 +1512,38 @@ function renderMeaningAnalysis(ma) {
   return h;
 }
 
+function generateReferralCode(email) {
+  var prefix = (email.split('@')[0] || '').replace(/[^a-zA-Z]/g, '').substring(0, 4).toUpperCase() || 'USER';
+  var hash = 0;
+  for (var i = 0; i < email.length; i++) {
+    hash = ((hash << 5) - hash) + email.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return 'DAVAI-' + prefix + ((Math.abs(hash) % 900) + 100);
+}
+
+function previewRefCode(email) {
+  var wrap = document.getElementById('ref-code-wrap');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }
+  var code = generateReferralCode(email);
+  var baseUrl = CONFIG.siteUrl.split('?')[0];
+  var refUrl = baseUrl + '?ref=' + code;
+  var chip = document.getElementById('ref-code-chip');
+  if (chip) chip.textContent = code;
+  var urlEl = document.getElementById('ref-url-display');
+  if (urlEl) urlEl.textContent = refUrl;
+  var link = document.getElementById('ref-share-link');
+  if (link) link.href = refUrl;
+  if (wrap) wrap.style.display = 'block';
+}
+
 function copyShareLink(btn) {
-  navigator.clipboard.writeText(CONFIG.siteUrl).then(function() {
+  var link = document.getElementById('ref-share-link');
+  var urlToCopy = link ? link.href : CONFIG.siteUrl;
+  navigator.clipboard.writeText(urlToCopy).then(function() {
     btn.textContent = '✓ Копирано!';
     setTimeout(function() { btn.textContent = 'Копирай линка'; }, 2000);
   });
@@ -1625,7 +1885,13 @@ function buildNatalEmailSection(d) {
 }
 
 // ─── ИМЕЙЛ ───────────────────────────────────────────────────────────────────
-function openEmailModal() { document.getElementById('email-modal').classList.remove('hidden'); }
+function openEmailModal() {
+  var refInput = document.getElementById('ref-email-input');
+  if (refInput && refInput.value) {
+    document.getElementById('email-input').value = refInput.value;
+  }
+  document.getElementById('email-modal').classList.remove('hidden');
+}
 function closeEmailModal() {
   document.getElementById('email-modal').classList.add('hidden');
   document.getElementById('email-error').style.display = 'none';
@@ -1642,63 +1908,125 @@ async function sendEmail() {
 
   try {
     const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
-    // Build compact email HTML from analysisResult (avoids sending heavy DOM innerHTML)
+    // Build email HTML with Three Mirrors structure and inline styles
+    var emailMirror = function(num, color, title) {
+      return '<div style="margin:32px 0 16px;padding:14px 20px;background:#f8f8f6;border-radius:8px;border-left:4px solid ' + color + ';">' +
+        '<div style="font-size:10px;font-weight:700;color:' + color + ';text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">' + num + '</div>' +
+        '<div style="font-size:17px;font-family:Georgia,serif;font-weight:500;color:#1a1a1a;">' + title + '</div>' +
+        '</div>';
+    };
+    var h2 = function(t) { return '<h2 style="font-size:15px;color:#1a1a1a;margin:16px 0 8px;font-family:sans-serif;">' + t + '</h2>'; };
+    var p = function(t) { return '<p style="color:#555;line-height:1.7;margin:0 0 8px;font-size:14px;">' + t + '</p>'; };
+
     let emailHtml = '';
     if (analysisResult) {
       const d = analysisResult;
-      if (d.summary) emailHtml += `<h2>Обобщение</h2><p>${d.summary}</p>`;
-      if (d.top_pattern) emailHtml += `<h2>Основен модел</h2><p><em>"${d.top_pattern}"</em></p>`;
-      if (d.summary_actions?.length) emailHtml += '<h2>Три стъпки</h2><ol>' + d.summary_actions.map(a => `<li>${a}</li>`).join('') + '</ol>';
+
+      // ── ОГЛЕДАЛО №1 — НАВИЦИ ──
+      emailHtml += emailMirror('ОГЛЕДАЛО №1', '#1D9E75', 'Навици — Как живееш днес');
+      if (d.summary) emailHtml += h2('Обобщение') + p(d.summary);
+      if (d.top_pattern) emailHtml += h2('Основен модел') + '<p style="color:#555;line-height:1.7;font-style:italic;font-size:14px;">"' + d.top_pattern + '"</p>';
+      if (d.summary_actions && d.summary_actions.length) emailHtml += h2('Три стъпки') + '<ol style="color:#555;padding-left:20px;line-height:1.7;">' + d.summary_actions.map(function(a) { return '<li style="margin-bottom:6px;">' + a + '</li>'; }).join('') + '</ol>';
+      if (d.areas && d.areas.length) {
+        emailHtml += h2('Анализ по области');
+        d.areas.forEach(function(a) {
+          emailHtml += '<div style="margin-bottom:14px;padding:12px 16px;background:#f5f5f3;border-radius:8px;">';
+          emailHtml += '<div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:6px;">' + a.name + ' — ' + (a.score || 0) + '/10</div>';
+          if (a.insight) emailHtml += '<p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 8px;">' + a.insight + '</p>';
+          if (a.actions && a.actions.length) emailHtml += '<ul style="color:#555;padding-left:16px;margin:0;">' + a.actions.map(function(x) { return '<li style="font-size:13px;margin-bottom:4px;">' + x + '</li>'; }).join('') + '</ul>';
+          emailHtml += '</div>';
+        });
+      }
+
+      // ── ОГЛЕДАЛО №2 — БЛОКАЖИ ──
+      emailHtml += emailMirror('ОГЛЕДАЛО №2', '#4A3BAA', 'Блокажи — Какво те спира');
       if (d.psychological_profile) {
         const pp = d.psychological_profile;
-        emailHtml += '<h2>Психологически профил</h2>';
-        if (pp.attachment_style) emailHtml += `<p><strong>Стил на привързаност:</strong> ${pp.attachment_style}</p>`;
-        if (pp.locus_of_control) emailHtml += `<p><strong>Локус на контрол:</strong> ${pp.locus_of_control}</p>`;
-        if (pp.giving_schema) emailHtml += `<p><strong>Схема на даване:</strong> ${pp.giving_schema}</p>`;
-        if (pp.core_schema) emailHtml += `<p><strong>Основна схема:</strong> ${pp.core_schema}</p>`;
+        emailHtml += h2('🧠 Психологически профил');
+        if (pp.attachment_style) emailHtml += p('<strong>Начин на свързване:</strong> ' + pp.attachment_style);
+        if (pp.locus_of_control) emailHtml += p('<strong>Чие влияние:</strong> ' + pp.locus_of_control);
+        if (pp.giving_schema) emailHtml += p('<strong>Откъде даваш:</strong> ' + pp.giving_schema);
+        if (pp.core_schema) emailHtml += p('<strong>Основно убеждение:</strong> ' + pp.core_schema);
       }
-      if (d.patterns?.length) { emailHtml += '<h2>Поведенчески модели</h2>'; d.patterns.forEach(p => { emailHtml += `<h3>${p.title}</h3><p>${p.description}</p>`; if (p.psychological_root) emailHtml += `<p><em>Корен: ${p.psychological_root}</em></p>`; }); }
-      if (d.blind_spots?.length) { emailHtml += '<h2>Където се лъжеш</h2>'; d.blind_spots.forEach(b => { emailHtml += `<h3>${b.area}</h3><p>${b.insight}</p>`; }); }
+      if (d.patterns && d.patterns.length) {
+        emailHtml += h2('Поведенчески модели');
+        d.patterns.forEach(function(pt) {
+          emailHtml += '<div style="margin-bottom:12px;">';
+          emailHtml += '<strong style="color:#1a1a1a;">' + pt.title + '</strong>';
+          emailHtml += p(pt.description);
+          if (pt.psychological_root) emailHtml += '<p style="font-size:12px;color:#4A3BAA;font-style:italic;margin:4px 0;">' + pt.psychological_root + '</p>';
+          emailHtml += '</div>';
+        });
+      }
+      if (d.blind_spots && d.blind_spots.length) {
+        emailHtml += h2('Слепи зони');
+        d.blind_spots.forEach(function(b) {
+          emailHtml += '<div style="margin-bottom:10px;"><strong style="color:#1a1a1a;">' + b.area + '</strong>' + p(b.insight) + '</div>';
+        });
+      }
       if (d.giving_analysis) {
         const ga = d.giving_analysis;
-        emailHtml += '<h2>Твоята схема на даване</h2>';
-        if (ga.current_giving) emailHtml += `<p><strong>Как даваш сега:</strong> ${ga.current_giving}</p>`;
-        if (ga.giving_cost) emailHtml += `<p><strong>Цената:</strong> ${ga.giving_cost}</p>`;
-        if (ga.giving_invitation) emailHtml += `<p><strong>Даването от пълнота:</strong> ${ga.giving_invitation}</p>`;
+        emailHtml += h2('🤲 Схема на даване');
+        if (ga.current_giving) emailHtml += p('<strong>Как даваш сега:</strong> ' + ga.current_giving);
+        if (ga.giving_cost) emailHtml += p('<strong>Цената:</strong> ' + ga.giving_cost);
+        if (ga.giving_invitation) emailHtml += p('<strong>Даването от пълнота:</strong> ' + ga.giving_invitation);
       }
-      if (d.areas?.length) { emailHtml += '<h2>Анализ по области</h2>'; d.areas.forEach(a => { emailHtml += `<h3>${a.name} — ${a.score}/10</h3><p>${a.insight}</p>`; if (a.actions?.length) emailHtml += '<ul>' + a.actions.map(x => `<li>${x}</li>`).join('') + '</ul>'; }); }
-      if (d.morning_routines?.length) emailHtml += '<h2>Сутрешни рутини</h2><ul>' + d.morning_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
-      if (d.evening_routines?.length) emailHtml += '<h2>Вечерни рутини</h2><ul>' + d.evening_routines.map(r => `<li>${r}</li>`).join('') + '</ul>';
-      if (d.daily_questions?.length) emailHtml += '<h2>Въпроси за всеки ден</h2><ol>' + d.daily_questions.map(q => `<li>${q}</li>`).join('') + '</ol>';
-      if (d.meaning_analysis) {
-        const ma = d.meaning_analysis;
-        emailHtml += '<div style="margin-top:28px;padding:24px;border:2px solid #B08D57;border-radius:14px;background:#FDF6EC;">';
-        emailHtml += '<div style="font-size:11px;font-weight:600;color:#B08D57;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Последният слой</div>';
-        emailHtml += '<h2 style="color:#7A5E2F;font-size:18px;margin:0 0 16px;">Смисъл</h2>';
-        if (ma.declared_vs_lived) emailHtml += `<p><strong style="color:#B08D57;">Казано срещу живяното:</strong> ${ma.declared_vs_lived}</p>`;
-        if (ma.where_it_points) emailHtml += `<p><strong style="color:#B08D57;">Накъде сочи:</strong> ${ma.where_it_points}</p>`;
-        if (ma.the_giving_moment) emailHtml += `<p><strong style="color:#B08D57;">Моментът на даването:</strong> ${ma.the_giving_moment}</p>`;
-        if (ma.current_anchor) emailHtml += `<p><strong style="color:#B08D57;">На какво стоиш сега:</strong> ${ma.current_anchor}</p>`;
-        if (ma.anchor_honesty) emailHtml += `<p style="color:#666;font-style:italic;">${ma.anchor_honesty}</p>`;
-        if (ma.life_stage_reflection) emailHtml += `<p>${ma.life_stage_reflection}</p>`;
-        if (ma.quiet_door) emailHtml += `<blockquote style="border-left:3px solid #B08D57;margin:12px 0;padding:8px 16px;font-style:italic;color:#7A5E2F;">${ma.quiet_door}</blockquote>`;
-        if (ma.the_real_question) emailHtml += `<div style="background:#7A5E2F;border-radius:10px;padding:16px;text-align:center;margin-top:14px;"><p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;">Въпросът за носене с теб</p><p style="color:#fff;font-style:italic;margin:0;">${ma.the_real_question}</p></div>`;
+
+      // ── ЦЕНТРАЛНА ДИАГНОЗА ──
+      if (d.central_diagnosis) {
+        const cd = d.central_diagnosis;
+        emailHtml += '<div style="margin:32px 0 16px;padding:24px;background:#1a1a1a;border-radius:10px;">';
+        emailHtml += '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:10px;">ЦЕНТРАЛНА ДИАГНОЗА</div>';
+        if (cd.price_statement) emailHtml += '<p style="font-family:Georgia,serif;font-size:17px;color:white;line-height:1.5;margin:0 0 16px;">' + cd.price_statement + '</p>';
+        (cd.cost_areas || []).forEach(function(ca) {
+          emailHtml += '<div style="margin-bottom:10px;border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;">';
+          emailHtml += '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:4px;">' + ca.area + '</div>';
+          emailHtml += '<p style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;margin:0;">' + ca.description + '</p>';
+          emailHtml += '</div>';
+        });
         emailHtml += '</div>';
       }
-      if (d.principles?.length) {
+
+      // ── ОГЛЕДАЛО №3 — УРОЦИ ──
+      emailHtml += emailMirror('ОГЛЕДАЛО №3', '#854F0B', 'Уроци — Какво животът се опитва да ти покаже');
+      if (d.morning_routines && d.morning_routines.length) emailHtml += h2('☀ Сутрешни рутини') + '<ul style="color:#555;padding-left:20px;line-height:1.7;">' + d.morning_routines.map(function(r) { return '<li style="margin-bottom:4px;">' + r + '</li>'; }).join('') + '</ul>';
+      if (d.evening_routines && d.evening_routines.length) emailHtml += h2('🌙 Вечерни рутини') + '<ul style="color:#555;padding-left:20px;line-height:1.7;">' + d.evening_routines.map(function(r) { return '<li style="margin-bottom:4px;">' + r + '</li>'; }).join('') + '</ul>';
+      if (d.daily_questions && d.daily_questions.length) emailHtml += h2('Въпроси за всеки ден') + '<ol style="color:#555;padding-left:20px;line-height:1.7;">' + d.daily_questions.map(function(q) { return '<li style="margin-bottom:6px;">' + q + '</li>'; }).join('') + '</ol>';
+
+      // ── СМИСЪЛ ──
+      if (d.meaning_analysis) {
+        const ma = d.meaning_analysis;
+        emailHtml += '<div style="margin:32px 0 16px;padding:14px 20px;background:#FDF6EC;border-radius:8px;border-left:4px solid #B08D57;">';
+        emailHtml += '<div style="font-size:10px;font-weight:700;color:#B08D57;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">ПОСЛЕДНИЯТ СЛОЙ</div>';
+        emailHtml += '<div style="font-size:17px;font-family:Georgia,serif;font-weight:500;color:#7A5E2F;">Смисъл</div>';
+        emailHtml += '</div>';
+        if (ma.declared_vs_lived) emailHtml += p('<strong style="color:#B08D57;">Казано срещу живяното:</strong> ' + ma.declared_vs_lived);
+        if (ma.where_it_points) emailHtml += p('<strong style="color:#B08D57;">Накъде сочи:</strong> ' + ma.where_it_points);
+        if (ma.the_giving_moment) emailHtml += p('<strong style="color:#B08D57;">Моментът на даването:</strong> ' + ma.the_giving_moment);
+        if (ma.current_anchor) emailHtml += p('<strong style="color:#B08D57;">На какво стоиш сега:</strong> ' + ma.current_anchor);
+        if (ma.anchor_honesty) emailHtml += '<p style="color:#666;font-style:italic;line-height:1.7;font-size:14px;">' + ma.anchor_honesty + '</p>';
+        if (ma.life_stage_reflection) emailHtml += p(ma.life_stage_reflection);
+        emailHtml += '<blockquote style="border-left:3px solid #B08D57;margin:12px 0;padding:14px 16px;color:#7A5E2F;line-height:1.9;">';
+        emailHtml += '<p style="margin:0 0 10px;">Забелязваш ли — почти всичко, на което разчиташ, може да се изтощи.</p>';
+        emailHtml += '<p style="margin:0 0 10px;">Но има Нещо, на което можеш да се опреш, дори когато всичко друго изчезне. Нещо, което те носи, без да го молиш за това. Някои Го наричат Бог. Други — Творец, или просто Това, което е по-голямо от тях. Името няма значение. Важното е, че никога не си бил сам в това — само си забравил да погледнеш натам.</p>';
+        emailHtml += '<p style="margin:0;font-weight:600;">Не бързай към отговора.</p>';
+        emailHtml += '</blockquote>';
+        if (ma.the_real_question) emailHtml += '<div style="background:#7A5E2F;border-radius:10px;padding:16px;text-align:center;margin-top:14px;"><p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;">Въпросът за носене с теб</p><p style="color:#fff;font-style:italic;margin:0;">' + ma.the_real_question + '</p></div>';
+      }
+
+      // ── ЛИЧЕН КОДЕКС ──
+      if (d.principles && d.principles.length) {
         emailHtml += '<div style="margin-top:28px;padding:28px;background:#1a1a1a;border-radius:14px;">';
-        emailHtml += '<h2 style="color:#fff;font-size:18px;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</h2>';
-        emailHtml += '<p style="color:rgba(255,255,255,0.4);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:20px;">Принципите, открити чрез твоя живот</p>';
-        d.principles.forEach(function(p) {
+        emailHtml += '<h2 style="color:#fff;font-size:18px;letter-spacing:0.08em;margin:0 0 4px;">ЛИЧЕН КОДЕКС</h2>';
+        emailHtml += '<p style="color:rgba(255,255,255,0.4);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 20px;">Принципите, открити чрез твоя живот</p>';
+        d.principles.forEach(function(pr) {
           emailHtml += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:18px 0;">';
-          emailHtml += '<div style="display:flex;gap:14px;align-items:baseline;margin-bottom:8px;">';
-          emailHtml += '<span style="font-size:1.8rem;font-weight:600;color:#1D9E75;line-height:1;">' + p.number + '</span>';
-          emailHtml += '<strong style="font-size:15px;color:#fff;">' + p.title + '</strong></div>';
-          emailHtml += '<p style="font-size:14px;color:rgba(255,255,255,0.85);font-style:italic;margin-bottom:8px;">' + p.statement + '</p>';
-          emailHtml += '<p style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:10px;">' + p.origin + '</p>';
+          emailHtml += '<div style="margin-bottom:8px;"><span style="font-size:1.8rem;font-weight:600;color:#1D9E75;line-height:1;">' + pr.number + '</span> <strong style="font-size:15px;color:#fff;">' + pr.title + '</strong></div>';
+          emailHtml += '<p style="font-size:14px;color:rgba(255,255,255,0.85);font-style:italic;margin-bottom:8px;">' + pr.statement + '</p>';
+          emailHtml += '<p style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:10px;">' + pr.origin + '</p>';
           emailHtml += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid #1D9E75;padding:8px 12px;border-radius:0 6px 6px 0;">';
-          emailHtml += '<p style="font-size:11px;color:#1D9E75;font-weight:600;text-transform:uppercase;margin-bottom:3px;">Сутрешен въпрос</p>';
-          emailHtml += '<p style="font-size:13px;color:rgba(255,255,255,0.75);">' + p.morning_question + '</p></div></div>';
+          emailHtml += '<p style="font-size:11px;color:#1D9E75;font-weight:600;text-transform:uppercase;margin:0 0 3px;">Сутрешен въпрос</p>';
+          emailHtml += '<p style="font-size:13px;color:rgba(255,255,255,0.75);margin:0;">' + pr.morning_question + '</p></div></div>';
         });
         emailHtml += '</div>';
       }
@@ -1715,8 +2043,19 @@ async function sendEmail() {
     });
     const data = await res.json();
     btn.textContent = data.ok ? '✓ Изпратено!' : 'Грешка — опитай пак';
-    if (data.ok) setTimeout(closeEmailModal, 2000);
-    else btn.disabled = false;
+    if (data.ok) {
+      if (data.refCode) {
+        var _baseUrl = CONFIG.siteUrl.split('?')[0];
+        var _refUrl = _baseUrl + '?ref=' + data.refCode;
+        var _chip = document.getElementById('ref-code-chip');
+        if (_chip) _chip.textContent = data.refCode;
+        var _urlEl = document.getElementById('ref-url-display');
+        if (_urlEl) _urlEl.textContent = _refUrl;
+        var _link = document.getElementById('ref-share-link');
+        if (_link) _link.href = _refUrl;
+      }
+      setTimeout(closeEmailModal, 2000);
+    } else btn.disabled = false;
   } catch(e) {
     btn.textContent = 'Грешка — опитай пак';
     btn.disabled = false;
@@ -1924,5 +2263,7 @@ export default {
 }
 -->
 
+</body>
+</html>
 </body>
 </html>
