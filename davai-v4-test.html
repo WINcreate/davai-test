@@ -189,7 +189,7 @@
   <div class="modal">
     <div class="modal-title">Изпрати резултата на мейла</div>
     <p class="modal-text">Въведи имейл адреса си и ще получиш пълния анализ, рутините и дневните въпроси.</p>
-    <input type="email" class="input-field" id="email-input" placeholder="твоят@имейл.com">
+    <input type="email" class="input-field" id="email-input" placeholder="твоят@имейл.com" oninput="previewRefCode(this.value)">
     <div id="email-error" style="font-size:13px;color:var(--red-text);margin-bottom:12px;display:none;">Моля, въведи валиден имейл адрес.</div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-secondary" onclick="closeEmailModal()">Отказ</button>
@@ -1504,6 +1504,29 @@ function renderMeaningAnalysis(ma) {
   return h;
 }
 
+function generateReferralCode(email) {
+  var prefix = (email.split('@')[0] || '').replace(/[^a-zA-Z]/g, '').substring(0, 4).toUpperCase() || 'USER';
+  var hash = 0;
+  for (var i = 0; i < email.length; i++) {
+    hash = ((hash << 5) - hash) + email.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return 'DAVAI-' + prefix + ((Math.abs(hash) % 900) + 100);
+}
+
+function previewRefCode(email) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+  var code = generateReferralCode(email);
+  var baseUrl = CONFIG.siteUrl.split('?')[0];
+  var refUrl = baseUrl + '?ref=' + code;
+  var chip = document.getElementById('ref-code-chip');
+  if (chip) chip.textContent = code;
+  var urlEl = document.getElementById('ref-url-display');
+  if (urlEl) urlEl.textContent = refUrl;
+  var link = document.getElementById('ref-share-link');
+  if (link) link.href = refUrl;
+}
+
 function copyShareLink(btn) {
   var link = document.getElementById('ref-share-link');
   var urlToCopy = link ? link.href : CONFIG.siteUrl;
@@ -2221,5 +2244,7 @@ export default {
 }
 -->
 
+</body>
+</html>
 </body>
 </html>
