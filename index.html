@@ -1181,8 +1181,7 @@ function renderAnalysis(d, isPaid) {
     html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:10px;">Приятелят получава <strong>25% отстъпка</strong>.<br>На всеки 5 успешни препоръки ти получаваш <strong>безплатен одит</strong>.</div>';
     html += '<div id="ref-url-display" style="padding:8px 12px;background:rgba(0,0,0,0.05);border-radius:8px;font-size:12px;color:var(--text-secondary);word-break:break-all;margin-bottom:12px;">' + _baseUrl + '</div>';
     html += '<div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;">';
-    html += '<a id="ref-share-link" class="btn btn-primary" href="' + _baseUrl + '" target="_blank">Сподели одита →</a>';
-    html += '<button class="btn btn-ghost" onclick="copyShareLink(this)">Копирай линка</button>';
+    html += '<button class="btn btn-primary" id="ref-share-btn" data-href="' + _baseUrl + '" data-code="" onclick="shareReferralLink(this)">Сподели линка</button>';
     html += '</div></div>';
   } else {
     html += lockedCard('Персонални рутини · Дневни въпроси · Личен кодекс',
@@ -1535,18 +1534,29 @@ function previewRefCode(email) {
   if (chip) chip.textContent = code;
   var urlEl = document.getElementById('ref-url-display');
   if (urlEl) urlEl.textContent = refUrl;
-  var link = document.getElementById('ref-share-link');
-  if (link) link.href = refUrl;
+  var btn = document.getElementById('ref-share-btn');
+  if (btn) { btn.dataset.href = refUrl; btn.dataset.code = code; }
   if (wrap) wrap.style.display = 'block';
 }
 
-function copyShareLink(btn) {
-  var link = document.getElementById('ref-share-link');
-  var urlToCopy = link ? link.href : CONFIG.siteUrl;
-  navigator.clipboard.writeText(urlToCopy).then(function() {
-    btn.textContent = '✓ Копирано!';
-    setTimeout(function() { btn.textContent = 'Копирай линка'; }, 2000);
-  });
+async function shareReferralLink(btn) {
+  var url = btn.dataset.href || CONFIG.siteUrl;
+  var code = btn.dataset.code || '';
+  var shareData = {
+    title: 'ДАВАЙ! — Личен одит на живота',
+    text: 'Виж това, мисля че може да ти бъде полезно. С код ' + code + ' получаваш 25% отстъпка.',
+    url: url
+  };
+  if (navigator.share) {
+    try { await navigator.share(shareData); } catch(e) {}
+  } else {
+    try {
+      await navigator.clipboard.writeText(url);
+      var orig = btn.textContent;
+      btn.textContent = 'Копирано ✓';
+      setTimeout(function() { btn.textContent = orig; }, 2000);
+    } catch(e) {}
+  }
 }
 
 // ─── PERPLEXITY АНАЛИЗ ───────────────────────────────────────────────────────
@@ -2051,8 +2061,8 @@ async function sendEmail() {
         if (_chip) _chip.textContent = data.refCode;
         var _urlEl = document.getElementById('ref-url-display');
         if (_urlEl) _urlEl.textContent = _refUrl;
-        var _link = document.getElementById('ref-share-link');
-        if (_link) _link.href = _refUrl;
+        var _btn = document.getElementById('ref-share-btn');
+        if (_btn) { _btn.dataset.href = _refUrl; _btn.dataset.code = data.refCode; }
       }
       setTimeout(closeEmailModal, 2000);
     } else btn.disabled = false;
