@@ -469,6 +469,15 @@ const CONFIG = {
 };
 var promoCode = new URLSearchParams(window.location.search).get('promo') || null;
 
+// ─── ANALYTICS (само GA4 / gtag) ─────────────────────────────────────────────
+const DEV = /localhost|127\.0\.0\.1/.test(location.hostname) || location.protocol === 'file:' || new URLSearchParams(location.search).has('debug');
+function trackEvent(eventName, eventData) {
+  const data = Object.assign({ timestamp: new Date().toISOString(), page_url: location.href }, eventData || {});
+  if (DEV) { data.debug_mode = true; console.log('[track]', eventName, data); }
+  try { if (typeof window.gtag === 'function') window.gtag('event', eventName, data); } catch(e) {}
+}
+let _odit50 = false;
+
 
 
 // ─── ДАННИ ───────────────────────────────────────────────────────────────────
@@ -555,6 +564,7 @@ function showScreen(id) {
 
 // ─── СТАРТ НА ОДИТА (без предварително плащане) ──────────────────────────────
 function startAudit() {
+  trackEvent('quiz_started', {});
   buildSituations();
   showScreen('areas');
   renderArea();
@@ -562,6 +572,7 @@ function startAudit() {
 
 // ─── ПЛАЩАНЕ ЗА ПЪЛНИ РЕЗУЛТАТИ ──────────────────────────────────────────────
 async function payForFullResults() {
+  trackEvent('buy_clicked', { value: 14.60, currency: 'EUR' });
   try {
     sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
     sessionStorage.setItem('davai_answers', JSON.stringify(answers));
@@ -601,8 +612,10 @@ async function checkPaymentReturn() {
       sessionStorage.removeItem('davai_analysis');
       sessionStorage.removeItem('davai_answers');
       paymentVerified = true;
+      trackEvent('purchase_complete', { value: 14.60, currency: 'EUR' });
       renderResults(analysisResult);
       fetchPrinciples();
+      trackEvent('natal_upsell_shown', {});
     } else {
       showScreen('intro');
     }
@@ -635,6 +648,7 @@ async function checkPaymentReturn() {
 
 // ─── НАТАЛНА КАРТА — ПЛАЩАНЕ ─────────────────────────────────────────────────
 function payForNatal() {
+  trackEvent('natal_buy_clicked', { value: 8.90, currency: 'EUR' });
   if (!CONFIG.natalPaymentLink || CONFIG.natalPaymentLink === 'NATAL_PAYMENT_LINK_HERE') {
     // Без конфигуриран линк — показва формата директно (за тест)
     toggleNatalForm();
@@ -690,6 +704,7 @@ function nextArea() {
   saveCurrentArea();
   if (!answers[a.key]?.rating) { alert('Моля, дай оценка от 1 до 10.'); return; }
   if ((answers[a.key]?.desc || '').length < 20) { alert('Моля, опиши ситуацията с поне няколко думи.'); return; }
+  if (!_odit50 && (current + 1) >= AREAS.length / 2) { _odit50 = true; trackEvent('quiz_progress_50', {}); }
   if (current < AREAS.length - 1) { current++; renderArea(); }
   else { showScreen('situations'); }
 }
@@ -726,6 +741,7 @@ async function generateAnalysis() {
   const ls = document.getElementById('lessons-text').value.trim();
   if (reg.length < 10 || pr.length < 10 || ls.length < 10) { alert('Моля, попълни и трите полета.'); return; }
   answers.regrets = reg; answers.proud = pr; answers.lessons = ls;
+  trackEvent('quiz_completed', {});
   showScreen('loading');
   const loadingTimer = animateLoadingSteps();
 
@@ -1214,6 +1230,8 @@ function renderPreview(d) {
   document.getElementById('natal-upsell').style.display = 'none';
   document.getElementById('perplexity-upsell').style.display = 'none';
   document.getElementById('results-content').innerHTML = renderAnalysis(d, false);
+  trackEvent('free_result_shown', {});
+  trackEvent('offer_shown', {});
 }
 
 function renderResults(d) {
@@ -2183,6 +2201,7 @@ function fmtTime(s) {
 }
 
 // ─── СТАРТ ───────────────────────────────────────────────────────────────────
+trackEvent('page_loaded', {});
 checkPaymentReturn();
 </script>
 
