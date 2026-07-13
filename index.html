@@ -171,7 +171,11 @@
   }
 
   /* ── ГЛАСОВО ВЪВЕЖДАНЕ ── */
-  .voice-btn-wrap { margin: -6px 0 1.5rem; }
+  .voice-btn-wrap { margin: 0 0 12px; }
+  .voice-cta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .voice-prompt { font-size: 13px; color: var(--text-secondary); }
+  .voice-btn-accent { color: var(--green); border-color: var(--green); background: var(--green-light); font-weight: 500; }
+  .field-help { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; margin: -2px 0 12px; }
   .voice-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 7px 16px; color: var(--text-tertiary); border: 1px solid var(--border); background: transparent; border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
   .voice-btn:hover { color: var(--green); border-color: var(--green); background: var(--green-light); }
   .voice-message { font-size: 13px; color: var(--green-dark); background: var(--green-light); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; line-height: 1.6; }
@@ -215,7 +219,13 @@
     <div class="brand-sub">Личен жизнен отчет</div>
     <p class="intro-text">Честна оценка на седем области от живота ти. Задълбочен анализ на поведенческите модели, персонални рутини и ключови въпроси за всеки ден.</p>
     <div class="card" style="background:var(--amber);border-color:transparent;margin-bottom:1rem;">
-      <div class="card-text" style="color:var(--amber-text);font-size:13px;">⏱ Около 15–20 минути. Колкото по-честен си, толкова по-точен е анализът.</div>
+      <div class="card-text" style="color:var(--amber-text);font-size:13px;">🕐 Повечето хора завършват за 10–12 минути. Колкото по-конкретен си, толкова по-точен е анализът.</div>
+    </div>
+    <div class="card" style="border-color:var(--border);margin-bottom:1rem;padding:14px 18px;">
+      <div class="card-text" style="font-size:13px;line-height:1.7;"><strong>🎤 Пиши или говори — твой избор.</strong> Всяко поле има бутон „Говори" — просто разкажи вместо да пишеш. Работи директно от браузъра.</div>
+    </div>
+    <div class="card" style="border-color:var(--border);margin-bottom:1rem;padding:14px 18px;">
+      <div class="card-text" style="font-size:13px;line-height:1.7;"><strong>✏️ Няма правилни отговори.</strong> 2–3 изречения са напълно достатъчни. Конкретен пример от живота ти прави анализа по-дълбок от дълъг общ текст.</div>
     </div>
     <div class="card" style="border-color:var(--border);margin-bottom:2rem;padding:14px 18px;">
       <div class="card-text" style="font-size:13px;line-height:1.7;">🔒 Изследването е напълно <strong style="color:var(--green);">анонимно</strong>. Данните, които предоставяш, <em>не се запазват</em> при нас.</div>
@@ -268,6 +278,7 @@
     <div class="field-label">Оценка от 1 до 10</div>
     <div class="rating-grid" id="rating-grid"></div>
     <div class="field-label">Опиши честно</div>
+    <div class="field-help">💡 2–3 изречения са достатъчни. Конкретен пример работи по-добре от дълъг текст.</div>
     <textarea id="area-desc" placeholder="Бъди конкретен. Детайлите правят анализа точен..."></textarea>
     <div>
       <button class="btn btn-secondary" id="btn-back" onclick="prevArea()">Назад</button>
@@ -495,19 +506,26 @@ let _odit50 = false;
 // ─── ДАННИ ───────────────────────────────────────────────────────────────────
 const AREAS = [
   { key: 'physical', name: 'Физическо здраве',
-    q: 'Как е физическото ти здраве в момента? Опиши енергийното си ниво, съня, движението, болките и навиците около тялото си.' },
+    q: 'Как е физическото ти здраве в момента? Опиши енергийното си ниво, съня, движението, болките и навиците около тялото си.',
+    ph: 'Напр. Спя добре, но имам хронично напрежение в гърба. Спортувам 3 пъти седмично.' },
   { key: 'mental', name: 'Психическо здраве',
-    q: 'Как е психическото ти здраве? Опиши тревожността, настроението, стреса, как се справяш с трудните емоции.' },
+    q: 'Как е психическото ти здраве? Опиши тревожността, настроението, стреса, как се справяш с трудните емоции.',
+    ph: 'Напр. Като цяло съм добре, но под стрес стигам до преумора. Тревожността идва на вълни.' },
   { key: 'relationship', name: 'Романтична връзка',
-    q: 'Как е романтичната ти връзка? Ако нямаш такава, опиши защо и какво чувстваш. Ако имаш — какво работи, какво не работи, и какво избягваш да казваш.' },
+    q: 'Как е романтичната ти връзка? Ако нямаш такава, опиши защо и какво чувстваш. Ако имаш — какво работи, какво не работи, и какво избягваш да казваш.',
+    ph: 'Напр. С партньора сме близки, но има период на дистанция и избягвам да говоря за някои неща.' },
   { key: 'friendships', name: 'Приятелства',
-    q: 'Как са приятелствата ти? С кого прекарваш времето, колко дълбоки са тези връзки, издигат ли те или те дърпат надолу?' },
+    q: 'Как са приятелствата ти? С кого прекарваш времето, колко дълбоки са тези връзки, издигат ли те или те дърпат надолу?',
+    ph: 'Напр. Имам малко близки хора, но рядко намирам време за тях.' },
   { key: 'career', name: 'Кариерно удовлетворение',
-    q: 'Как е кариерното ти удовлетворение? Опиши смисъла, ростежа, парите, отношенията с колеги. Кое те мотивира и кое те изтощава?' },
+    q: 'Как е кариерното ти удовлетворение? Опиши смисъла, ростежа, парите, отношенията с колеги. Кое те мотивира и кое те изтощава?',
+    ph: 'Напр. Работата ми върви, но губя смисъл в ежедневието ѝ.' },
   { key: 'finances', name: 'Финанси',
-    q: 'Как са финансите ти? Опиши доходите, разходите, спестяванията, дълговете и страховете около парите.' },
+    q: 'Как са финансите ти? Опиши доходите, разходите, спестяванията, дълговете и страховете около парите.',
+    ph: 'Напр. Стабилен съм, но не инвестирам и се страхувам от неочаквани разходи.' },
   { key: 'fun', name: 'Забавление и радост',
-    q: 'Колко радост и забавление имаш? Кога последно си се смял от сърце? Какво те зарежда и колко често го правиш?' }
+    q: 'Колко радост и забавление имаш? Кога последно си се смял от сърце? Какво те зарежда и колко често го правиш?',
+    ph: 'Напр. Рядко правя неща само за себе си. Забравил съм какво ме зарежда.' }
 ];
 
 let current = 0;
@@ -691,6 +709,7 @@ function renderArea() {
   document.getElementById('area-name').textContent = a.name;
   document.getElementById('area-question').textContent = a.q;
   document.getElementById('area-desc').value = answers[a.key]?.desc || '';
+  document.getElementById('area-desc').placeholder = a.ph || 'Бъди конкретен. Детайлите правят анализа точен...';
   const saved = answers[a.key]?.rating || null;
   document.getElementById('rating-grid').innerHTML = [1,2,3,4,5,6,7,8,9,10].map(n =>
     '<button class="rating-btn' + (saved === n ? ' selected' : '') + '" onclick="selectRating(' + n + ')">' + n + '</button>'
@@ -2134,8 +2153,9 @@ function initVoiceInputs() {
     const wrap = document.createElement('div');
     wrap.className = 'voice-btn-wrap';
     wrap.id = 'voice-wrap-' + id;
-    wrap.innerHTML = '<button class="voice-btn" onclick="startVoice(\'' + id + '\',' + dur + ')">🎙 Говори</button>';
-    ta.insertAdjacentElement('afterend', wrap);
+    wrap.innerHTML = '<div class="voice-cta"><span class="voice-prompt">🎤 Предпочиташ да говориш?</span>' +
+      '<button class="voice-btn voice-btn-accent" onclick="startVoice(\'' + id + '\',' + dur + ')">🎙 Говори</button></div>';
+    ta.insertAdjacentElement('beforebegin', wrap);
   });
 }
 
