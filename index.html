@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ДАВАЙ! — Личен одит на живота</title>
 
+<!-- Google Analytics 4 (GA4) — един общ property за двете фунии (одит + нумерология) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GY8KMVSK0J"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GY8KMVSK0J');
+</script>
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -395,7 +404,7 @@
       <div class="card-title" style="margin-bottom:12px;">Запази резултата</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
         <button class="btn btn-ghost" onclick="openEmailModal()">📧 Изпрати на мейл</button>
-        <button class="btn btn-ghost" onclick="window.print()">⬇ Свали като PDF</button>
+        <button class="btn btn-ghost" onclick="trackEvent('pdf_download', {}); window.print()">⬇ Свали като PDF</button>
       </div>
     </div>
 
@@ -469,10 +478,13 @@ const CONFIG = {
 };
 var promoCode = new URLSearchParams(window.location.search).get('promo') || null;
 
-// ─── ANALYTICS (само GA4 / gtag) ─────────────────────────────────────────────
+// ─── ANALYTICS (GA4 / gtag) ──────────────────────────────────────────────────
+// funnel_type разграничава двете фунии в общия GA4 property (един Measurement ID).
+// ⚠️ В davai-numerology.html този FUNNEL_TYPE трябва да е 'numerology' (не 'audit').
+const FUNNEL_TYPE = 'audit';
 const DEV = /localhost|127\.0\.0\.1/.test(location.hostname) || location.protocol === 'file:' || new URLSearchParams(location.search).has('debug');
 function trackEvent(eventName, eventData) {
-  const data = Object.assign({ timestamp: new Date().toISOString(), page_url: location.href }, eventData || {});
+  const data = Object.assign({ funnel_type: FUNNEL_TYPE, timestamp: new Date().toISOString(), page_url: location.href }, eventData || {});
   if (DEV) { data.debug_mode = true; console.log('[track]', eventName, data); }
   try { if (typeof window.gtag === 'function') window.gtag('event', eventName, data); } catch(e) {}
 }
@@ -612,7 +624,7 @@ async function checkPaymentReturn() {
       sessionStorage.removeItem('davai_analysis');
       sessionStorage.removeItem('davai_answers');
       paymentVerified = true;
-      trackEvent('purchase_complete', { value: 14.60, currency: 'EUR' });
+      trackEvent('purchase', { value: 14.60, currency: 'EUR' });
       renderResults(analysisResult);
       fetchPrinciples();
       trackEvent('natal_upsell_shown', {});
@@ -1566,10 +1578,11 @@ async function shareReferralLink(btn) {
     url: url
   };
   if (navigator.share) {
-    try { await navigator.share(shareData); } catch(e) {}
+    try { await navigator.share(shareData); trackEvent('referral_link_copied', { method: 'share' }); } catch(e) {}
   } else {
     try {
       await navigator.clipboard.writeText(url);
+      trackEvent('referral_link_copied', { method: 'clipboard' });
       var orig = btn.textContent;
       btn.textContent = 'Копирано ✓';
       setTimeout(function() { btn.textContent = orig; }, 2000);
@@ -1600,6 +1613,14 @@ async function fetchPerplexityAnalysis() {
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
+    if (!data.result) {
+      // Graceful fallback — приятелско съобщение, не сурова JSON грешка
+      const pr = document.getElementById('perplexity-results');
+      pr.innerHTML = '<div class="card"><div class="card-text">' + (data.message || 'Техниките не можаха да се заредят този път.') + '</div></div>';
+      pr.style.display = 'block';
+      document.getElementById('perplexity-upsell').style.display = 'none';
+      return;
+    }
     renderPerplexityResults(data.result);
     document.getElementById('perplexity-upsell').style.display = 'none';
   } catch(e) {
@@ -2072,6 +2093,7 @@ async function sendEmail() {
     const data = await res.json();
     btn.textContent = data.ok ? '✓ Изпратено!' : 'Грешка — опитай пак';
     if (data.ok) {
+      trackEvent('email_sent', {});
       if (data.refCode) {
         var _baseUrl = CONFIG.siteUrl.split('?')[0];
         var _refUrl = _baseUrl + '?ref=' + data.refCode;
