@@ -117,6 +117,9 @@
   .feature-item:last-child { border-bottom: none; }
   .feature-check { color: var(--green); font-weight: 500; flex-shrink: 0; }
   .secure-note { font-size: 12px; color: var(--text-tertiary); text-align: center; margin-top: 12px; }
+  /* Диагонално зачеркване — не се слива с цифрите (за старата цена) */
+  .price-strike { position: relative; display: inline-block; font-size: 17px; color: var(--text-tertiary); font-weight: 500; }
+  .price-strike::after { content: ""; position: absolute; left: -3px; right: -3px; top: 52%; height: 2px; background: var(--red-text); transform: rotate(-10deg); border-radius: 2px; }
 
   /* UPSELL */
   .upsell { border: 2px solid var(--green); border-radius: var(--radius); padding: 22px; margin-top: 1.5rem; background: var(--green-light); }
@@ -174,7 +177,8 @@
   .voice-btn-wrap { margin: 0 0 12px; }
   .voice-cta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .voice-prompt { font-size: 13px; color: var(--text-secondary); }
-  .voice-btn-accent { color: var(--green); border-color: var(--green); background: var(--green-light); font-weight: 500; }
+  .voice-btn.voice-btn-accent { background: var(--green-light); color: var(--green-dark); border-color: var(--green); font-weight: 600; }
+  .voice-btn.voice-btn-accent:hover { background: #CDEEE1; color: var(--green-dark); }
   .field-help { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; margin: -2px 0 12px; }
   .voice-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 7px 16px; color: var(--text-tertiary); border: 1px solid var(--border); background: transparent; border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
   .voice-btn:hover { color: var(--green); border-color: var(--green); background: var(--green-light); }
@@ -472,7 +476,7 @@
     <div id="perplexity-results" style="display:none;margin-top:1rem;"></div>
 
     <div class="divider no-print"></div>
-    <button class="btn btn-secondary no-print" onclick="location.reload()">Нов одит →</button>
+    <button class="btn btn-secondary no-print" onclick="startOver()">Нов одит →</button>
   </div>
 
 </div>
@@ -531,6 +535,7 @@ const AREAS = [
 let current = 0;
 let answers = {};
 let paymentVerified = false;
+let sitCount = 3;
 let analysisResult = null;
 let natalEmailHTML = '';    // Съхранява натален анализ за имейл
 let perplexityEmailHTML = ''; // Съхранява техниките за имейл
@@ -603,10 +608,8 @@ function startAudit() {
 // ─── ПЛАЩАНЕ ЗА ПЪЛНИ РЕЗУЛТАТИ ──────────────────────────────────────────────
 async function payForFullResults() {
   trackEvent('buy_clicked', { value: 14.60, currency: 'EUR' });
-  try {
-    sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
-    sessionStorage.setItem('davai_answers', JSON.stringify(answers));
-  } catch(e) {}
+  // Пълният анализ се генерира СЛЕД плащане — пазим само отговорите
+  try { sessionStorage.setItem('davai_answers', JSON.stringify(answers)); } catch(e) {}
 
   try {
     const res = await fetch(CONFIG.workerUrl + '/create-checkout', {
@@ -614,13 +617,17 @@ async function payForFullResults() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         priceId: CONFIG.priceId,
-        successUrl: CONFIG.siteUrl + '?payment=success',
-        cancelUrl: CONFIG.siteUrl,
+        successUrl: (location.origin + location.pathname) + '?payment=success&session_id={CHECKOUT_SESSION_ID}',
+        cancelUrl: (location.origin + location.pathname),
         voucherCode: promoCode || undefined
       })
     });
     const data = await res.json();
-    if (data.url) { window.location.href = data.url; return; }
+    if (data.url) {
+      if (data.bypass) sessionStorage.setItem('davai_paid', '1'); // 100% код — няма session_id
+      window.location.href = data.url;
+      return;
+    }
   } catch(e) {}
 
   // Fallback ако Worker не отговори
@@ -633,26 +640,29 @@ async function checkPaymentReturn() {
   const status = params.get('payment');
 
   if (status === 'success') {
+    const sid = params.get('session_id') || null;
     window.history.replaceState({}, document.title, window.location.pathname);
-    const saved = sessionStorage.getItem('davai_analysis');
-    if (saved) {
-      // Плащане след анализ → разкрий пълните резултати
-      analysisResult = JSON.parse(saved);
-      answers = JSON.parse(sessionStorage.getItem('davai_answers') || '{}');
-      sessionStorage.removeItem('davai_analysis');
-      sessionStorage.removeItem('davai_answers');
-      paymentVerified = true;
+    try { answers = JSON.parse(sessionStorage.getItem('davai_answers') || '{}'); } catch(e) { answers = {}; }
+    const hasAnswers = answers && Object.keys(answers).length > 0;
+    const allowed = sid || sessionStorage.getItem('davai_paid') === '1';
+    if (hasAnswers && allowed) {
+      sessionStorage.setItem('davai_paid', '1');
+      if (sid) sessionStorage.setItem('davai_sid', sid);
       trackEvent('purchase', { value: 14.60, currency: 'EUR' });
-      renderResults(analysisResult);
-      fetchPrinciples();
-      trackEvent('natal_upsell_shown', {});
+      generateFullAnalysis(sid);              // Фаза 2 — генерира се сега, след плащане
     } else {
       showScreen('intro');
     }
-  } else if (status === 'cancelled') {
+    return;
+  }
+
+  if (status === 'cancelled') {
     window.history.replaceState({}, document.title, window.location.pathname);
     showScreen('intro');
-  } else if (params.get('natal') === 'success') {
+    return;
+  }
+
+  if (params.get('natal') === 'success') {
     window.history.replaceState({}, document.title, window.location.pathname);
     try {
       const savedResult = sessionStorage.getItem('davai_analysis');
@@ -672,9 +682,40 @@ async function checkPaymentReturn() {
         showScreen('intro');
       }
     } catch(e) { showScreen('intro'); }
+    return;
+  }
+
+  // Презареждане след успешно плащане → покажи вече генерирания пълен анализ
+  const savedFull = sessionStorage.getItem('davai_analysis');
+  if (savedFull) {
+    try {
+      analysisResult = JSON.parse(savedFull);
+      answers = JSON.parse(sessionStorage.getItem('davai_answers') || '{}');
+      paymentVerified = true;
+      renderResults(analysisResult);
+      return;
+    } catch(e) {}
+  }
+  // Плащането е минало, но Фаза 2 не е завършила (грешка) → повтори автоматично
+  if (sessionStorage.getItem('davai_paid') === '1') {
+    try { answers = JSON.parse(sessionStorage.getItem('davai_answers') || '{}'); } catch(e) { answers = {}; }
+    if (answers && Object.keys(answers).length > 0) {
+      generateFullAnalysis(sessionStorage.getItem('davai_sid') || null);
+    }
   }
 }
 
+
+// ─── НОВ ОДИТ (изчиства запазеното състояние) ────────────────────────────────
+function startOver() {
+  try {
+    sessionStorage.removeItem('davai_analysis');
+    sessionStorage.removeItem('davai_answers');
+    sessionStorage.removeItem('davai_paid');
+    sessionStorage.removeItem('davai_sid');
+  } catch(e) {}
+  window.location.href = window.location.pathname;
+}
 
 // ─── НАТАЛНА КАРТА — ПЛАЩАНЕ ─────────────────────────────────────────────────
 function payForNatal() {
@@ -692,12 +733,28 @@ function payForNatal() {
 }
 
 // ─── ОБЛАСТИ ─────────────────────────────────────────────────────────────────
+function sitBlockHTML(n) {
+  return '<div class="sit-block" id="sit-block-' + n + '"><div class="sit-label">Ситуация ' + n +
+    (n > 3 ? ' <span style="color:var(--text-tertiary);font-weight:400;">(по избор)</span>' : '') + '</div>' +
+    '<textarea id="sit-' + n + '" placeholder="Опиши конкретно — какво се случи, как реагира, какъв беше резултатът..."></textarea></div>';
+}
+
 function buildSituations() {
   const c = document.getElementById('situations-container');
-  c.innerHTML = [1,2,3,4,5].map(n =>
-    '<div class="sit-block"><div class="sit-label">Ситуация ' + n + '</div>' +
-    '<textarea id="sit-' + n + '" placeholder="Опиши конкретно — какво се случи, как реагира, какъв беше резултатът..."></textarea></div>'
-  ).join('');
+  sitCount = 3;
+  c.innerHTML = [1,2,3].map(sitBlockHTML).join('') +
+    '<button type="button" class="btn btn-secondary" id="add-situation-btn" onclick="addSituation()" style="margin:4px 0 12px;">+ Добави още ситуация</button>' +
+    '<div class="field-help">💡 Добави поне 3 ситуации — колкото повече споделиш, толкова по-точен е анализът.</div>';
+  setTimeout(initVoiceInputs, 50);
+}
+
+function addSituation() {
+  if (sitCount >= 5) return;
+  sitCount++;
+  const btn = document.getElementById('add-situation-btn');
+  btn.insertAdjacentHTML('beforebegin', sitBlockHTML(sitCount));
+  if (sitCount >= 5) btn.style.display = 'none';
+  setTimeout(initVoiceInputs, 50);
 }
 
 function renderArea() {
@@ -744,9 +801,11 @@ function prevArea() { saveCurrentArea(); if (current > 0) { current--; renderAre
 function goToLastArea() { current = AREAS.length - 1; showScreen('areas'); renderArea(); }
 
 function nextToLessons() {
-  const filled = [1,2,3,4,5].filter(n => (document.getElementById('sit-' + n).value.trim().length > 10));
+  const sits = [];
+  for (let n = 1; n <= 5; n++) { const el = document.getElementById('sit-' + n); if (el) sits.push(el.value.trim()); }
+  const filled = sits.filter(s => s.length > 10);
   if (filled.length < 3) { alert('Моля, опиши поне три ситуации.'); return; }
-  answers.situations = [1,2,3,4,5].map(n => document.getElementById('sit-' + n).value.trim());
+  answers.situations = sits;
   showScreen('lessons');
 }
 
@@ -765,17 +824,8 @@ function animateLoadingSteps() {
   return interval;
 }
 
-// ─── AI АНАЛИЗ (две заявки — избягва Cloudflare timeout) ────────────────────
-async function generateAnalysis() {
-  const reg = document.getElementById('regrets').value.trim();
-  const pr = document.getElementById('proud').value.trim();
-  const ls = document.getElementById('lessons-text').value.trim();
-  if (reg.length < 10 || pr.length < 10 || ls.length < 10) { alert('Моля, попълни и трите полета.'); return; }
-  answers.regrets = reg; answers.proud = pr; answers.lessons = ls;
-  trackEvent('quiz_completed', {});
-  showScreen('loading');
-  const loadingTimer = animateLoadingSteps();
-
+// ─── ОБОБЩЕНИЯ ЗА ПРОМПТА (общи за двете фази) ───────────────────────────────
+function buildSummaries() {
   const aSum = AREAS.map(a => a.name + ' [' + (answers[a.key]?.rating || '?') + '/10]: ' + (answers[a.key]?.desc || '')).join('\n\n');
   const sSum = (answers.situations || []).filter(s => s.length > 5).map((s, i) => 'Ситуация ' + (i+1) + ': ' + s).join('\n\n');
   const m = answers.meaning || {};
@@ -785,39 +835,90 @@ async function generateAnalysis() {
     'Кога се чувства най-жив: ' + (m.q3 || []).join(' и '),
     'Жизнен етап (самоописание): ' + (m.q4 || '')
   ].filter(function(l) { return !l.endsWith(': '); }).join('\n');
+  return { aSum, sSum, mSum };
+}
+
+// ─── ФАЗА 1: БЕЗПЛАТНО PREVIEW (една малка бърза заявка) ──────────────────────
+async function generateAnalysis() {
+  const reg = document.getElementById('regrets').value.trim();
+  const pr = document.getElementById('proud').value.trim();
+  const ls = document.getElementById('lessons-text').value.trim();
+  if (reg.length < 10 || pr.length < 10 || ls.length < 10) { alert('Моля, попълни и трите полета.'); return; }
+  answers.regrets = reg; answers.proud = pr; answers.lessons = ls;
+  trackEvent('quiz_completed', {});
+  // Запази отговорите — нужни за Фаза 2 след връщане от плащане
+  try { sessionStorage.setItem('davai_answers', JSON.stringify(answers)); } catch(e) {}
+
+  showScreen('loading');
+  const loadingTimer = animateLoadingSteps();
+  const { aSum, sSum, mSum } = buildSummaries();
 
   try {
-    // Заявка 1: Психологически профил, модели, слепи зони (~3500 токена, ~35 сек)
-    const res1 = await fetch(CONFIG.workerUrl + '/analyze', {
+    const res = await fetch(CONFIG.workerUrl + '/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: buildPromptCore(aSum, sSum, mSum), max_tokens: 4500 })
+      body: JSON.stringify({ prompt: buildPromptFree(aSum, sSum, mSum), max_tokens: 1800 })
     });
-    const data1 = await res1.json();
-    if (data1.error) throw new Error(data1.error);
-    const core = repairAndParseJSON(data1.content);
-    if (!core) throw new Error('Неуспешен анализ — опитай отново.');
-
-    // Заявка 2: Области, рутини, въпроси (~2500 токена, ~25 сек)
-    const res2 = await fetch(CONFIG.workerUrl + '/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: buildPromptAreas(aSum, sSum), max_tokens: 3500 })
-    });
-    const data2 = await res2.json();
-    if (!data2.error) {
-      const areas = repairAndParseJSON(data2.content);
-      if (areas) Object.assign(core, areas);
-    }
-
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const free = repairAndParseJSON(data.content);
+    if (!free) throw new Error('Неуспешен анализ — опитай отново.');
     clearInterval(loadingTimer);
-    analysisResult = core;
-    renderPreview(core);
+    analysisResult = free;
+    renderPreview(free);
   } catch(e) {
     clearInterval(loadingTimer);
     showScreen('results');
     document.getElementById('results-content').innerHTML =
       '<div class="card"><div class="card-title">Грешка</div><div class="card-text">Нещо се обърка: ' + e.message + '</div></div>';
+  }
+}
+
+// Вика верифицирания /analyze-paid при плащане; ако Worker-ът още няма endpoint-а (404) —
+// временно пада към /analyze (същата сигурност като досега, до Worker deploy-а).
+async function callAnalyzePaid(body, sid) {
+  if (sid) {
+    const b = Object.assign({}, body, { session_id: sid });
+    const r = await fetch(CONFIG.workerUrl + '/analyze-paid', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
+    if (r.status !== 404) return r.json();   // 200 или 402 → връщаме (не заобикаляме верификацията)
+    // 404 = стар Worker без /analyze-paid → временен fallback
+  }
+  const r2 = await fetch(CONFIG.workerUrl + '/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  return r2.json();
+}
+
+// ─── ФАЗА 2: ПЪЛЕН АНАЛИЗ (само след плащане — двете заявки паралелно) ────────
+async function generateFullAnalysis(sid) {
+  showScreen('loading');
+  const loadingTimer = animateLoadingSteps();
+  const { aSum, sSum, mSum } = buildSummaries();
+  const body1 = { prompt: buildPromptCore(aSum, sSum, mSum), max_tokens: 5000 };
+  const body2 = { prompt: buildPromptAreas(aSum, sSum), max_tokens: 3500 };
+
+  try {
+    const [data1, data2] = await Promise.all([
+      callAnalyzePaid(body1, sid),
+      callAnalyzePaid(body2, sid)
+    ]);
+    if (data1.error) throw new Error(data1.error);
+    const core = repairAndParseJSON(data1.content);
+    if (!core) throw new Error('Неуспешен анализ — опитай отново.');
+    if (!data2.error) {
+      const areas = repairAndParseJSON(data2.content);
+      if (areas) Object.assign(core, areas);
+    }
+    clearInterval(loadingTimer);
+    analysisResult = core;
+    paymentVerified = true;
+    try { sessionStorage.setItem('davai_analysis', JSON.stringify(core)); } catch(e) {}
+    renderResults(core);
+    fetchPrinciples();
+    trackEvent('natal_upsell_shown', {});
+  } catch(e) {
+    clearInterval(loadingTimer);
+    showScreen('results');
+    document.getElementById('results-content').innerHTML =
+      '<div class="card"><div class="card-title">Грешка</div><div class="card-text">Плащането мина успешно, но генерирането се прекъсна: ' + e.message + '. Презареди страницата, за да продължи автоматично.</div></div>';
   }
 }
 
@@ -846,6 +947,40 @@ function repairAndParseJSON(txt) {
 }
 
 // ─── ПРОМПТ 1: ПСИХОЛОГИЧЕСКИ ПРОФИЛ, МОДЕЛИ, СЛЕПИ ЗОНИ ────────────────────
+// ─── ПРОМПТ (Фаза 1): само безплатното preview — кратко и бързо ───────────────
+function buildPromptFree(aSum, sSum, mSum) {
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  return `Днешна дата: ${today}.
+
+Ти си личен одитор — говориш ДИРЕКТНО към човека (второ лице: "Ти...", "Плащаш..."). Никога трето лице. Чист, естествен БЪЛГАРСКИ, без жаргон — топло и директно, като близък човек, който те познава.
+
+ДАННИ:
+${aSum}
+
+СИТУАЦИИ: ${sSum}
+
+СЪЖАЛЕНИЯ: ${answers.regrets}
+ГОРДОСТ: ${answers.proud}
+УРОЦИ: ${answers.lessons}
+
+СМИСЪЛ (четири избора): ${mSum}
+
+Генерирай КРАТКО безплатно preview. ВЪРНИ САМО ВАЛИДЕН JSON:
+{
+  "free_preview": {
+    "score_synthesis": "Едно изречение, което улавя общата картина от всичките 7 оценки. Не изброявай областите — улови усещането зад тях. Тон: 'Животът ти е добър — но има цена, която плащаш за това.'",
+    "score_overview": "2-3 изречения. Премини естествено през областите — кои теглят нагоре, кои надолу, и какво разказва картината. Ако някъде оценката е ниска, но описанието показва повече ресурс — отбележи го. Наблюдение, не оценка.",
+    "score_underestimation": "1-2 изречения. Посочи конкретна област, в която оценката е по-ниска от това, което описанието показва. Обясни защо — свикване, перфекционизъм, приемане за нормално. Да предизвика разпознаване.",
+    "score_breakthrough": "1 изречение. Назови конкретна област по име. Мотивиращо: 'Малка промяна в [област] има непропорционален ефект.'",
+    "main_pattern_quote": "Точно три изречения (ще се покажат в курсив). 1) назови модела с конкретна ситуация от отговорите; 2) автоматичната реакция и непосредствената цена; 3) отвори въпрос към нещо по-дълбоко, което е само в пълния анализ."
+  },
+  "central_diagnosis": { "price_statement": "В момента плащаш цената на [конкретното — контрол/страх/саможертва/...]. Директно твърдение какво коства, НЕ защо." },
+  "blind_spot_teaser": "Едно завършено изречение — самостоятелна мисъл за основната слепа зона. Не отрязано наполовина.",
+  "pattern_count": 5
+}
+КРИТИЧНО: Второ лице. Чист български. JSON завършен. Кратко. pattern_count = цяло число 3-6 (колко повтарящи се модела виждаш).`;
+}
+
 function buildPromptCore(aSum, sSum, mSum) {
   const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
   return `Днешна дата: ${today}.
@@ -1253,6 +1388,120 @@ function renderAnalysis(d, isPaid) {
   return html;
 }
 
+// ─── БЕЗПЛАТНО PREVIEW (нова freemium структура — 7 елемента) ─────────────────
+function renderFreePreview(d) {
+  const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
+  const fp = d.free_preview || {};
+  let html = '';
+
+  // ЕЛЕМЕНТ 1 — Средна оценка + 4 елемента
+  html += '<div class="card">';
+  html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:16px;">';
+  html += '<div class="avg-score">' + avg + '</div><div class="avg-label">/10 средна оценка</div></div>';
+  if (fp.score_synthesis) html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.2rem;line-height:1.5;color:var(--text);margin-bottom:14px;">' + fp.score_synthesis + '</div>';
+  if (fp.score_overview) html += '<div class="card-text" style="margin-bottom:14px;">' + fp.score_overview + '</div>';
+  if (fp.score_underestimation) html += '<div style="background:var(--green-light);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--green-dark);line-height:1.6;">' + fp.score_underestimation + '</div>';
+  if (fp.score_breakthrough) html += '<div class="card-text" style="font-weight:500;color:var(--text);">' + fp.score_breakthrough + '</div>';
+  html += '</div>';
+
+  // ЕЛЕМЕНТ 2 — Централна диагноза + фиксирано изречение
+  var cd = d.central_diagnosis;
+  if (cd && cd.price_statement) {
+    html += '<div class="card" style="border-left:3px solid var(--purple-text);">';
+    html += '<div class="card-text" style="font-size:15px;color:var(--text);line-height:1.7;">' + cd.price_statement + '</div>';
+    html += '<div style="font-style:italic;color:var(--text-secondary);font-size:14px;margin-top:10px;line-height:1.6;">Но откъде идва това — и защо се е превърнало в единствения ти отговор?</div>';
+    html += '</div>';
+  }
+
+  // ЕЛЕМЕНТ 3 — Основният модел (цитат, 3 изречения)
+  var quote = fp.main_pattern_quote || d.top_pattern;
+  if (quote) {
+    html += '<div class="card" style="border-left:3px solid var(--green);">';
+    html += '<div class="card-title">Основният модел</div>';
+    html += '<div class="card-text" style="font-style:italic;font-size:15px;line-height:1.75;">„' + quote + '"</div>';
+    html += '</div>';
+  }
+
+  // ЕЛЕМЕНТ 4 — Сляпа зона (тийзър) + заключващ блок
+  var teaser = d.blind_spot_teaser || (d.blind_spots && d.blind_spots[0] && d.blind_spots[0].insight);
+  if (teaser) {
+    html += '<div class="card">';
+    html += '<div class="card-title">Твоята най-голяма сляпа зона</div>';
+    html += '<div class="card-text" style="font-size:15px;line-height:1.75;margin-bottom:14px;">' + teaser + '</div>';
+    html += '<div style="text-align:center;font-size:26px;opacity:0.85;">🔒</div>';
+    html += '</div>';
+  }
+
+  // ЕЛЕМЕНТ 5 — Какво открихме още за теб (6 реда)
+  var nPatterns = (d.patterns && d.patterns.length) || d.pattern_count || 5;
+  var discoveries = [
+    'Открихме ' + nPatterns + ' повтарящи се поведенчески модела, които управляват решенията ти',
+    'Изградихме психологически профил през 4 различни лещи',
+    'Разкрихме слепите ти зони в отношенията, парите и ежедневните решения',
+    'Създадохме персонални сутрешни и вечерни рутини, базирани на твоя профил',
+    'Извлякохме личния ти кодекс от отговорите ти',
+    'Анализирахме какво всъщност дава смисъл на решенията ти'
+  ];
+  html += '<div class="card">';
+  html += '<div class="card-title" style="margin-bottom:14px;">Какво открихме още за теб</div>';
+  discoveries.forEach(function(line) {
+    html += '<div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;font-size:14px;color:var(--text-secondary);line-height:1.55;">';
+    html += '<span style="color:var(--green);font-weight:600;flex-shrink:0;">✓</span><span>' + line + '</span></div>';
+  });
+  html += '</div>';
+
+  // ЕЛЕМЕНТ 6 — Затварящ текст (фиксиран)
+  html += '<div style="text-align:center;font-size:15px;line-height:1.85;color:var(--text-secondary);margin:26px 8px;">';
+  html += 'Това, което видя дотук, е само началото.<br>Вече знаеш как изглежда животът ти днес.<br>Сега е време да разбереш защо е така и какво можеш да промениш.';
+  html += '</div>';
+
+  // ЕЛЕМЕНТ 7 — CTA + бутон
+  html += renderFreeCTA();
+  return html;
+}
+
+function renderFreeCTA() {
+  var html = '<div class="card" style="border:2px solid var(--green);">';
+  html += '<div class="card-text" style="font-size:15px;line-height:1.8;color:var(--text);">';
+  html += 'Ти вече направи най-трудната част — беше честен със себе си.<br><br>';
+  html += 'В пълния анализ чрез „Метода на трите огледала" ще откриеш:<br>';
+  html += '<strong>Къде си</strong>, <strong>Какво те държи там</strong>, и <strong>Каква е следващата ти стъпка</strong>.<br><br>';
+  html += 'Нека твоите отговори ти покажат това, което е трудно да видиш сам.';
+  html += '</div>';
+
+  html += '<div style="margin:18px 0;">';
+  html += '<div class="field-label" style="margin-bottom:10px;">В своя персонален анализ ще откриеш:</div>';
+  [
+    'Кой модел най-много управлява живота ти',
+    'Коя е най-голямата цена, която плащаш всеки ден',
+    'Какво те спира, без да го осъзнаваш',
+    'Защо попадаш в едни и същи ситуации',
+    'Какви конкретни стъпки можеш да предприемеш',
+    'Психологически профил',
+    'Скрити поведенчески модели',
+    'Слепи зони, които трудно виждаш сам',
+    'Практични стъпки за промяна',
+    'Личен кодекс за следващия етап'
+  ].forEach(function(item) {
+    html += '<div style="display:flex;gap:10px;padding:5px 0;font-size:14px;color:var(--text-secondary);"><span style="color:var(--green);flex-shrink:0;">✓</span><span>' + item + '</span></div>';
+  });
+  html += '</div>';
+
+  // Цена
+  html += '<div style="text-align:center;background:var(--bg);border-radius:12px;padding:20px;margin-bottom:16px;">';
+  html += '<div style="font-size:13px;color:var(--text-tertiary);margin-bottom:2px;">Реална стойност на твоя персонален анализ:</div>';
+  html += '<div style="margin-bottom:12px;"><span class="price-strike">49,00 €</span></div>';
+  html += '<div style="font-size:13px;color:var(--text-tertiary);margin-bottom:2px;">Твоята инвестиция днес:</div>';
+  html += '<div style="font-family:\'Playfair Display\',serif;font-size:2.8rem;font-weight:600;color:var(--green);line-height:1;">14,60 €</div>';
+  html += '<div style="font-size:12px;color:var(--text-tertiary);margin-top:8px;">Еднократно плащане</div>';
+  html += '</div>';
+
+  html += '<button class="btn btn-primary" onclick="payForFullResults()" style="width:100%;justify-content:center;padding:16px;">Отключи моя анализ</button>';
+  html += '<div class="secure-note" style="margin-top:10px;">🔒 Обработено от Stripe · Криптирано и сигурно</div>';
+  html += '</div>';
+  return html;
+}
+
 // ─── PREVIEW (преди плащане) ──────────────────────────────────────────────────
 function renderPreview(d) {
   showScreen('results');
@@ -1260,7 +1509,7 @@ function renderPreview(d) {
   if (saveCard) saveCard.style.display = 'none';
   document.getElementById('natal-upsell').style.display = 'none';
   document.getElementById('perplexity-upsell').style.display = 'none';
-  document.getElementById('results-content').innerHTML = renderAnalysis(d, false);
+  document.getElementById('results-content').innerHTML = renderFreePreview(d);
   trackEvent('free_result_shown', {});
   trackEvent('offer_shown', {});
 }
@@ -2234,7 +2483,7 @@ function stopVoice() {
     var wrap = document.getElementById('voice-wrap-' + voiceTargetId);
     var savedId = voiceTargetId, savedDur = voiceOrigDur;
     voiceTargetId = null;
-    if (wrap) wrap.innerHTML = '<button class="voice-btn" onclick="startVoice(\'' + savedId + '\',' + savedDur + ')">🎙 Говори</button>';
+    if (wrap) wrap.innerHTML = '<button class="voice-btn voice-btn-accent" onclick="startVoice(\'' + savedId + '\',' + savedDur + ')">🎙 Говори</button>';
   }
 }
 
