@@ -854,16 +854,16 @@ async function generateAnalysis() {
   const loadingTimer = animateLoadingSteps();
   const { aSum, sSum, mSum } = buildSummaries();
 
+  const freeBody = JSON.stringify({ prompt: buildPromptFree(aSum, sSum, mSum), max_tokens: 2200 });
   try {
-    const res = await fetch(CONFIG.workerUrl + '/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: buildPromptFree(aSum, sSum, mSum), max_tokens: 1800 })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    const free = repairAndParseJSON(data.content);
-    if (!free) throw new Error('Неуспешен анализ — опитай отново.');
+    let free = null, lastErr = '';
+    for (let attempt = 0; attempt < 2 && !free; attempt++) {
+      const res = await fetch(CONFIG.workerUrl + '/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: freeBody });
+      const data = await res.json();
+      if (data.error) { lastErr = data.error; continue; }
+      free = repairAndParseJSON(data.content);
+    }
+    if (!free) throw new Error(lastErr || 'Неуспешен анализ — опитай отново.');
     clearInterval(loadingTimer);
     analysisResult = free;
     renderPreview(free);
@@ -893,8 +893,8 @@ async function generateFullAnalysis(sid) {
   showScreen('loading');
   const loadingTimer = animateLoadingSteps();
   const { aSum, sSum, mSum } = buildSummaries();
-  const body1 = { prompt: buildPromptCore(aSum, sSum, mSum), max_tokens: 5000 };
-  const body2 = { prompt: buildPromptAreas(aSum, sSum), max_tokens: 3500 };
+  const body1 = { prompt: buildPromptCore(aSum, sSum, mSum), max_tokens: 6500 };
+  const body2 = { prompt: buildPromptAreas(aSum, sSum), max_tokens: 4000 };
 
   try {
     const [data1, data2] = await Promise.all([
@@ -902,7 +902,12 @@ async function generateFullAnalysis(sid) {
       callAnalyzePaid(body2, sid)
     ]);
     if (data1.error) throw new Error(data1.error);
-    const core = repairAndParseJSON(data1.content);
+    let core = repairAndParseJSON(data1.content);
+    if (!core) {
+      // Повторен опит за основната заявка (AI понякога връща отрязан/невалиден JSON)
+      const retry = await callAnalyzePaid(body1, sid);
+      if (!retry.error) core = repairAndParseJSON(retry.content);
+    }
     if (!core) throw new Error('Неуспешен анализ — опитай отново.');
     if (!data2.error) {
       const areas = repairAndParseJSON(data2.content);
