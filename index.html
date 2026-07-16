@@ -390,7 +390,7 @@
     <div id="meaning-error" style="display:none;font-size:13px;color:var(--red-text);background:var(--red-light);padding:10px 14px;border-radius:10px;margin-bottom:14px;"></div>
     <div>
       <button class="btn btn-secondary" onclick="showScreen('lessons')">Назад</button>
-      <button class="btn btn-primary" onclick="validateAndGenerateAnalysis()">Виж пълния анализ →</button>
+      <button class="btn btn-primary" onclick="validateAndGenerateAnalysis()">Покажи анализа ми →</button>
     </div>
   </div>
 
@@ -1033,11 +1033,31 @@ ${mSum}
 3. ОТКЪДЕ ДАВА: От страх/дълг/изтощение/пълнота — каква цена плаща.
 4. ОСНОВНО УБЕЖДЕНИЕ: Прекален контрол, Самосаботаж, Чувство на измама, Бягство от конфликти, Нужда от одобрение, Отлагане, Черно-бяло мислене.
 
+ОГЛЕДАЛО №1 — "Навици — Как живееш днес"
+
+Този раздел е част от ПЛАТЕНИЯ анализ. Човекът вече е платил и очаква яснота, дълбочина и конкретика — не загатвания. Този раздел трябва да НАДГРАЖДА безплатния preview, не да го повтаря: където безплатната част е назовавала модел или цена, тук ги обясняваш докрай, с примери от отговорите на човека.
+
+ФИЛОСОФИЯ (присъства навсякъде, без да е лозунг):
+Всичко има цена. Въпросът не е дали я плащаш, а дали плащаш правилната. Показвай тази идея чрез конкретните изводи — каква цена е платена за силните страни, каква цена се плаща днес, къде цената вече е станала твърде висока, кои избори носят краткосрочно облекчение, но дългосрочна загуба. НЕ повтаряй едни и същи фрази за "цената".
+
+СТИЛ:
+Пиши като човек, който е наблюдавал живота на читателя — не като психолог, коуч или учител. Тон: честен, човешки, директен, спокоен, уважителен. Всеки извод произтича от данните във въпросника. Не измисляй, не драматизирай, не използвай мотивационни клишета, празни похвали или психологически жаргон.
+
+СЕКЦИЯ 1 (поле "summary") — ОБОБЩЕНИЕ:
+Първото изречение въвежда философията на цената. Пример за тон (не копирай дословно, адаптирай към човека): "Животът ти изглежда стабилен. Но стабилността има цена — и отговорите ти показват точно каква е тя." След това разкажи историята зад оценките — НЕ изброявай числа: кои области са най-силни, защо са силни, каква цена е платена за тях; кои области страдат, защо страдат, как влияят върху останалите; назови ЯСНО най-важната област (без загатване) и обясни защо тя оказва най-голямо влияние върху останалите. Подкрепи всеки извод с конкретни примери от отговорите на човека.
+
+СЕКЦИЯ 2 (поле "what_works") — КАКВО ВЕЧЕ РАБОТИ ДОБРЕ:
+Целта не е похвала, а човекът да разбере на какво може да стъпи. Опиши конкретните му силни страни (само тези, които реално се виждат в отговорите — напр. постоянство, дисциплина, отговорност, устойчивост, способност да учи или да изгражда отношения). Свържи ги с философията на цената. Пример за тон: "Това не са качества, които си получил случайно. За всяко от тях вече си платил правилната цена." Без мотивационен език, без преувеличение.
+
+СЕКЦИЯ 3 (поле "top_pattern") — ОСНОВНИЯТ МОДЕЛ:
+Тук давай пълна яснота — назови модела, не загатвай. Обясни: как се проявява; в кои области се вижда; как му е помогнал досега; каква цена започва да носи днес. Свържи с конкретни примери от въпросника. Пиши така, че човекът да каже "Да, точно така функционирам." Завърши секцията с естествен мост към следващото огледало, напр.: "Вече виждаш как този модел влияе на живота ти. Следващото огледало ще покаже откъде идва и защо продължава да управлява решенията ти."
+
 ВЪРНИ САМО ВАЛИДЕН JSON:
 {
-  "summary": "4 изречения директно: кой си, основната тема, каква цена плащаш, от каква позиция даваш.",
+  "summary": "Секция 1 — Обобщение. Виж пълната инструкция по-горе. 3-5 изречения.",
+  "what_works": "Секция 2 — Какво вече работи добре. Виж пълната инструкция по-горе. 2-3 изречения.",
   "summary_actions": ["Действие 1 с дата след ${today}", "Действие 2", "Действие 3"],
-  "top_pattern": "1 изречение — най-силният модел директно към него",
+  "top_pattern": "Секция 3 — Основният модел. Виж пълната инструкция по-горе. 3-5 изречения, завършва с мост към следващото огледало.",
   "psychological_profile": {
     "attachment_style": "1-2 изречения с пример от отговорите. Без термини.",
     "locus_of_control": "1-2 изречения с конкретен пример.",
@@ -1158,12 +1178,24 @@ function renderAnalysis(d, isPaid) {
     html += '</div>';
   }
 
+  // Какво вече работи добре (само в платения анализ)
+  if (isPaid && d.what_works) {
+    html += '<div class="card">';
+    html += '<div class="card-title">Какво вече работи добре</div>';
+    html += '<div class="card-text">' + d.what_works + '</div>';
+    html += '</div>';
+  }
+
   // FREE: Основен модел
   if (d.top_pattern) {
     html += '<div class="card" style="border-left:3px solid var(--green);">';
     html += '<div class="card-title">Основният модел</div>';
     html += '<div class="card-text" style="font-style:italic;font-size:15px;">"' + d.top_pattern + '"</div>';
     html += '</div>';
+    // Преход към Огледало №2 (фиксиран текст, само в платения анализ)
+    if (isPaid) {
+      html += '<div class="card-text" style="font-style:italic;color:var(--text-secondary);margin:-4px 0 14px;">Дотук разгледахме живота ти такъв, какъвто е днес. В следващото огледало ще разбереш защо именно тези модели продължават да се повтарят.</div>';
+    }
   }
 
   // Области: платена → интегриран изглед (оценка + прозрение + действия); безплатна → оценка + blurred preview
@@ -1234,6 +1266,11 @@ function renderAnalysis(d, isPaid) {
     }
   }
 
+  // Финал на Огледало №1 (фиксиран текст, само в платения анализ)
+  if (isPaid) {
+    html += '<div class="card-text" style="text-align:center;font-style:italic;color:var(--text-secondary);margin:18px 4px 4px;">Не можеш да промениш цената, която плащаш, докато не я видиш ясно.</div>';
+  }
+
   // ═══════════════════════════════════════════════════════════════
   // ОГЛЕДАЛО №2 — БЛОКАЖИ
   // ═══════════════════════════════════════════════════════════════
@@ -1275,7 +1312,7 @@ function renderAnalysis(d, isPaid) {
       html += '</div>';
     }
     if (d.blind_spots && d.blind_spots.length) {
-      html += '<div class="card"><div class="card-title">Където се лъжеш</div>';
+      html += '<div class="card"><div class="card-title">Къде се лъжеш</div>';
       d.blind_spots.forEach(function(b) {
         html += '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">' + b.area + '</div>';
         html += '<div class="card-text">' + b.insight + '</div></div>';
@@ -1611,7 +1648,7 @@ function renderResults_UNUSED_v3_START(d) {
   }
 
   if (d.blind_spots?.length) {
-    html += '<div class="card"><div class="card-title">Където се лъжеш</div>';
+    html += '<div class="card"><div class="card-title">Къде се лъжеш</div>';
     d.blind_spots.forEach(b => {
       html += '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">' + b.area + '</div>';
       html += '<div class="card-text">' + b.insight + '</div></div>';
@@ -1815,7 +1852,7 @@ function renderMeaningAnalysis(ma) {
   }
   if (ma.life_stage_reflection) {
     h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
-    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Където се намираш сега</div>';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Къде се намираш сега</div>';
     h += '<div class="card-text">' + ma.life_stage_reflection + '</div></div>';
   }
   h += '<div style="border-left:3px solid var(--gold);padding:14px 16px;margin-bottom:16px;background:rgba(176,141,87,0.05);border-radius:0 10px 10px 0;">';
@@ -2266,6 +2303,7 @@ async function sendEmail() {
       // ── ОГЛЕДАЛО №1 — НАВИЦИ ──
       emailHtml += emailMirror('ОГЛЕДАЛО №1', '#1D9E75', 'Навици — Как живееш днес');
       if (d.summary) emailHtml += h2('Обобщение') + p(d.summary);
+      if (d.what_works) emailHtml += h2('Какво вече работи добре') + p(d.what_works);
       if (d.top_pattern) emailHtml += h2('Основен модел') + '<p style="color:#555;line-height:1.7;font-style:italic;font-size:14px;">"' + d.top_pattern + '"</p>';
       if (d.summary_actions && d.summary_actions.length) emailHtml += h2('Три стъпки') + '<ol style="color:#555;padding-left:20px;line-height:1.7;">' + d.summary_actions.map(function(a) { return '<li style="margin-bottom:6px;">' + a + '</li>'; }).join('') + '</ol>';
       if (d.areas && d.areas.length) {
