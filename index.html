@@ -893,7 +893,7 @@ async function generateFullAnalysis(sid) {
   showScreen('loading');
   const loadingTimer = animateLoadingSteps();
   const { aSum, sSum, mSum } = buildSummaries();
-  const body1 = { prompt: buildPromptCore(aSum, sSum, mSum), max_tokens: 6500 };
+  const body1 = { prompt: buildPromptCore(aSum, sSum, mSum), max_tokens: 8000 };
   const body2 = { prompt: buildPromptAreas(aSum, sSum), max_tokens: 4000 };
 
   try {
@@ -1052,12 +1052,33 @@ ${mSum}
 СЕКЦИЯ 3 (поле "top_pattern") — ОСНОВНИЯТ МОДЕЛ:
 Тук давай пълна яснота — назови модела, не загатвай. Обясни: как се проявява; в кои области се вижда; как му е помогнал досега; каква цена започва да носи днес. Свържи с конкретни примери от въпросника. Пиши така, че човекът да каже "Да, точно така функционирам." Завърши секцията с естествен мост към следващото огледало, напр.: "Вече виждаш как този модел влияе на живота ти. Следващото огледало ще покаже откъде идва и защо продължава да управлява решенията ти."
 
+ОГЛЕДАЛО №3 — "Уроци — Какво животът се опитва да ти покаже" (поле "lessons_deep")
+
+Стил и философия: същите като в останалите огледала. Чист, граматически правилен български. Тон: честен, човешки, директен, спокоен, уважителен — не психолог, не коуч. Всеки извод произтича от конкретните отговори на човека. Без клишета, без изкуствен драматизъм, без повторение на едни и същи фрази.
+
+УВОД (поле "intro"): Отвори с кратка философска рамка (2-3 изречения), която въвежда идеята, че животът повтаря един и същ урок, докато не бъде научен. Пример за тон: "Животът рядко ни наказва. По-често ни повтаря един и същ урок, докато не го научим." След това свържи идеята конкретно с отговорите на човека — без клише, с конкретика от неговия въпросник.
+
+УРОК №1 (поле "lesson_1"): Конкретен урок, извлечен директно от отговорите на човека (ситуации, съжаления, гордост, уроци). Включи три елемента: как се проявява (конкретна ситуация от отговорите), каква цена плаща заради него, какво би се променило, ако го научи.
+
+УРОК №2 (поле "lesson_2"): Следващият повтарящ се урок, различен от Урок №1. Същата структура: ситуация, цена, възможност. Не повтаряй фрази от Урок №1.
+
+УРОК №3 — НАЙ-ДЪЛБОКИЯТ УРОК (поле "lesson_3"): Свързан обикновено с идентичността, страха, доверието, приемането, свободата или отговорността на човека — избери темата, която реално произтича от неговите отговори, не произволно. Този урок трябва да е най-личният и най-проникновен от трите. Същата структура: ситуация, цена, възможност.
+
+ОБЩИЯТ УРОК (поле "closing"): Едно изречение, което обобщава връзката между трите урока — затваря секцията, мост към Смисъл. Пример за тон: "Животът не те спира. Опитва се да те научи на нещо, което вече не можеш да заобиколиш." или: "Докато плащаш една и съща цена по един и същ начин, ще получаваш сходни резултати, дори ситуациите да изглеждат различни."
+
 ВЪРНИ САМО ВАЛИДЕН JSON:
 {
   "summary": "Секция 1 — Обобщение. Виж пълната инструкция по-горе. 3-5 изречения.",
   "what_works": "Секция 2 — Какво вече работи добре. Виж пълната инструкция по-горе. 2-3 изречения.",
   "summary_actions": ["Действие 1 с дата след ${today}", "Действие 2", "Действие 3"],
   "top_pattern": "Секция 3 — Основният модел. Виж пълната инструкция по-горе. 3-5 изречения, завършва с мост към следващото огледало.",
+  "lessons_deep": {
+    "intro": "Уводът на Огледало №3. Виж инструкцията по-горе. 3-4 изречения.",
+    "lesson_1": { "situation": "1-2 изречения — конкретна ситуация.", "cost": "1 изречение — цената.", "opportunity": "1 изречение — какво би се променило." },
+    "lesson_2": { "situation": "1-2 изречения — различна ситуация от Урок 1.", "cost": "1 изречение.", "opportunity": "1 изречение." },
+    "lesson_3": { "situation": "1-2 изречения — най-дълбокият, най-личен урок.", "cost": "1 изречение.", "opportunity": "1 изречение." },
+    "closing": "Общият урок — 1 изречение, мост към Смисъл."
+  },
   "psychological_profile": {
     "attachment_style": "1-2 изречения с пример от отговорите. Без термини.",
     "locus_of_control": "1-2 изречения с конкретен пример.",
@@ -1390,6 +1411,22 @@ function renderAnalysis(d, isPaid) {
     'Всяка трудност носи урок. Това огледало показва кои уроци вече си научил, кои избягваш, и къде животът те кани да пораснеш.');
 
   if (isPaid) {
+    if (d.lessons_deep) {
+      const ld = d.lessons_deep;
+      html += '<div class="card" style="border:2px solid var(--amber);background:linear-gradient(135deg,#fffbf2,#fff);">';
+      if (ld.intro) html += '<div class="card-text" style="margin-bottom:18px;">' + ld.intro + '</div>';
+      [ld.lesson_1, ld.lesson_2, ld.lesson_3].forEach(function(l, i) {
+        if (!l) return;
+        html += '<div style="' + (i > 0 ? 'border-top:1px solid var(--border);padding-top:16px;margin-top:16px;' : '') + '">';
+        html += '<div class="card-title" style="margin-bottom:8px;">Урок №' + (i + 1) + (i === 2 ? ' — най-дълбокият' : '') + '</div>';
+        if (l.situation) html += '<div class="card-text" style="margin-bottom:8px;">' + l.situation + '</div>';
+        if (l.cost) html += '<div style="font-size:13px;color:var(--red-text);margin-bottom:6px;"><strong>Цената:</strong> ' + l.cost + '</div>';
+        if (l.opportunity) html += '<div style="font-size:13px;color:var(--green-dark);">' + l.opportunity + '</div>';
+        html += '</div>';
+      });
+      if (ld.closing) html += '<div class="card-text" style="font-style:italic;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">' + ld.closing + '</div>';
+      html += '</div>';
+    }
     if (d.morning_routines || d.evening_routines) {
       html += '<div class="card"><div class="card-title">Твоите персонални рутини</div>';
       html += '<div class="routine-grid">';
@@ -1771,48 +1808,72 @@ async function fetchPrinciples() {
   if (shareBlock) shareBlock.parentNode.insertBefore(placeholder, shareBlock);
 
   const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
-  const prompt = 'Днешна дата: ' + today + '.\n\nТи си психолог и лайф коуч. Имаш следните лични данни на човек:\n\nСЪЖАЛЕНИЯ: ' + answers.regrets + '\n\nГОРДОСТ: ' + answers.proud + '\n\nУРОЦИ ПО ТРУДНИЯ НАЧИН: ' + answers.lessons + '\n\nИзвлечи 5-7 лични принципа, САМО от неговите собствени думи — не общи принципи от книги. Търси убежденията, които той вече е открил чрез опит, но никога не е формулирал официално. Всеки принцип трябва да звучи като негов — с неговия глас, свързан с реален момент.\n\nВърни САМО валиден JSON на БЪЛГАРСКИ:\n{"principles":[{"number":1,"title":"Кратко заглавие (3-5 думи)","statement":"Аз... — формулировка в първо лице","origin":"От кой точен опит или урок идва — 1 изречение","morning_question":"Въпрос за сутринта, директно свързан с принципа"}]}';
+  const mainPattern = (analysisResult && analysisResult.top_pattern) || '';
+  const prompt = 'Днешна дата: ' + today + '.\n\nТи си психолог и лайф коуч. Имаш следните лични данни на човек:\n\nСЪЖАЛЕНИЯ: ' + answers.regrets + '\n\nГОРДОСТ: ' + answers.proud + '\n\nУРОЦИ ПО ТРУДНИЯ НАЧИН: ' + answers.lessons + '\n\nОСНОВНИЯТ МОДЕЛ, ОТКРИТ В АНАЛИЗА: ' + mainPattern + '\n\n' +
+    'ЧАСТ 1 — ЛИЧЕН КОДЕКС:\nИзвлечи 5-7 лични принципа, САМО от неговите собствени думи — не общи принципи от книги. Търси убежденията, които той вече е открил чрез опит, но никога не е формулирал официално. Всеки принцип трябва да звучи като негов — с неговия глас, свързан с реален момент.\n\n' +
+    'ЧАСТ 2 — "СЛЕД ЕДНА ГОДИНА..." (поле "epilogue"):\nПоследният раздел от целия анализ. Целта му не е да анализира, а да затвори преживяването спокойно и човешки.\n\n' +
+    'ПЕРСОНАЛИЗАЦИЯ: Текстът следва фиксирана структура и философия за първите две трети. Само последната една трета се персонализира — свързва се с основния модел, вече открит в анализа (даден по-горе). Не измисляй нова тема — използвай точно него.\n\n' +
+    'ЗАБРАНЕНО: Не обещавай резултати. Не предсказвай бъдещето. Не използвай мотивационен език. Не използвай фрази като "Всичко е възможно.", "Ти можеш.", "Успехът е в твоите ръце.", "Ще промениш живота си."\n\n' +
+    'Пиши така, сякаш разговаряш с близък човек.\n\n' +
+    'СТРУКТУРА:\n1. Започни с несигурност. Пример: "Не знам как ще изглежда животът ти след една година."\n' +
+    '2. Кажи какво е почти сигурно — не че животът ще стане по-лесен, а че ако човекът започне да вижда по-ясно себе си, ще започне да вижда по различен начин и живота около себе си.\n' +
+    '3. Кажи, че някои неща ще останат, други ще си тръгнат — без да уточняваш кои.\n' +
+    '4. Свържи текста с философията на ДАВАЙ!: най-голямата промяна няма да бъде какво му се случва, а каква цена избира да плаща.\n' +
+    '5. ПЕРСОНАЛИЗАЦИЯ (последната една трета): използвай основния модел от анализа (напр. контрол → цената на контрола; страх → цената на страха; постоянно угаждане → цената на одобрението; отлагане → цената на отлагането; избягване на конфликт → цената на мълчанието; живот за другите → цената да забравиш себе си). Не измисляй нови теми.\n' +
+    '6. Завърши спокойно, с фиксирана логика (адаптирай формулировката, но запази смисъла и реда): "Животът рядко иска от нас повече. По-често ни показва един и същ урок, докато не сме готови да го научим." После: "Когато най-накрая го научим, преставаме да плащаме цената му отново и отново." Последният ред ВИНАГИ завършва с: "Тогава не ставаме друг човек. Ставаме повече себе си."\n\n' +
+    'Върни САМО валиден JSON на БЪЛГАРСКИ:\n{"principles":[{"number":1,"title":"Кратко заглавие (3-5 думи)","statement":"Аз... — формулировка в първо лице","origin":"От кой точен опит или урок идва — 1 изречение","morning_question":"Въпрос за сутринта, директно свързан с принципа"}],"epilogue":"Текстът на \'След една година...\' по структурата по-горе. 8-10 изречения общо."}';
 
   try {
     const res = await fetch(CONFIG.workerUrl + '/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt, max_tokens: 3000 })
+      body: JSON.stringify({ prompt: prompt, max_tokens: 3800 })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     const parsed = JSON.parse(data.content.replace(/```json\n?|```\n?/g, '').trim());
-    renderPrinciples(parsed.principles || []);
+    if (analysisResult) { analysisResult.principles = parsed.principles || []; analysisResult.epilogue = parsed.epilogue || ''; }
+    renderPrinciples(parsed.principles || [], parsed.epilogue || '');
   } catch(e) {
     const el = document.getElementById('principles-loading');
     if (el) el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;">Личният кодекс не успя да се зареди.</div>';
   }
 }
 
-function renderPrinciples(principles) {
-  if (!principles || !principles.length) {
+function renderPrinciples(principles, epilogue) {
+  if ((!principles || !principles.length) && !epilogue) {
     const el = document.getElementById('principles-loading');
     if (el) el.remove();
     return;
   }
-  let html = '<div class="card" style="border:2px solid #1a1a1a;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);color:#fff;">';
-  html += '<div class="card-title" style="color:#fff;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</div>';
-  html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:24px;text-transform:uppercase;letter-spacing:0.06em;">Принципите, открити чрез твоя живот</div>';
-  principles.forEach(function(p) {
-    html += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:20px 0;">';
-    html += '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:10px;">';
-    html += '<div style="font-family:\'Playfair Display\',serif;font-size:2rem;font-weight:600;color:var(--green);line-height:1;flex-shrink:0;">' + p.number + '</div>';
-    html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;font-weight:500;color:#fff;line-height:1.3;">' + p.title + '</div>';
+  let html = '';
+  if (principles && principles.length) {
+    html += '<div class="card" style="border:2px solid #1a1a1a;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);color:#fff;">';
+    html += '<div class="card-title" style="color:#fff;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:24px;text-transform:uppercase;letter-spacing:0.06em;">Принципите, открити чрез твоя живот</div>';
+    principles.forEach(function(p) {
+      html += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:20px 0;">';
+      html += '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:10px;">';
+      html += '<div style="font-family:\'Playfair Display\',serif;font-size:2rem;font-weight:600;color:var(--green);line-height:1;flex-shrink:0;">' + p.number + '</div>';
+      html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;font-weight:500;color:#fff;line-height:1.3;">' + p.title + '</div>';
+      html += '</div>';
+      html += '<div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.7;margin-bottom:10px;font-style:italic;">' + p.statement + '</div>';
+      html += '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Откъде идва</div>';
+      html += '<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:12px;">' + p.origin + '</div>';
+      html += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;">';
+      html += '<div style="font-size:11px;color:var(--green);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Сутрешен въпрос</div>';
+      html += '<div style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;">' + p.morning_question + '</div>';
+      html += '</div></div>';
+    });
     html += '</div>';
-    html += '<div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.7;margin-bottom:10px;font-style:italic;">' + p.statement + '</div>';
-    html += '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Откъде идва</div>';
-    html += '<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:12px;">' + p.origin + '</div>';
-    html += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;">';
-    html += '<div style="font-size:11px;color:var(--green);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Сутрешен въпрос</div>';
-    html += '<div style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;">' + p.morning_question + '</div>';
-    html += '</div></div>';
-  });
-  html += '</div>';
+  }
+  // "След една година..." — епилог, абсолютно последната страница на отчета
+  if (epilogue) {
+    html += '<div class="card" style="border:none;background:var(--bg);text-align:center;padding:36px 28px;margin-top:14px;">';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-style:italic;font-size:1.2rem;color:var(--text);margin-bottom:18px;">След една година...</div>';
+    html += '<div class="card-text" style="font-size:15px;line-height:1.9;text-align:left;">' + epilogue.replace(/\n+/g, '<br><br>') + '</div>';
+    html += '</div>';
+  }
   const el = document.getElementById('principles-loading');
   if (el) el.outerHTML = html;
 }
@@ -2368,6 +2429,18 @@ async function sendEmail() {
 
       // ── ОГЛЕДАЛО №3 — УРОЦИ ──
       emailHtml += emailMirror('ОГЛЕДАЛО №3', '#854F0B', 'Уроци — Какво животът се опитва да ти покаже');
+      if (d.lessons_deep) {
+        const ld = d.lessons_deep;
+        if (ld.intro) emailHtml += p(ld.intro);
+        [ld.lesson_1, ld.lesson_2, ld.lesson_3].forEach(function(l, i) {
+          if (!l) return;
+          emailHtml += h2('Урок №' + (i + 1) + (i === 2 ? ' — най-дълбокият' : ''));
+          if (l.situation) emailHtml += p(l.situation);
+          if (l.cost) emailHtml += p('<strong>Цената:</strong> ' + l.cost);
+          if (l.opportunity) emailHtml += p(l.opportunity);
+        });
+        if (ld.closing) emailHtml += p('<em>' + ld.closing + '</em>');
+      }
       if (d.morning_routines && d.morning_routines.length) emailHtml += h2('☀ Сутрешни рутини') + '<ul style="color:#555;padding-left:20px;line-height:1.7;">' + d.morning_routines.map(function(r) { return '<li style="margin-bottom:4px;">' + r + '</li>'; }).join('') + '</ul>';
       if (d.evening_routines && d.evening_routines.length) emailHtml += h2('🌙 Вечерни рутини') + '<ul style="color:#555;padding-left:20px;line-height:1.7;">' + d.evening_routines.map(function(r) { return '<li style="margin-bottom:4px;">' + r + '</li>'; }).join('') + '</ul>';
       if (d.daily_questions && d.daily_questions.length) emailHtml += h2('Въпроси за всеки ден') + '<ol style="color:#555;padding-left:20px;line-height:1.7;">' + d.daily_questions.map(function(q) { return '<li style="margin-bottom:6px;">' + q + '</li>'; }).join('') + '</ol>';
@@ -2407,6 +2480,14 @@ async function sendEmail() {
           emailHtml += '<p style="font-size:11px;color:#1D9E75;font-weight:600;text-transform:uppercase;margin:0 0 3px;">Сутрешен въпрос</p>';
           emailHtml += '<p style="font-size:13px;color:rgba(255,255,255,0.75);margin:0;">' + pr.morning_question + '</p></div></div>';
         });
+        emailHtml += '</div>';
+      }
+
+      // ── СЛЕД ЕДНА ГОДИНА (епилог, абсолютно последно в отчета) ──
+      if (d.epilogue) {
+        emailHtml += '<div style="margin-top:28px;padding:28px;text-align:center;">';
+        emailHtml += '<h2 style="font-family:Georgia,serif;font-style:italic;font-size:18px;color:#1a1a1a;margin:0 0 16px;">След една година...</h2>';
+        emailHtml += '<p style="color:#555;line-height:1.9;font-size:14px;text-align:left;">' + d.epilogue.replace(/\n+/g, '<br><br>') + '</p>';
         emailHtml += '</div>';
       }
     }
