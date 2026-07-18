@@ -14,6 +14,24 @@
   gtag('config', 'G-GY8KMVSK0J');
 </script>
 
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1275180257473388');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1275180257473388&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -492,6 +510,19 @@ const CONFIG = {
   workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev',
   siteUrl: 'https://odit.davai.v.bg'
 };
+
+// ─── META ATTRIBUTION (fbclid/_fbc/_fbp) — за Meta CAPI Purchase tracking ────
+function getCookie(name) {
+  const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return match ? match.pop() : null;
+}
+function getFbParams() {
+  return {
+    fbclid: new URLSearchParams(window.location.search).get('fbclid') || null,
+    fbc: getCookie('_fbc'),
+    fbp: getCookie('_fbp')
+  };
+}
 var promoCode = new URLSearchParams(window.location.search).get('promo') || null;
 
 // ─── ANALYTICS (GA4 / gtag) ──────────────────────────────────────────────────
@@ -613,6 +644,7 @@ async function payForFullResults() {
   try { sessionStorage.setItem('davai_answers', JSON.stringify(answers)); } catch(e) {}
 
   try {
+    const fb = getFbParams();
     const res = await fetch(CONFIG.workerUrl + '/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -620,7 +652,8 @@ async function payForFullResults() {
         priceId: CONFIG.priceId,
         successUrl: (location.origin + location.pathname) + '?payment=success&session_id={CHECKOUT_SESSION_ID}',
         cancelUrl: (location.origin + location.pathname),
-        voucherCode: promoCode || undefined
+        voucherCode: promoCode || undefined,
+        fbclid: fb.fbclid, fbc: fb.fbc, fbp: fb.fbp
       })
     });
     const data = await res.json();
@@ -719,7 +752,7 @@ function startOver() {
 }
 
 // ─── НАТАЛНА КАРТА — ПЛАЩАНЕ ─────────────────────────────────────────────────
-function payForNatal() {
+async function payForNatal() {
   trackEvent('natal_buy_clicked', { value: 8.90, currency: 'EUR' });
   if (!CONFIG.natalPaymentLink || CONFIG.natalPaymentLink === 'NATAL_PAYMENT_LINK_HERE') {
     // Без конфигуриран линк — показва формата директно (за тест)
@@ -730,7 +763,27 @@ function payForNatal() {
     sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
     sessionStorage.setItem('davai_answers', JSON.stringify(answers));
   } catch(e) {}
-  window.location.href = CONFIG.natalPaymentLink;
+  // Програматичен checkout — за пълна Meta attribution (fbclid/fbc/fbp), fallback към Payment Link
+  try {
+    const fb = getFbParams();
+    const res = await fetch(CONFIG.workerUrl + '/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: 890,
+        productName: 'ДАВАЙ! Натална карта',
+        product: 'natal',
+        successUrl: CONFIG.siteUrl + '?natal=success',
+        cancelUrl: CONFIG.siteUrl,
+        fbclid: fb.fbclid, fbc: fb.fbc, fbp: fb.fbp
+      })
+    });
+    const data = await res.json();
+    if (data.url) { window.location.href = data.url; return; }
+    throw new Error(data.error || 'no url');
+  } catch(e) {
+    window.location.href = CONFIG.natalPaymentLink; // краен fallback
+  }
 }
 
 // ─── ОБЛАСТИ ─────────────────────────────────────────────────────────────────
@@ -744,7 +797,7 @@ function buildSituations() {
   const c = document.getElementById('situations-container');
   sitCount = 3;
   c.innerHTML = [1,2,3].map(sitBlockHTML).join('') +
-    '<button type="button" class="btn btn-secondary" id="add-situation-btn" onclick="addSituation()" style="margin:4px 0 12px;">+ Добави още ситуация</button>' +
+    '<button type="button" class="btn btn-secondary" id="add-situation-btn" onclick="addSituation()" style="margin:4px 0 12px;background:var(--green-light);color:var(--green-dark);border:1px solid var(--green);font-weight:600;">+ Добави още една ситуация</button>' +
     '<div class="field-help">💡 Добави поне 3 ситуации — колкото повече споделиш, толкова по-точен е анализът.</div>';
   setTimeout(initVoiceInputs, 50);
 }
@@ -1502,7 +1555,8 @@ function renderAnalysis(d, isPaid) {
     html += '<div id="ref-code-chip" style="font-family:monospace;font-size:20px;font-weight:700;color:var(--green);background:white;padding:10px 22px;border-radius:10px;display:inline-block;letter-spacing:0.05em;"></div>';
     html += '</div>';
     html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:10px;">Приятелят получава <strong>25% отстъпка</strong>.<br>На всеки 5 успешни препоръки ти получаваш <strong>безплатен одит</strong>.</div>';
-    html += '<div id="ref-url-display" style="padding:8px 12px;background:rgba(0,0,0,0.05);border-radius:8px;font-size:12px;color:var(--text-secondary);word-break:break-all;margin-bottom:12px;">' + _baseUrl + '</div>';
+    html += '<div style="font-size:13px;font-weight:600;color:var(--green-dark);margin-bottom:6px;">👇 Копирай линка и го изпрати сам (WhatsApp, Viber, SMS) — носи 25% отстъпка на получателя:</div>';
+    html += '<div id="ref-url-display" style="padding:12px 14px;background:white;border:2px solid var(--green);border-radius:10px;font-size:13px;font-weight:600;color:var(--green-dark);word-break:break-all;margin-bottom:14px;">' + _baseUrl + '</div>';
     html += '<div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;">';
     html += '<button class="btn btn-primary" id="ref-share-btn" data-href="' + _baseUrl + '" data-code="" onclick="shareReferralLink(this)">Сподели линка</button>';
     html += '</div></div>';
