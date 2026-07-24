@@ -617,7 +617,12 @@ function validateAndGenerateAnalysis() {
     q3: Array.from(q3).map(function(b) { return b.textContent; }),
     q4: q4[0].textContent
   };
-  generateAnalysis();
+  if (sessionStorage.getItem('davai_paid') === '1') {
+    // Вече платено (cross-domain upsell arrival — виж checkPaymentReturn()) — направо Фаза 2, без нов paywall
+    generateFullAnalysis(sessionStorage.getItem('davai_sid') || null);
+  } else {
+    generateAnalysis();
+  }
 }
 
 // ─── НАВИГАЦИЯ ───────────────────────────────────────────────────────────────
@@ -684,6 +689,17 @@ async function checkPaymentReturn() {
       if (sid) sessionStorage.setItem('davai_sid', sid);
       trackEvent('purchase', { value: 14.60, currency: 'EUR' });
       generateFullAnalysis(sid);              // Фаза 2 — генерира се сега, след плащане
+    } else if (sid) {
+      // Платено е (има session_id от Stripe), но няма локални отговори — плащане,
+      // инициирано от друг домейн (напр. upsell от Нумерологичния одит). Пускаме
+      // въпросника директно, без ново плащане — Фаза 2 стартира накрая (виж
+      // validateAndGenerateAnalysis()).
+      sessionStorage.setItem('davai_paid', '1');
+      sessionStorage.setItem('davai_sid', sid);
+      trackEvent('purchase', { value: 14.60, currency: 'EUR' });
+      answers = {};
+      alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
+      startAudit();
     } else {
       showScreen('intro');
     }
