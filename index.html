@@ -680,6 +680,7 @@ async function checkPaymentReturn() {
 
   if (status === 'success') {
     const sid = params.get('session_id') || null;
+    const unlockToken = params.get('unlock_token') || null;
     window.history.replaceState({}, document.title, window.location.pathname);
     try { answers = JSON.parse(sessionStorage.getItem('davai_answers') || '{}'); } catch(e) { answers = {}; }
     const hasAnswers = answers && Object.keys(answers).length > 0;
@@ -700,6 +701,27 @@ async function checkPaymentReturn() {
       answers = {};
       alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
       startAudit();
+    } else if (unlockToken) {
+      // Cross-domain 100% промо bypass (напр. от Нумерологичния одит) — sessionStorage не се
+      // пренася между домейни и bypass няма реален Stripe session_id, затова токенът се
+      // верифицира еднократно през Worker-а, преди да се отключи съдържанието.
+      try {
+        const vres = await fetch(CONFIG.workerUrl + '/verify-unlock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: unlockToken, product: 'odit' })
+        });
+        const vdata = await vres.json();
+        if (vdata.valid) {
+          sessionStorage.setItem('davai_paid', '1');
+          trackEvent('purchase', { value: 14.60, currency: 'EUR' });
+          answers = {};
+          alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
+          startAudit();
+        } else {
+          showScreen('intro');
+        }
+      } catch(e) { showScreen('intro'); }
     } else {
       showScreen('intro');
     }
