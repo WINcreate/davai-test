@@ -526,7 +526,14 @@ function getFbParams() {
     fbp: getCookie('_fbp')
   };
 }
+// Промо кодът трябва да преживее bypass redirect-а (пълно презареждане на страницата,
+// URL-ът вече няма ?promo=) — иначе payForNatal() губи voucherCode и иска реално плащане.
+const LS_PROMO = 'davai_odit_promo';
 var promoCode = new URLSearchParams(window.location.search).get('promo') || null;
+try {
+  if (promoCode) sessionStorage.setItem(LS_PROMO, promoCode);
+  else promoCode = sessionStorage.getItem(LS_PROMO) || null;
+} catch(e) {}
 
 // ─── ANALYTICS (GA4 / gtag) ──────────────────────────────────────────────────
 // funnel_type разграничава двете фунии в общия GA4 property (един Measurement ID).
