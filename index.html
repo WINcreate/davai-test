@@ -252,7 +252,10 @@ src="https://www.facebook.com/tr?id=1275180257473388&ev=PageView&noscript=1"
     <div class="card" style="border-color:var(--border);margin-bottom:2rem;padding:14px 18px;">
       <div class="card-text" style="font-size:13px;line-height:1.7;">🔒 Изследването е напълно <strong style="color:var(--green);">анонимно</strong>. Данните, които предоставяш, <em>не се запазват</em> при нас.</div>
     </div>
-    <button class="btn btn-primary" onclick="startAudit()">Започни одита →</button>
+    <div class="field-label" style="margin-bottom:8px;">Имейл (за да получиш резултата)</div>
+    <input type="email" class="input-field" id="intro-email" placeholder="твоят@имейл.com" style="margin-bottom:8px;">
+    <div class="err-msg" id="intro-email-error" style="display:none;margin-bottom:14px;">Моля въведи валиден имейл.</div>
+    <button class="btn btn-primary" onclick="startAuditWithEmail()">Започни одита →</button>
   </div>
 
   <!-- PAYMENT -->
@@ -568,6 +571,7 @@ let current = 0;
 let answers = {};
 let paymentVerified = false;
 let sitCount = 3;
+let oditEmail = null; // задължителен, събран на интро екрана — ключ за кръстосания анализ (summary:*:{email})
 let analysisResult = null;
 let natalEmailHTML = '';    // Съхранява натален анализ за имейл
 let perplexityEmailHTML = ''; // Съхранява техниките за имейл
@@ -635,6 +639,18 @@ function showScreen(id) {
 }
 
 // ─── СТАРТ НА ОДИТА (без предварително плащане) ──────────────────────────────
+function startAuditWithEmail() {
+  const val = (document.getElementById('intro-email').value || '').trim();
+  const err = document.getElementById('intro-email-error');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)) {
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  oditEmail = val;
+  startAudit();
+}
+
 function startAudit() {
   trackEvent('quiz_started', {});
   buildSituations();
@@ -694,11 +710,20 @@ async function checkPaymentReturn() {
       // Платено е (има session_id от Stripe), но няма локални отговори — плащане,
       // инициирано от друг домейн (напр. upsell от Нумерологичния одит). Пускаме
       // въпросника директно, без ново плащане — Фаза 2 стартира накрая (виж
-      // validateAndGenerateAnalysis()).
+      // validateAndGenerateAnalysis()). Имейлът за кръстосания анализ идва от Stripe
+      // (одитът няма собствено интро поле при това пристигане — интрото е прескочено).
       sessionStorage.setItem('davai_paid', '1');
       sessionStorage.setItem('davai_sid', sid);
       trackEvent('purchase', { value: 14.60, currency: 'EUR' });
       answers = {};
+      try {
+        const eres = await fetch(CONFIG.workerUrl + '/session-email', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sid })
+        });
+        const edata = await eres.json();
+        if (edata.email) oditEmail = edata.email;
+      } catch(e) {}
       alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
       startAudit();
     } else if (unlockToken) {
@@ -716,6 +741,7 @@ async function checkPaymentReturn() {
           sessionStorage.setItem('davai_paid', '1');
           trackEvent('purchase', { value: 14.60, currency: 'EUR' });
           answers = {};
+          if (vdata.email) oditEmail = vdata.email;
           alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
           startAudit();
         } else {
@@ -814,6 +840,7 @@ async function payForNatal() {
         successUrl: CONFIG.siteUrl + '?natal=success',
         cancelUrl: CONFIG.siteUrl,
         voucherCode: promoCode || undefined,
+        email: oditEmail || undefined,
         fbclid: fb.fbclid, fbc: fb.fbc, fbp: fb.fbp
       })
     });
@@ -985,10 +1012,25 @@ async function generateFullAnalysis(sid) {
   showScreen('loading');
   const loadingTimer = animateLoadingSteps();
   const { aSum, sSum, mSum } = buildSummaries();
+
+  // Кръстосан анализ (Фуния 2) — обобщения от предходни платени Нумерология/Натал по имейл.
+  // Best-effort: ако /cross-context не отговори, продължаваме без контекст (не блокира одита).
+  let crossContext = { numerology: null, natal: null };
+  if (oditEmail) {
+    try {
+      const cres = await fetch(CONFIG.workerUrl + '/cross-context', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: oditEmail })
+      });
+      const cdata = await cres.json();
+      if (cdata && (cdata.numerology || cdata.natal)) crossContext = cdata;
+    } catch(e) {}
+  }
+
   // Три по-малки паралелни заявки (вместо една голяма) — предпазва от Cloudflare timeout
-  const body1 = { prompt: buildPromptCore(aSum, sSum, mSum), max_tokens: 6000 };
+  const body1 = { prompt: buildPromptCore(aSum, sSum, mSum, crossContext), max_tokens: 6000 };
   const body2 = { prompt: buildPromptAreas(aSum, sSum), max_tokens: 4000 };
-  const body3 = { prompt: buildPromptLessonsMeaning(aSum, sSum, mSum), max_tokens: 4000 };
+  const body3 = { prompt: buildPromptLessonsMeaning(aSum, sSum, mSum, crossContext), max_tokens: 4000 };
 
   try {
     const [data1, data2, data3] = await Promise.all([
@@ -1023,6 +1065,24 @@ async function generateFullAnalysis(sid) {
     renderResults(core);
     fetchPrinciples();
     trackEvent('natal_upsell_shown', {});
+
+    // Кръстосан анализ — обобщение за бъдещ Натал add-on (fire-and-forget, не блокира UI)
+    if (oditEmail) {
+      const bits = [core.summary, core.top_pattern];
+      (core.patterns || []).forEach(p => bits.push(p.title + ': ' + p.description));
+      (core.blind_spots || []).forEach(b => bits.push(b.area + ': ' + b.insight));
+      if (core.lessons_deep) {
+        const ld = core.lessons_deep;
+        if (ld.lesson_3) bits.push(ld.lesson_3.situation);
+        if (ld.closing) bits.push(ld.closing);
+      }
+      if (core.meaning_analysis && core.meaning_analysis.where_it_points) bits.push(core.meaning_analysis.where_it_points);
+      const analysisText = bits.filter(Boolean).join('\n');
+      fetch(CONFIG.workerUrl + '/save-summary', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product: 'odit', email: oditEmail, analysisText })
+      }).catch(function() {});
+    }
   } catch(e) {
     clearInterval(loadingTimer);
     showScreen('results');
@@ -1112,7 +1172,19 @@ ${aSum}
 КРИТИЧНО: Второ лице. Чист български. JSON завършен. Кратко.`;
 }
 
-function buildPromptCore(aSum, sSum, mSum) {
+// Кръстосан анализ (Фуния 2) — обобщения от предходна Нумерология/Натал по имейл.
+// НЕ добавя нов блок в анализа — само инструктира AI-то да вплете находките в
+// съществуващите блокове (Навици/Блокажи/Уроци/Смисъл), никога да не ги повтаря буквално.
+function crossContextBlock(crossContext) {
+  if (!crossContext || (!crossContext.numerology && !crossContext.natal)) return '';
+  let s = '\n\nКРЪСТОСАН КОНТЕКСТ (от предходни платени анализи на този клиент — НЕ добавяй нов раздел, само вплети находките в съществуващите блокове по-долу, без да ги повтаряш буквално):\n';
+  if (crossContext.numerology) s += 'От Нумерологичния одит: ' + crossContext.numerology + '\n';
+  if (crossContext.natal) s += 'От Наталната карта: ' + crossContext.natal + '\n';
+  s += 'Където моделите съвпадат между системите — потвърди го и задълбочи в контекста на реалния живот. Където контрастират — назови контраста директно.';
+  return s;
+}
+
+function buildPromptCore(aSum, sSum, mSum, crossContext) {
   const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
   return `Днешна дата: ${today}.
 
@@ -1129,6 +1201,7 @@ ${aSum}
 
 СМИСЪЛ (четири избора на клиента):
 ${mSum}
+${crossContextBlock(crossContext)}
 
 АНАЛИЗИРАЙ ПРЕЗ 4 ЛЕЩИ:
 1. НАЧИН НА СВЪРЗВАНЕ: Сигурен/Тревожен/Избягващ/Объркан — конкретно от отговорите.
@@ -1193,7 +1266,7 @@ ${mSum}
 // Разделено от buildPromptCore, за да не удължава една-единствена заявка
 // (по-дълга генерация носеше риск от Cloudflare timeout). meaning_analysis
 // (СМИСЪЛ) е преместен тук БУКВАЛНО непроменен.
-function buildPromptLessonsMeaning(aSum, sSum, mSum) {
+function buildPromptLessonsMeaning(aSum, sSum, mSum, crossContext) {
   const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
   return `Днешна дата: ${today}.
 
@@ -1210,6 +1283,7 @@ ${aSum}
 
 СМИСЪЛ (четири избора на клиента):
 ${mSum}
+${crossContextBlock(crossContext)}
 
 ОГЛЕДАЛО №3 — "Уроци — Какво животът се опитва да ти покаже" (поле "lessons_deep")
 
@@ -2376,85 +2450,56 @@ async function fetchNatalAnalysis(planetsData) {
     return (PLANET_BG[p.name] || p.name).replace(/[^\w\sА-я]/gu,'').trim() + ' в ' + (SIGN_BG[p.sign] || p.sign) + (p.is_retro === 'true' ? ' (ретроградна)' : '');
   }).join(', ');
 
-  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
-  const auditCtx = analysisResult ? '\nОдитът идентифицира основен модел: "' + (analysisResult.top_pattern || '') + '"' : '';
-
-  const prompt = 'Днешна дата: ' + today + '. Ти си астролог-психолог. Анализирай тази натална карта и обясни архетипните сили и предизвикателства на човека.\n\nНАТАЛНА КАРТА:\nАсцендент: ' + ascSign + '\nСреднонебие (MC): ' + mcSign + '\nПланети: ' + planetsText + auditCtx + '\n\nВърни САМО валиден JSON на БЪЛГАРСКИ:\n{\n  "asc_meaning": "2-3 изречения — какво казва асцендентът за личността и начина на представяне пред света",\n  "sun_moon": "2-3 изречения — динамиката между Слънце и Луна — съзнателно и несъзнателно",\n  "key_themes": ["Тема 1 — конкретна сила или предизвикателство", "Тема 2", "Тема 3"],\n  "life_mission": "2-3 изречения — MC и жизненото призвание",\n  "shadow": "2 изречения — какво е в сянката, какво трябва да се интегрира",\n  "practical": "2-3 конкретни съвета как тази карта да се използва като ресурс"\n}' + GRAMMAR_RULES;
-
+  // /natal-analysis — единствен източник (Worker), чете кръстосан контекст по имейл сам
   try {
-    const res = await fetch(CONFIG.workerUrl + '/analyze', {
+    const res = await fetch(CONFIG.workerUrl + '/natal-analysis', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: prompt, max_tokens: 2000 })
+      body: JSON.stringify({ ascSign, mcSign, planetsText, email: oditEmail || undefined })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    const parsed = JSON.parse(data.content.replace(/```json\n?|```\n?/g, '').trim());
-    renderNatalAnalysis(parsed);
+    renderNatalAnalysis(data.report);
   } catch(e) {
     const el = document.getElementById('natal-ai-loading');
     if (el) el.innerHTML = '<div class="card-text" style="color:var(--red-text);">Грешка при астрологичния анализ: ' + e.message + '</div>';
   }
 }
 
-function renderNatalAnalysis(d) {
+// Прост параграфен рендер на течен текст (наталният анализ вече е ЕДИН непрекъснат
+// разказ без раздели — виж buildNatalPrompt в Worker-а)
+function natalTextToHtml(text) {
+  return (text || '').split(/\n+/).map(function(p) {
+    p = p.trim();
+    if (!p) return '';
+    return '<p class="card-text" style="margin-bottom:14px;line-height:1.75;">' + escapeHtmlClient(p) + '</p>';
+  }).join('');
+}
+function escapeHtmlClient(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderNatalAnalysis(reportText) {
   let html = '<div class="card" style="border:2px solid var(--purple-light);background:linear-gradient(135deg,#f5f3ff 0%,#fff 100%);margin-top:1rem;">';
   html += '<div class="card-title" style="color:var(--purple-text);margin-bottom:4px;">🔮 Астрологичен психоанализ</div>';
   html += '<div class="card-text" style="margin-bottom:18px;color:var(--purple-text);">Архетипните сили и предизвикателства на твоята карта</div>';
-
-  if (d.asc_meaning) {
-    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
-    html += '<div class="summary-label" style="color:var(--purple-text);">Асцендент — как те виждат</div>';
-    html += '<div class="card-text">' + d.asc_meaning + '</div></div>';
-  }
-  if (d.sun_moon) {
-    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
-    html += '<div class="summary-label" style="color:var(--purple-text);">Слънце &amp; Луна — вътрешната динамика</div>';
-    html += '<div class="card-text">' + d.sun_moon + '</div></div>';
-  }
-  if (d.key_themes && d.key_themes.length) {
-    html += '<div style="margin-bottom:16px;"><div class="field-label" style="color:var(--purple-text);margin-bottom:10px;">Ключови теми в картата</div>';
-    d.key_themes.forEach(function(t, i) {
-      html += '<div class="action-item"><div class="action-num" style="background:var(--purple-light);color:var(--purple-text);">' + (i+1) + '</div><div class="action-text">' + t + '</div></div>';
-    });
-    html += '</div>';
-  }
-  if (d.life_mission) {
-    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
-    html += '<div class="summary-label" style="color:var(--purple-text);">Жизнено призвание (MC)</div>';
-    html += '<div class="card-text">' + d.life_mission + '</div></div>';
-  }
-  if (d.shadow) {
-    html += '<div class="summary-block" style="border-color:var(--purple-text);margin-bottom:16px;">';
-    html += '<div class="summary-label" style="color:var(--purple-text);">Сянката — за интегриране</div>';
-    html += '<div class="card-text" style="font-style:italic;">' + d.shadow + '</div></div>';
-  }
-  if (d.practical) {
-    html += '<div style="background:var(--purple-light);border-radius:10px;padding:14px 16px;">';
-    html += '<div class="field-label" style="color:var(--purple-text);margin-bottom:8px;">Практически насоки</div>';
-    html += '<div class="card-text">' + d.practical + '</div></div>';
-  }
+  html += natalTextToHtml(reportText);
   html += '</div>';
 
   const el = document.getElementById('natal-ai-loading');
   if (el) el.outerHTML = html;
   // Съхрани за имейл (inline styles за email клиенти)
-  natalEmailHTML = buildNatalEmailSection(d);
+  natalEmailHTML = buildNatalEmailSection(reportText);
   // Обнови #natal-results с loaded клас
   var nr = document.getElementById('natal-results');
   if (nr) { nr.classList.add('loaded'); nr.style.display = 'block'; }
 }
 
-function buildNatalEmailSection(d) {
-  if (!d) return '';
+function buildNatalEmailSection(reportText) {
+  if (!reportText) return '';
   var h = '<div style="margin-top:20px;padding:20px;border:1px solid #d0c8f8;border-radius:12px;background:#f8f6ff;">';
   h += '<h2 style="color:#4A3BAA;font-size:15px;margin:0 0 14px;">🔮 Астрологичен психоанализ</h2>';
-  if (d.asc_meaning) h += '<p><strong>Асцендент:</strong> ' + d.asc_meaning + '</p>';
-  if (d.sun_moon) h += '<p><strong>Слънце &amp; Луна:</strong> ' + d.sun_moon + '</p>';
-  if (d.key_themes && d.key_themes.length) h += '<p><strong>Ключови теми:</strong></p><ul>' + d.key_themes.map(function(t){return '<li>' + t + '</li>';}).join('') + '</ul>';
-  if (d.life_mission) h += '<p><strong>Жизнено призвание:</strong> ' + d.life_mission + '</p>';
-  if (d.shadow) h += '<p><strong>Сянката:</strong> <em>' + d.shadow + '</em></p>';
-  if (d.practical) h += '<p><strong>Практически насоки:</strong> ' + d.practical + '</p>';
+  h += reportText.split(/\n+/).filter(function(p){return p.trim();}).map(function(p){ return '<p>' + p.trim() + '</p>'; }).join('');
   h += '</div>';
   return h;
 }
