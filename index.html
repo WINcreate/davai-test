@@ -728,10 +728,9 @@ async function checkPaymentReturn() {
       generateFullAnalysis(sid);              // Фаза 2 — генерира се сега, след плащане
     } else if (sid) {
       // Платено е (има session_id от Stripe), но няма локални отговори — плащане,
-      // инициирано от друг домейн (напр. upsell от Нумерологичния одит). Пускаме
-      // въпросника директно, без ново плащане — Фаза 2 стартира накрая (виж
-      // validateAndGenerateAnalysis()). Имейлът за кръстосания анализ идва от Stripe
-      // (одитът няма собствено интро поле при това пристигане — интрото е прескочено).
+      // инициирано от друг домейн (напр. upsell от Нумерологичния одит). Имейлът идва
+      // от Stripe и се предпопълва в интрото — потребителят потвърждава/коригира го
+      // и продължава сам (полето остава задължителна стъпка, никога не се прескача).
       sessionStorage.setItem('davai_paid', '1');
       sessionStorage.setItem('davai_sid', sid);
       trackEvent('purchase', { value: 14.60, currency: 'EUR' });
@@ -744,19 +743,15 @@ async function checkPaymentReturn() {
         const edata = await eres.json();
         if (edata.email) oditEmail = edata.email;
       } catch(e) {}
-      if (oditEmail) {
-        try { sessionStorage.setItem(LS_ODIT_EMAIL, oditEmail); } catch(e) {}
-        alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
-        startAudit();
-      } else {
-        // Плащането мина, но Stripe сесията няма имейл — поискай го преди да пуснем
-        // въпросника (Стъпка 1+2: без имейл одитът не стартира).
-        showScreen('intro');
-      }
+      showScreen('intro');
+      if (oditEmail) document.getElementById('intro-email').value = oditEmail;
+      alert('Плащането е потвърдено! Провери имейла отдолу (или го промени) и натисни „Започни одита →", за да продължиш към въпросите.');
     } else if (unlockToken) {
       // Cross-domain 100% промо bypass (напр. от Нумерологичния одит) — sessionStorage не се
       // пренася между домейни и bypass няма реален Stripe session_id, затова токенът се
-      // верифицира еднократно през Worker-а, преди да се отключи съдържанието.
+      // верифицира еднократно през Worker-а, преди да се отключи съдържанието. Имейлът (ако
+      // токенът носи такъв) се предпопълва в интрото — полето остава задължителна стъпка,
+      // никога не се прескача директно към въпросника.
       try {
         const vres = await fetch(CONFIG.workerUrl + '/verify-unlock', {
           method: 'POST',
@@ -769,15 +764,9 @@ async function checkPaymentReturn() {
           trackEvent('purchase', { value: 14.60, currency: 'EUR' });
           answers = {};
           if (vdata.email) oditEmail = vdata.email;
-          if (oditEmail) {
-            try { sessionStorage.setItem(LS_ODIT_EMAIL, oditEmail); } catch(e) {}
-            alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
-            startAudit();
-          } else {
-            // Токенът е валиден, но без имейл — поискай го преди да пуснем въпросника
-            // (Стъпка 1+2: без имейл одитът не стартира).
-            showScreen('intro');
-          }
+          showScreen('intro');
+          if (oditEmail) document.getElementById('intro-email').value = oditEmail;
+          alert('Плащането е потвърдено! Провери имейла отдолу (или го промени) и натисни „Започни одита →", за да продължиш към въпросите.');
         } else {
           showScreen('intro');
         }
