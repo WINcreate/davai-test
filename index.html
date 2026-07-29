@@ -581,6 +581,7 @@ let sitCount = 3;
 let oditEmail = null; // задължителен, събран на интро екрана — ключ за кръстосания анализ (summary:*:{email})
 let analysisResult = null;
 let natalEmailHTML = '';    // Съхранява натален анализ за имейл
+let natalReportText = null; // текстът на наталния анализ — за бутона „Изпрати на имейл" (бърз, без модал)
 let perplexityEmailHTML = ''; // Съхранява техниките за имейл
 
 // ─── СМИСЪЛ — МНОГОКРАТЕН ИЗБОР ─────────────────────────────────────────────
@@ -2497,9 +2498,42 @@ function renderNatalAnalysis(reportText) {
   if (el) el.outerHTML = html;
   // Съхрани за имейл (inline styles за email клиенти)
   natalEmailHTML = buildNatalEmailSection(reportText);
+  natalReportText = reportText;
   // Обнови #natal-results с loaded клас
   var nr = document.getElementById('natal-results');
   if (nr) { nr.classList.add('loaded'); nr.style.display = 'block'; }
+
+  var actionsDiv = document.createElement('div');
+  actionsDiv.className = 'card no-print';
+  actionsDiv.style.marginTop = '10px';
+  actionsDiv.innerHTML = '<div class="field-label" style="margin-bottom:10px;">Запази резултата:</div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+    '<button class="btn btn-ghost" onclick="trackEvent(\'pdf_download\', {}); window.print()">⬇ Свали като PDF</button>' +
+    '<button class="btn btn-ghost" id="natal-email-btn" onclick="sendNatalEmailQuick()">📧 Изпрати на имейл</button>' +
+    '</div><div id="natal-email-status" style="font-size:12px;margin-top:8px;"></div>';
+  if (nr) nr.appendChild(actionsDiv);
+}
+
+async function sendNatalEmailQuick() {
+  const btn = document.getElementById('natal-email-btn');
+  const status = document.getElementById('natal-email-status');
+  if (!oditEmail || !natalReportText) return;
+  btn.disabled = true; btn.textContent = 'Изпращане...';
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/send-natal-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: oditEmail, report: natalReportText })
+    });
+    const data = await res.json();
+    btn.disabled = false; btn.textContent = '📧 Изпрати на имейл';
+    status.textContent = data.ok ? '✓ Изпратено на ' + oditEmail : 'Грешка — опитай пак';
+    status.style.color = data.ok ? 'var(--green)' : 'var(--red-text)';
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '📧 Изпрати на имейл';
+    status.textContent = 'Грешка — опитай пак';
+    status.style.color = 'var(--red-text)';
+  }
 }
 
 function buildNatalEmailSection(reportText) {
