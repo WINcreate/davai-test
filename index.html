@@ -579,6 +579,10 @@ let answers = {};
 let paymentVerified = false;
 let sitCount = 3;
 let oditEmail = null; // задължителен, събран на интро екрана — ключ за кръстосания анализ (summary:*:{email})
+// Имейлът трябва да преживее пълния page reload при Stripe/bypass redirect (иначе се губи
+// след връщане и generateFullAnalysis() тръгва без email — виж checkPaymentReturn()).
+const LS_ODIT_EMAIL = 'davai_odit_email';
+try { oditEmail = sessionStorage.getItem(LS_ODIT_EMAIL) || null; } catch(e) {}
 let analysisResult = null;
 let natalEmailHTML = '';    // Съхранява натален анализ за имейл
 let natalReportText = null; // текстът на наталния анализ — за бутона „Изпрати на имейл" (бърз, без модал)
@@ -650,12 +654,19 @@ function showScreen(id) {
 function startAuditWithEmail() {
   const val = (document.getElementById('intro-email').value || '').trim();
   const err = document.getElementById('intro-email-error');
+  if (!val) {
+    err.textContent = 'Въведи имейл за да получиш резултата и да свържем анализите си.';
+    err.style.display = 'block';
+    return;
+  }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)) {
+    err.textContent = 'Моля въведи валиден имейл.';
     err.style.display = 'block';
     return;
   }
   err.style.display = 'none';
   oditEmail = val;
+  try { sessionStorage.setItem(LS_ODIT_EMAIL, oditEmail); } catch(e) {}
   startAudit();
 }
 
@@ -682,6 +693,7 @@ async function payForFullResults() {
         successUrl: (location.origin + location.pathname) + '?payment=success&session_id={CHECKOUT_SESSION_ID}',
         cancelUrl: (location.origin + location.pathname),
         voucherCode: promoCode || undefined,
+        email: oditEmail || undefined,
         fbclid: fb.fbclid, fbc: fb.fbc, fbp: fb.fbp
       })
     });
@@ -732,8 +744,15 @@ async function checkPaymentReturn() {
         const edata = await eres.json();
         if (edata.email) oditEmail = edata.email;
       } catch(e) {}
-      alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
-      startAudit();
+      if (oditEmail) {
+        try { sessionStorage.setItem(LS_ODIT_EMAIL, oditEmail); } catch(e) {}
+        alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
+        startAudit();
+      } else {
+        // Плащането мина, но Stripe сесията няма имейл — поискай го преди да пуснем
+        // въпросника (Стъпка 1+2: без имейл одитът не стартира).
+        showScreen('intro');
+      }
     } else if (unlockToken) {
       // Cross-domain 100% промо bypass (напр. от Нумерологичния одит) — sessionStorage не се
       // пренася между домейни и bypass няма реален Stripe session_id, затова токенът се
@@ -750,8 +769,15 @@ async function checkPaymentReturn() {
           trackEvent('purchase', { value: 14.60, currency: 'EUR' });
           answers = {};
           if (vdata.email) oditEmail = vdata.email;
-          alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
-          startAudit();
+          if (oditEmail) {
+            try { sessionStorage.setItem(LS_ODIT_EMAIL, oditEmail); } catch(e) {}
+            alert('Плащането е потвърдено! Остава само да отговориш на въпросите — след това получаваш пълния си Личен одит.');
+            startAudit();
+          } else {
+            // Токенът е валиден, но без имейл — поискай го преди да пуснем въпросника
+            // (Стъпка 1+2: без имейл одитът не стартира).
+            showScreen('intro');
+          }
         } else {
           showScreen('intro');
         }
@@ -1183,12 +1209,25 @@ ${aSum}
 // Кръстосан анализ (Фуния 2) — обобщения от предходна Нумерология/Натал по имейл.
 // НЕ добавя нов блок в анализа — само инструктира AI-то да вплете находките в
 // съществуващите блокове (Навици/Блокажи/Уроци/Смисъл), никога да не ги повтаря буквално.
-function crossContextBlock(crossContext) {
+function crossContextBlock(crossContext, section) {
   if (!crossContext || (!crossContext.numerology && !crossContext.natal)) return '';
   let s = '\n\nКРЪСТОСАН КОНТЕКСТ (от предходни платени анализи на този клиент — НЕ добавяй нов раздел, само вплети находките в съществуващите блокове по-долу, без да ги повтаряш буквално):\n';
   if (crossContext.numerology) s += 'От Нумерологичния одит: ' + crossContext.numerology + '\n';
   if (crossContext.natal) s += 'От Наталната карта: ' + crossContext.natal + '\n';
-  s += 'Където моделите съвпадат между системите — потвърди го и задълбочи в контекста на реалния живот. Където контрастират — назови контраста директно.';
+
+  if (section === 'blockages') {
+    if (crossContext.numerology) s += '\nАко има нумерологично обобщение: в Блокажи свържи основния поведенчески модел с конкретното жизнено число и неговия архетип.';
+    if (crossContext.natal) s += '\nАко има натален контекст: в Блокажи свържи поведенческите модели с планетарните енергии от картата.';
+  } else if (section === 'lessons_meaning') {
+    if (crossContext.numerology) s += '\nАко има нумерологично обобщение: в Уроци потвърди уроците с кармичния контекст от нумерологията — число на съдбата, лична година. В Смисъл финалният синтез свързва жизненото число с призванието и смисловата посока.';
+    if (crossContext.natal) s += '\nАко има натален контекст: в Уроци потвърди уроците с астрологичния кармичен контекст — MC, доминиращи планети. В Смисъл MC и жизненото число се срещат във финалния синтез.';
+  }
+
+  if (crossContext.numerology && crossContext.natal) {
+    s += '\nИма и двата контекста едновременно: не изброявай числата и планетите отделно. Вплитай ги в наратива там, където потвърждават или допълват откритото в одита. Конкретно: в Урок №3 и в Смисъл — задължително.';
+  }
+
+  s += '\nКъдето моделите съвпадат между системите — потвърди го и задълбочи в контекста на реалния живот. Където контрастират — назови контраста директно.';
   return s;
 }
 
@@ -1209,7 +1248,7 @@ ${aSum}
 
 СМИСЪЛ (четири избора на клиента):
 ${mSum}
-${crossContextBlock(crossContext)}
+${crossContextBlock(crossContext, 'blockages')}
 
 АНАЛИЗИРАЙ ПРЕЗ 4 ЛЕЩИ:
 1. НАЧИН НА СВЪРЗВАНЕ: Сигурен/Тревожен/Избягващ/Объркан — конкретно от отговорите.
@@ -1291,7 +1330,7 @@ ${aSum}
 
 СМИСЪЛ (четири избора на клиента):
 ${mSum}
-${crossContextBlock(crossContext)}
+${crossContextBlock(crossContext, 'lessons_meaning')}
 
 ОГЛЕДАЛО №3 — "Уроци — Какво животът се опитва да ти покаже" (поле "lessons_deep")
 
