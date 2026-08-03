@@ -1886,6 +1886,7 @@ function renderPreview(d) {
   var saveCard = document.querySelector('#screen-results .card.no-print');
   if (saveCard) saveCard.style.display = 'none';
   document.getElementById('natal-upsell').style.display = 'none';
+  document.getElementById('numerology-upsell').style.display = 'none';
   document.getElementById('perplexity-upsell').style.display = 'none';
   document.getElementById('results-content').innerHTML = renderFreePreview(d);
   trackEvent('free_result_shown', {});
