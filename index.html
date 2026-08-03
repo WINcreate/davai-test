@@ -486,6 +486,19 @@ src="https://www.facebook.com/tr?id=1275180257473388&ev=PageView&noscript=1"
 
     <div id="natal-results" style="display:none;margin-top:1rem;"></div>
 
+    <div class="upsell no-print" id="numerology-upsell" style="background:var(--purple-light);border-color:var(--purple-text);">
+      <div class="upsell-title" style="color:var(--purple-text);">Още една гледна точка — Нумерологичен одит</div>
+      <div class="upsell-text" style="color:var(--purple-text);">Одитът показва как живееш днес. Нумерологията показва с каква природа си роден — числата зад датата и името ти. Различен инструмент, допълваща картина.</div>
+      <div style="font-size:13px;color:var(--purple-text);font-weight:600;margin-bottom:12px;">-25% за теб, защото току-що завърши Одита</div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="goNumerology()" style="background:var(--purple-text);">Добави нумерологичен одит →</button>
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <span style="font-size:14px;color:var(--text-tertiary);text-decoration:line-through;">12,90 €</span>
+          <span style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;color:var(--purple-text);">9,68 €</span>
+        </div>
+      </div>
+    </div>
+
     <!-- PERPLEXITY DEEP ANALYSIS -->
     <div class="upsell no-print" id="perplexity-upsell" style="display:none;">
       <div class="upsell-title">🎯 Конкретни техники от науката</div>
@@ -858,7 +871,7 @@ async function payForNatal() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         amount: 890,
-        productName: 'ДАВАЙ! Натална карта',
+        productName: 'DAVAI! Natal Chart',
         product: 'natal',
         successUrl: CONFIG.siteUrl + '?natal=success',
         cancelUrl: CONFIG.siteUrl,
@@ -873,6 +886,14 @@ async function payForNatal() {
   } catch(e) {
     window.location.href = CONFIG.natalPaymentLink; // краен fallback
   }
+}
+
+// ─── КРОСЕЛ КЪМ НУМЕРОЛОГИЧНИЯ ОДИТ (-25%, само в тази посока) ───────────────
+function goNumerology() {
+  trackEvent('numerology_upsell_clicked', { value: 9.68, currency: 'EUR' });
+  var url = 'https://natal.davai.v.bg/?promo=DAVAI-AUDIT25';
+  if (oditEmail) url += '&email=' + encodeURIComponent(oditEmail);
+  window.location.href = url;
 }
 
 // ─── ОБЛАСТИ ─────────────────────────────────────────────────────────────────
