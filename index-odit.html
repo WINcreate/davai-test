@@ -1,0 +1,3026 @@
+<!DOCTYPE html>
+<!-- ДАВАЙ! ЛИЧЕН ОДИТ — деплойва се като index.html в WINcreate/davai-test (odit.davai.v.bg) -->
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ДАВАЙ! — Личен одит на живота</title>
+
+<!-- Google Analytics 4 (GA4) — един общ property за двете фунии (одит + нумерология) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GY8KMVSK0J"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-GY8KMVSK0J');
+</script>
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1275180257473388');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1275180257473388&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1D9E75; --green-light: #E1F5EE; --green-dark: #0F6E56; --green-deep: #085041;
+    --gold: #B08D57; --gold-dark: #7A5E2F; --gold-light: #FDF6EC;
+    --amber: #FAEEDA; --amber-text: #854F0B;
+    --red-light: #FCEBEB; --red-text: #A32D2D;
+    --purple-light: #F0EFFE; --purple-text: #4A3BAA;
+    --text: #1a1a1a; --text-secondary: #555; --text-tertiary: #999;
+    --border: rgba(0,0,0,0.1); --bg: #FAFAF8; --card: #fff; --radius: 14px;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .container { max-width: 640px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  .brand { font-family: 'Playfair Display', serif; font-size: 2.8rem; font-weight: 600; color: var(--text); letter-spacing: -0.02em; line-height: 1; margin-bottom: 4px; }
+  .brand-accent { color: var(--green); }
+  .brand-sub { font-size: 14px; color: var(--text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 2.5rem; }
+  .intro-text { font-size: 15px; color: var(--text-secondary); line-height: 1.8; margin-bottom: 1.5rem; }
+
+  .phase-chips { display: flex; gap: 8px; margin-bottom: 2rem; flex-wrap: wrap; }
+  .phase-chip { font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); color: var(--text-tertiary); background: var(--card); }
+  .phase-chip.active { background: var(--green); color: white; border-color: var(--green); }
+  .phase-chip.done { border-color: var(--green); color: var(--green-dark); background: var(--green-light); }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 28px; border-radius: 50px; font-size: 14px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.2s; border: none; text-decoration: none; }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-primary:hover { background: var(--green-dark); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary { background: transparent; color: var(--text-secondary); border: 1px solid var(--border); margin-right: 10px; }
+  .btn-secondary:hover { background: var(--card); }
+  .btn-ghost { background: transparent; color: var(--green); border: 1px solid var(--green); }
+  .btn-ghost:hover { background: var(--green-light); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .progress-line { height: 2px; background: var(--border); border-radius: 2px; margin-bottom: 2rem; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.4s ease; }
+  .progress-label { font-size: 12px; color: var(--text-tertiary); margin-bottom: 8px; display: flex; justify-content: space-between; }
+
+  .area-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+  .area-question { font-size: 14px; color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.6; }
+  .field-label { font-size: 12px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+  .rating-grid { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .rating-btn { width: 46px; height: 46px; border-radius: 50%; border: 1.5px solid var(--border); background: var(--card); font-size: 14px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+  .rating-btn:hover { border-color: var(--green); color: var(--green); }
+  .rating-btn.selected { background: var(--green); border-color: var(--green); color: white; transform: scale(1.1); }
+  textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--card); resize: vertical; min-height: 120px; line-height: 1.7; margin-bottom: 1.5rem; transition: border-color 0.2s; }
+  textarea:focus { outline: none; border-color: var(--green); }
+  textarea::placeholder { color: var(--text-tertiary); }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 14px; }
+  .card-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .card-text { font-size: 14px; color: var(--text-secondary); line-height: 1.8; }
+  .tag { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; margin-bottom: 8px; }
+  .tag-red { background: var(--red-light); color: var(--red-text); }
+  .tag-amber { background: var(--amber); color: var(--amber-text); }
+  .tag-green { background: var(--green-light); color: var(--green-dark); }
+
+  .score-badge { font-size: 12px; font-weight: 500; padding: 4px 12px; border-radius: 20px; }
+  .score-high { background: var(--green-light); color: var(--green-dark); }
+  .score-mid { background: var(--amber); color: var(--amber-text); }
+  .score-low { background: var(--red-light); color: var(--red-text); }
+  .avg-score { font-family: 'Playfair Display', serif; font-size: 3rem; font-weight: 600; color: var(--green); line-height: 1; }
+  .avg-label { font-size: 13px; color: var(--text-tertiary); margin-top: 4px; }
+
+  .area-result { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 10px; }
+  .area-result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .area-result-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .area-insight { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; font-style: italic; }
+  .action-item { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+  .action-num { width: 22px; height: 22px; border-radius: 50%; background: var(--green-light); color: var(--green-dark); font-size: 11px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .action-text { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+  .routine-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+  .routine-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .routine-card-title { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .routine-card-title.morning { color: var(--amber-text); }
+  .routine-card-title.evening { color: var(--purple-text); }
+  .routine-item { font-size: 13px; color: var(--text-secondary); line-height: 1.6; padding: 7px 0; border-bottom: 1px solid var(--border); }
+  .routine-item:last-child { border-bottom: none; }
+
+  .daily-q-list { list-style: none; }
+  .daily-q-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .daily-q-item:last-child { border-bottom: none; }
+  .daily-q-num { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--green); font-weight: 600; flex-shrink: 0; line-height: 1.4; }
+  .daily-q-text { font-size: 14px; color: var(--text); line-height: 1.7; }
+
+  .summary-block { border-left: 3px solid var(--green); padding-left: 16px; margin-bottom: 16px; }
+  .summary-label { font-size: 11px; font-weight: 500; color: var(--green-dark); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+  .sit-block { margin-bottom: 1.2rem; }
+  .sit-label { font-size: 11px; font-weight: 500; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+
+  /* PAYMENT SCREEN */
+  .price-tag { font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 600; color: var(--text); line-height: 1; margin-bottom: 4px; }
+  .price-currency { font-size: 1.5rem; vertical-align: super; color: var(--text-secondary); }
+  .price-note { font-size: 13px; color: var(--text-tertiary); margin-bottom: 2rem; }
+  .feature-list { list-style: none; margin-bottom: 2rem; }
+  .feature-item { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+  .feature-item:last-child { border-bottom: none; }
+  .feature-check { color: var(--green); font-weight: 500; flex-shrink: 0; }
+  .secure-note { font-size: 12px; color: var(--text-tertiary); text-align: center; margin-top: 12px; }
+  /* Диагонално зачеркване — не се слива с цифрите (за старата цена) */
+  .price-strike { position: relative; display: inline-block; font-size: 17px; color: var(--text-tertiary); font-weight: 500; }
+  .price-strike::after { content: ""; position: absolute; left: -3px; right: -3px; top: 52%; height: 2px; background: var(--red-text); transform: rotate(-10deg); border-radius: 2px; }
+
+  /* UPSELL */
+  .upsell { border: 2px solid var(--green); border-radius: var(--radius); padding: 22px; margin-top: 1.5rem; background: var(--green-light); }
+  .upsell-title { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--green-deep); margin-bottom: 8px; }
+  .upsell-text { font-size: 13px; color: var(--green-dark); line-height: 1.7; margin-bottom: 14px; }
+
+  /* EMAIL MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .modal-overlay.hidden { display: none; }
+  .modal { background: var(--card); border-radius: var(--radius); padding: 28px; max-width: 420px; width: 100%; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 8px; }
+  .modal-text { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; }
+  .input-field { width: 100%; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text); background: var(--bg); margin-bottom: 14px; transition: border-color 0.2s; }
+  .input-field:focus { outline: none; border-color: var(--green); }
+
+  /* LOADING */
+  .loading-wrap { padding: 3rem 0; text-align: center; }
+  .loading-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--text); margin-bottom: 8px; }
+  .loading-sub { font-size: 13px; color: var(--text-tertiary); margin-bottom: 2rem; }
+  .loading-steps { text-align: left; max-width: 300px; margin: 0 auto 2rem; }
+  .loading-step { font-size: 13px; color: var(--text-tertiary); padding: 6px 0; display: flex; align-items: center; gap: 10px; }
+  .loading-step.active { color: var(--green); font-weight: 500; }
+  .loading-step.done { color: var(--text-secondary); }
+  .step-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: background 0.3s; }
+  .loading-step.active .step-dot { background: var(--green); }
+  .loading-step.done .step-dot { background: var(--green-dark); }
+  .dots { display: flex; gap: 8px; justify-content: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 1.2s ease-in-out infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes pulse { 0%,80%,100%{opacity:0.2;transform:scale(0.8)} 40%{opacity:1;transform:scale(1)} }
+
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  @media print {
+    .no-print { display: none !important; }
+    #screen-intro,#screen-payment,#screen-areas,#screen-situations,#screen-lessons,#screen-meaning,#screen-loading { display: none !important; }
+    #screen-results { display: block !important; }
+    body { background: white !important; }
+    .container { padding: 0 !important; max-width: 100% !important; }
+    .card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; margin-bottom: 12px !important; }
+    .brand { font-size: 2rem !important; }
+    .share-block { border: 2px solid #1D9E75 !important; }
+    #natal-results.loaded, #perplexity-results.loaded { display: block !important; }
+    @page { margin: 20mm; }
+  }
+  @media (max-width: 480px) {
+    .rating-btn { width: 40px; height: 40px; font-size: 13px; }
+    .brand { font-size: 2.2rem; }
+    .routine-grid { grid-template-columns: 1fr; }
+    .price-tag { font-size: 2.8rem; }
+  }
+
+  /* ── ГЛАСОВО ВЪВЕЖДАНЕ ── */
+  .voice-btn-wrap { margin: 0 0 12px; }
+  .voice-cta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .voice-prompt { font-size: 13px; color: var(--text-secondary); }
+  .voice-btn.voice-btn-accent { background: var(--green-light); color: var(--green-dark); border-color: var(--green); font-weight: 600; }
+  .voice-btn.voice-btn-accent:hover { background: #CDEEE1; color: var(--green-dark); }
+  .field-help { font-size: 12px; color: var(--text-tertiary); line-height: 1.5; margin: -2px 0 12px; }
+  .voice-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 7px 16px; color: var(--text-tertiary); border: 1px solid var(--border); background: transparent; border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+  .voice-btn:hover { color: var(--green); border-color: var(--green); background: var(--green-light); }
+  .voice-message { font-size: 13px; color: var(--green-dark); background: var(--green-light); border-radius: 10px; padding: 10px 14px; margin-bottom: 12px; line-height: 1.6; }
+  .voice-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .voice-timer-wrap { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
+  .voice-timer-svg { width: 52px; height: 52px; transform: rotate(-90deg); }
+  .voice-timer-bg { fill: none; stroke: var(--border); stroke-width: 3; }
+  .voice-timer-fill { fill: none; stroke: var(--green); stroke-width: 3; stroke-linecap: round; stroke-dasharray: 119.4; stroke-dashoffset: 0; transition: stroke-dashoffset 1s linear; }
+  .voice-timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 10px; font-weight: 600; color: var(--green); font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+  .voice-stop-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 7px 14px; background: var(--red-light); color: var(--red-text); border: 1px solid var(--red-text); border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .voice-add-btn { font-size: 12px; padding: 6px 12px; background: var(--amber); color: var(--amber-text); border: 1px solid var(--amber-text); border-radius: 20px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+
+  /* ── СМИСЪЛ — ИЗБОР ── */
+  .choices-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1.5rem; }
+  .choice-btn { padding: 10px 18px; border-radius: 50px; border: 1.5px solid var(--border); background: var(--card); font-size: 14px; color: var(--text-secondary); cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; line-height: 1.4; }
+  .choice-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+  .choice-btn.selected { background: var(--green); border-color: var(--green); color: white; }
+</style>
+</head>
+<body>
+
+<!-- EMAIL MODAL -->
+<div class="modal-overlay hidden" id="email-modal">
+  <div class="modal">
+    <div class="modal-title">Изпрати резултата на мейла</div>
+    <p class="modal-text">Въведи имейл адреса си и ще получиш пълния анализ, рутините и дневните въпроси.</p>
+    <input type="email" class="input-field" id="email-input" placeholder="твоят@имейл.com" oninput="previewRefCode(this.value)">
+    <div id="email-error" style="font-size:13px;color:var(--red-text);margin-bottom:12px;display:none;">Моля, въведи валиден имейл адрес.</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-secondary" onclick="closeEmailModal()">Отказ</button>
+      <button class="btn btn-primary" id="send-email-btn" onclick="sendEmail()">Изпрати →</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- INTRO -->
+  <div id="screen-intro" class="screen active">
+    <div class="brand">ДА<span class="brand-accent">ВАЙ</span><span style="color:var(--green)">!</span></div>
+    <div class="brand-sub">Личен жизнен отчет</div>
+    <p class="intro-text">Честна оценка на седем области от живота ти. Задълбочен анализ на поведенческите модели, персонални рутини и ключови въпроси за всеки ден.</p>
+    <div class="card" style="background:var(--amber);border-color:transparent;margin-bottom:1rem;">
+      <div class="card-text" style="color:var(--amber-text);font-size:13px;">🕐 Повечето хора завършват за 10–12 минути. Колкото по-конкретен си, толкова по-точен е анализът.</div>
+    </div>
+    <div class="card" style="border-color:var(--border);margin-bottom:1rem;padding:14px 18px;">
+      <div class="card-text" style="font-size:13px;line-height:1.7;"><strong>🎤 Пиши или говори — твой избор.</strong> Всяко поле има бутон „Говори" — просто разкажи вместо да пишеш. Работи директно от браузъра.</div>
+    </div>
+    <div class="card" style="border-color:var(--border);margin-bottom:1rem;padding:14px 18px;">
+      <div class="card-text" style="font-size:13px;line-height:1.7;"><strong>✏️ Няма правилни отговори.</strong> 2–3 изречения са напълно достатъчни. Конкретен пример от живота ти прави анализа по-дълбок от дълъг общ текст.</div>
+    </div>
+    <div class="card" style="border-color:var(--border);margin-bottom:2rem;padding:14px 18px;">
+      <div class="card-text" style="font-size:13px;line-height:1.7;">🔒 Изследването е напълно <strong style="color:var(--green);">анонимно</strong>. Данните, които предоставяш, <em>не се запазват</em> при нас.</div>
+    </div>
+    <div class="field-label" style="margin-bottom:8px;">Имейл (за да получиш резултата)</div>
+    <input type="email" class="input-field" id="intro-email" placeholder="твоят@имейл.com" style="margin-bottom:8px;">
+    <div class="err-msg" id="intro-email-error" style="display:none;margin-bottom:14px;">Моля въведи валиден имейл.</div>
+    <button class="btn btn-primary" onclick="startAuditWithEmail()">Започни одита →</button>
+  </div>
+
+  <!-- PAYMENT -->
+  <div id="screen-payment" class="screen">
+    <div class="brand" style="margin-bottom:4px;">ДА<span class="brand-accent">ВАЙ</span><span style="color:var(--green)">!</span></div>
+    <div class="brand-sub">Личен жизнен отчет</div>
+
+    <div class="price-tag"><span class="price-currency">€</span>14.60</div>
+    <div class="price-note">≈ 28.55 лв · еднократно плащане · незабавен достъп</div>
+
+    <ul class="feature-list">
+      <li class="feature-item"><span class="feature-check">✓</span>Задълбочен анализ на 7 области от живота ти</li>
+      <li class="feature-item"><span class="feature-check">✓</span>Идентификация на поведенческите модели и самозаблудите</li>
+      <li class="feature-item"><span class="feature-check">✓</span>3 конкретни действия за всяка от 7-те области</li>
+      <li class="feature-item"><span class="feature-check">✓</span>Персонални сутрешни и вечерни рутини, съобразени с теб</li>
+      <li class="feature-item"><span class="feature-check">✓</span>3–5 ключови въпроса за ежедневна рефлексия</li>
+      <li class="feature-item"><span class="feature-check">✓</span>Резултатът на мейла + PDF за сваляне</li>
+    </ul>
+
+    <button class="btn btn-primary" id="checkout-btn" onclick="startCheckout()" style="width:100%;justify-content:center;padding:16px;">
+      Започни одита →
+    </button>
+    <div class="secure-note">🔒 Плащането е обработено от Stripe. Картовите данни не достигат до нас.</div>
+
+    <div style="margin-top:16px;text-align:center;">
+      <button class="btn btn-secondary" onclick="showScreen('intro')" style="font-size:13px;padding:10px 20px;">← Назад</button>
+    </div>
+  </div>
+
+  <!-- AREAS -->
+  <div id="screen-areas" class="screen">
+    <div class="phase-chips">
+      <div class="phase-chip done">1. Одит</div>
+      <div class="phase-chip">2. Ситуации</div>
+      <div class="phase-chip">3. Уроци</div>
+      <div class="phase-chip">4. Смисъл</div>
+    </div>
+    <div class="progress-label">
+      <span id="area-progress-text">1 от 7</span>
+      <span id="area-progress-pct">14%</span>
+    </div>
+    <div class="progress-line"><div class="progress-fill" id="progress-fill" style="width:14%"></div></div>
+    <div class="area-title" id="area-name"></div>
+    <div class="area-question" id="area-question"></div>
+    <div class="field-label">Оценка от 1 до 10</div>
+    <div class="rating-grid" id="rating-grid"></div>
+    <div class="field-label">Опиши честно</div>
+    <div class="field-help">💡 2–3 изречения са достатъчни. Конкретен пример работи по-добре от дълъг текст.</div>
+    <textarea id="area-desc" placeholder="Бъди конкретен. Детайлите правят анализа точен..."></textarea>
+    <div>
+      <button class="btn btn-secondary" id="btn-back" onclick="prevArea()">Назад</button>
+      <button class="btn btn-primary" onclick="nextArea()">Напред →</button>
+    </div>
+  </div>
+
+  <!-- SITUATIONS -->
+  <div id="screen-situations" class="screen">
+    <div class="phase-chips">
+      <div class="phase-chip done">1. Одит</div>
+      <div class="phase-chip active">2. Ситуации</div>
+      <div class="phase-chip">3. Уроци</div>
+      <div class="phase-chip">4. Смисъл</div>
+    </div>
+    <div class="area-title" style="margin-bottom:8px;">Трите ситуации</div>
+    <p class="card-text" style="margin-bottom:8px;">Именно в трудните моменти най-ясно се виждат моделите, които ни управляват. Опиши три конкретни ситуации, в които си се почувствал блокиран, разочарован или нещата не са се развили така, както си искал. Ако се сетиш за още, можеш да добавиш още една-две ситуации. Това ще направи анализа ти още по-точен.</p>
+    <div class="field-help" style="margin-bottom:1.5rem;">Няма правилни и грешни отговори. Най-ценен е първият пример, който ти идва наум.</div>
+    <div id="situations-container"></div>
+    <div>
+      <button class="btn btn-secondary" onclick="goToLastArea()">Назад</button>
+      <button class="btn btn-primary" onclick="nextToLessons()">Напред →</button>
+    </div>
+  </div>
+
+  <!-- LESSONS -->
+  <div id="screen-lessons" class="screen">
+    <div class="phase-chips">
+      <div class="phase-chip done">1. Одит</div>
+      <div class="phase-chip done">2. Ситуации</div>
+      <div class="phase-chip active">3. Уроци</div>
+      <div class="phase-chip">4. Смисъл</div>
+    </div>
+    <div class="area-title" style="margin-bottom:1.5rem;">Съжаления, Гордост и Уроци</div>
+    <div class="sit-block">
+      <div class="sit-label">Нещата, за които най-много съжаляваш до момента</div>
+      <textarea id="regrets" placeholder="Какво би направил по различен начин? Кое те измъчва когато се сетиш за него?"></textarea>
+    </div>
+    <div class="sit-block">
+      <div class="sit-label">Най-гордите ти моменти</div>
+      <textarea id="proud" placeholder="Кога си бил най-добрата версия на себе си?"></textarea>
+    </div>
+    <div class="sit-block">
+      <div class="sit-label">Уроците по трудния начин</div>
+      <textarea id="lessons-text" placeholder="Какво разбра за живота, за себе си, за другите — по начин, който само преживяването може да научи?"></textarea>
+    </div>
+    <div>
+      <button class="btn btn-secondary" onclick="showScreen('situations')">Назад</button>
+      <button class="btn btn-primary" onclick="goToMeaning()">Напред →</button>
+    </div>
+  </div>
+
+  <!-- MEANING -->
+  <div id="screen-meaning" class="screen">
+    <div class="phase-chips">
+      <div class="phase-chip done">1. Одит</div>
+      <div class="phase-chip done">2. Ситуации</div>
+      <div class="phase-chip done">3. Уроци</div>
+      <div class="phase-chip active">4. Смисъл</div>
+    </div>
+    <div class="area-title" style="margin-bottom:6px;">Смисъл</div>
+    <p class="area-question" style="margin-bottom:2rem;">Последният въпрос — не какво правиш, а на какво стъпваш, докато го правиш.</p>
+
+    <div class="sit-block">
+      <div class="sit-label">Когато всичко се обърка, на какво разчиташ най-много? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери до 2)</span></div>
+      <div class="choices-grid" id="m-q1">
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Контрол</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Другите хора</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Работата</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Парите</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q1',this,2)">Вътрешните си принципи</button>
+      </div>
+    </div>
+
+    <div class="sit-block">
+      <div class="sit-label">Кое е по-болезнено за теб? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери до 2)</span></div>
+      <div class="choices-grid" id="m-q2">
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да загубя пари</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да загубя репутация</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да загубя връзка</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q2',this,2)">Да изгубя себе си</button>
+      </div>
+    </div>
+
+    <div class="sit-block">
+      <div class="sit-label">Кога се чувстваш най-истински жив? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери до 2)</span></div>
+      <div class="choices-grid" id="m-q3">
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато постигам</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато помагам</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато съм свободен</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q3',this,2)">Когато съм свързан с нещо по-голямо от мен</button>
+      </div>
+    </div>
+
+    <div class="sit-block">
+      <div class="sit-label">Кое от изреченията най-точно те описва в момента? <span style="font-size:11px;color:var(--text-tertiary);font-weight:400;">(избери 1)</span></div>
+      <div class="choices-grid" id="m-q4" style="flex-direction:column;">
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Още не съм постигнал това, което искам — и не съм сигурен как</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Постигнах това, което исках — но щастието не дойде с него</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Чувствам се уморен, но не знам точно защо</button>
+        <button class="choice-btn" onclick="toggleChoice('m-q4',this,1)" style="text-align:left;border-radius:12px;">Имам добър живот, но се питам — това ли е всичко?</button>
+      </div>
+    </div>
+
+    <div id="meaning-error" style="display:none;font-size:13px;color:var(--red-text);background:var(--red-light);padding:10px 14px;border-radius:10px;margin-bottom:14px;"></div>
+    <div>
+      <button class="btn btn-secondary" onclick="showScreen('lessons')">Назад</button>
+      <button class="btn btn-primary" onclick="validateAndGenerateAnalysis()">Покажи анализа ми →</button>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="screen-loading" class="screen">
+    <div class="loading-wrap">
+      <div class="loading-title">Анализираме...</div>
+      <div class="loading-sub">Определяме моделите в отговорите ти.</div>
+      <div class="loading-steps">
+        <div class="loading-step active" id="lstep-1"><div class="step-dot"></div>Идентифициране на поведенчески модели</div>
+        <div class="loading-step" id="lstep-2"><div class="step-dot"></div>Анализ на самозаблудите</div>
+        <div class="loading-step" id="lstep-3"><div class="step-dot"></div>Изграждане на персонални рутини</div>
+        <div class="loading-step" id="lstep-4"><div class="step-dot"></div>Формулиране на дневните въпроси</div>
+        <div class="loading-step" id="lstep-5"><div class="step-dot"></div>Финализиране на препоръките</div>
+      </div>
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="screen-results" class="screen">
+    <div class="brand" style="margin-bottom:4px;">Готово<span class="brand-accent">.</span></div>
+    <p class="card-text" style="margin-bottom:2rem;">Ето честната картина. Не удобна — вярна.</p>
+    <div id="results-content"></div>
+
+    <div class="card no-print" style="margin-top:1.5rem;">
+      <div class="card-title" style="margin-bottom:12px;">Запази резултата</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="openEmailModal()">📧 Изпрати на мейл</button>
+        <button class="btn btn-ghost" onclick="trackEvent('pdf_download', {}); window.print()">⬇ Свали като PDF</button>
+      </div>
+    </div>
+
+    <div class="upsell no-print" id="natal-upsell">
+      <div class="upsell-title">Задълбочен анализ с натална карта</div>
+      <div class="upsell-text">Одитът показва поведенческите модели. Наталната карта показва архетипните — вродените сили и предизвикателства. Заедно дават пълна картина на кой си и защо реагираш така.</div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="payForNatal()">Добави натална карта →</button>
+        <div style="font-size:13px;color:var(--green-dark);"><span style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;">€8,90</span> · еднократно</div>
+      </div>
+
+      <div id="natal-form" style="display:none;margin-top:1.5rem;text-align:left;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div>
+            <div class="field-label">Дата на раждане</div>
+            <input type="date" id="natal-date" class="textarea" style="padding:10px 12px;height:auto;" max="2010-12-31" min="1930-01-01">
+          </div>
+          <div>
+            <div class="field-label">Час на раждане</div>
+            <input type="time" id="natal-time" class="textarea" style="padding:10px 12px;height:auto;" value="12:00">
+          </div>
+        </div>
+        <div style="margin-bottom:10px;">
+          <div class="field-label">Град на раждане</div>
+          <input type="text" id="natal-city" class="textarea" style="padding:10px 12px;height:auto;" placeholder="напр. Sofia или London">
+        </div>
+        <div style="margin-bottom:10px;">
+          <div class="field-label">Часова зона (UTC офсет)</div>
+          <select id="natal-tzone" class="textarea" style="padding:10px 12px;height:auto;">
+            <option value="2" selected>UTC+2 (България, Гърция)</option>
+            <option value="1">UTC+1 (Германия, Франция)</option>
+            <option value="0">UTC+0 (Великобритания)</option>
+            <option value="3">UTC+3 (Турция, Русия-Москва)</option>
+            <option value="-5">UTC-5 (Ню Йорк)</option>
+            <option value="-8">UTC-8 (Лос Анджелис)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="natal-submit-btn" onclick="fetchNatalChart()" style="width:100%;">Изчисли натална карта →</button>
+        <div id="natal-error" style="display:none;color:#A32D2D;font-size:13px;margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <div id="natal-results" style="display:none;margin-top:1rem;"></div>
+
+    <div class="upsell no-print" id="numerology-upsell" style="background:var(--purple-light);border-color:var(--purple-text);">
+      <div class="upsell-title" style="color:var(--purple-text);">Още една гледна точка — Нумерологичен одит</div>
+      <div class="upsell-text" style="color:var(--purple-text);">Одитът показва как живееш днес. Нумерологията показва с каква природа си роден — числата зад датата и името ти. Различен инструмент, допълваща картина.</div>
+      <div style="font-size:13px;color:var(--purple-text);font-weight:600;margin-bottom:12px;">-25% за теб, защото току-що завърши Одита</div>
+      <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="goNumerology()" style="background:var(--purple-text);">Добави нумерологичен одит →</button>
+        <div style="display:flex;align-items:baseline;gap:8px;">
+          <span style="font-size:14px;color:var(--text-tertiary);text-decoration:line-through;">12,90 €</span>
+          <span style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;color:var(--purple-text);">9,68 €</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERPLEXITY DEEP ANALYSIS -->
+    <div class="upsell no-print" id="perplexity-upsell" style="display:none;">
+      <div class="upsell-title">🎯 Конкретни техники от науката</div>
+      <div class="upsell-text">Търсим в реални изследвания, книги и подкасти конкретни техники за твоите поведенчески модели. Три действия, приложими още днес — плюс библиотека с източници, синтезирана специално за теб.</div>
+      <div style="font-size:13px;color:var(--green-dark);font-weight:500;margin-bottom:14px;">🎁 Даваме ги като <strong>БОНУС</strong> за теб — <em>ДАВАЙ напред и ти!</em></div>
+      <button class="btn btn-primary" id="perplexity-btn" onclick="fetchPerplexityAnalysis()">Вземи техниките →</button>
+      <div id="perplexity-error" style="display:none;color:#A32D2D;font-size:13px;margin-top:8px;"></div>
+    </div>
+
+    <div id="perplexity-results" style="display:none;margin-top:1rem;"></div>
+
+    <div class="divider no-print"></div>
+    <button class="btn btn-secondary no-print" onclick="startOver()">Нов одит →</button>
+  </div>
+
+</div>
+
+<script>
+// ─── КОНФИГУРАЦИЯ ────────────────────────────────────────────────────────────
+const CONFIG = {
+  stripePublicKey: 'pk_live_51T5Lz2GlIluEKXB5iLgi60vu6gWOD5pyay8c6RQg72hlqkoW8Ouf0RYMlIHM3E9DYUBRw3RckdQFAA8hF4spCOD100RiN6rJdM',
+  paymentLink: 'https://buy.stripe.com/00w4gz4U8ePs6hA6X07Vm02',
+  natalPaymentLink: 'https://buy.stripe.com/9B6dR92M06iWeO6gxA7Vm01',
+  priceId: 'price_1TWuHuGlIluEKXB58Mwxstvx',
+  workerUrl: 'https://davai-audit.kaloyan-5b3.workers.dev',
+  siteUrl: 'https://odit.davai.v.bg'
+};
+
+// ─── META ATTRIBUTION (fbclid/_fbc/_fbp) — за Meta CAPI Purchase tracking ────
+function getCookie(name) {
+  const match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return match ? match.pop() : null;
+}
+function getFbParams() {
+  return {
+    fbclid: new URLSearchParams(window.location.search).get('fbclid') || null,
+    fbc: getCookie('_fbc'),
+    fbp: getCookie('_fbp')
+  };
+}
+// Промо кодът трябва да преживее bypass redirect-а (пълно презареждане на страницата,
+// URL-ът вече няма ?promo=) — иначе payForNatal() губи voucherCode и иска реално плащане.
+const LS_PROMO = 'davai_odit_promo';
+var promoCode = new URLSearchParams(window.location.search).get('promo') || null;
+try {
+  if (promoCode) sessionStorage.setItem(LS_PROMO, promoCode);
+  else promoCode = sessionStorage.getItem(LS_PROMO) || null;
+} catch(e) {}
+
+// ─── ANALYTICS (GA4 / gtag) ──────────────────────────────────────────────────
+// funnel_type разграничава двете фунии в общия GA4 property (един Measurement ID).
+// ⚠️ В davai-numerology.html този FUNNEL_TYPE трябва да е 'numerology' (не 'audit').
+const FUNNEL_TYPE = 'audit';
+const DEV = /localhost|127\.0\.0\.1/.test(location.hostname) || location.protocol === 'file:' || new URLSearchParams(location.search).has('debug');
+function trackEvent(eventName, eventData) {
+  const data = Object.assign({ funnel_type: FUNNEL_TYPE, timestamp: new Date().toISOString(), page_url: location.href }, eventData || {});
+  if (DEV) { data.debug_mode = true; console.log('[track]', eventName, data); }
+  try { if (typeof window.gtag === 'function') window.gtag('event', eventName, data); } catch(e) {}
+}
+let _odit50 = false;
+
+
+
+// ─── ДАННИ ───────────────────────────────────────────────────────────────────
+const AREAS = [
+  { key: 'physical', name: 'Физическо здраве',
+    q: 'Как е физическото ти здраве в момента? Опиши енергийното си ниво, съня, движението, болките и навиците около тялото си.',
+    ph: 'Напр. Спя добре, но имам хронично напрежение в гърба. Спортувам 3 пъти седмично.' },
+  { key: 'mental', name: 'Психическо здраве',
+    q: 'Как е психическото ти здраве? Опиши тревожността, настроението, стреса, как се справяш с трудните емоции.',
+    ph: 'Напр. Като цяло съм добре, но под стрес стигам до преумора. Тревожността идва на вълни.' },
+  { key: 'relationship', name: 'Романтична връзка',
+    q: 'Как е романтичната ти връзка? Ако нямаш такава, опиши защо и какво чувстваш. Ако имаш — какво работи, какво не работи, и какво избягваш да казваш.',
+    ph: 'Напр. С партньора сме близки, но има период на дистанция и избягвам да говоря за някои неща.' },
+  { key: 'friendships', name: 'Приятелства',
+    q: 'Как са приятелствата ти? С кого прекарваш времето, колко дълбоки са тези връзки, издигат ли те или те дърпат надолу?',
+    ph: 'Напр. Имам малко близки хора, но рядко намирам време за тях.' },
+  { key: 'career', name: 'Кариерно удовлетворение',
+    q: 'Как е кариерното ти удовлетворение? Опиши смисъла, ростежа, парите, отношенията с колеги. Кое те мотивира и кое те изтощава?',
+    ph: 'Напр. Работата ми върви, но губя смисъл в ежедневието ѝ.' },
+  { key: 'finances', name: 'Финанси',
+    q: 'Как са финансите ти? Опиши доходите, разходите, спестяванията, дълговете и страховете около парите.',
+    ph: 'Напр. Стабилен съм, но не инвестирам и се страхувам от неочаквани разходи.' },
+  { key: 'fun', name: 'Забавление и радост',
+    q: 'Колко радост и забавление имаш? Кога последно си се смял от сърце? Какво те зарежда и колко често го правиш?',
+    ph: 'Напр. Рядко правя неща само за себе си. Забравил съм какво ме зарежда.' }
+];
+
+let current = 0;
+let answers = {};
+let paymentVerified = false;
+let sitCount = 3;
+let oditEmail = null; // задължителен, събран на интро екрана — ключ за кръстосания анализ (summary:*:{email})
+// Имейлът трябва да преживее пълния page reload при Stripe/bypass redirect (иначе се губи
+// след връщане и generateFullAnalysis() тръгва без email — виж checkPaymentReturn()).
+const LS_ODIT_EMAIL = 'davai_odit_email';
+try { oditEmail = sessionStorage.getItem(LS_ODIT_EMAIL) || null; } catch(e) {}
+let analysisResult = null;
+let natalEmailHTML = '';    // Съхранява натален анализ за имейл
+let natalReportText = null; // текстът на наталния анализ — за бутона „Изпрати на имейл" (бърз, без модал)
+let perplexityEmailHTML = ''; // Съхранява техниките за имейл
+
+// ─── СМИСЪЛ — МНОГОКРАТЕН ИЗБОР ─────────────────────────────────────────────
+function toggleChoice(groupId, btn, maxSelect) {
+  const group = document.getElementById(groupId);
+  if (btn.classList.contains('selected')) {
+    btn.classList.remove('selected');
+    return;
+  }
+  if (maxSelect === 1) {
+    group.querySelectorAll('.choice-btn.selected').forEach(function(b) { b.classList.remove('selected'); });
+  } else if (group.querySelectorAll('.choice-btn.selected').length >= maxSelect) {
+    return;
+  }
+  btn.classList.add('selected');
+}
+
+function goToMeaning() {
+  const reg = document.getElementById('regrets').value.trim();
+  const pr = document.getElementById('proud').value.trim();
+  const ls = document.getElementById('lessons-text').value.trim();
+  if (reg.length < 10 || pr.length < 10 || ls.length < 10) {
+    alert('Моля, попълни и трите полета.');
+    return;
+  }
+  answers.regrets = reg; answers.proud = pr; answers.lessons = ls;
+  showScreen('meaning');
+}
+
+function validateAndGenerateAnalysis() {
+  const errEl = document.getElementById('meaning-error');
+  const q1 = document.querySelectorAll('#m-q1 .choice-btn.selected');
+  const q2 = document.querySelectorAll('#m-q2 .choice-btn.selected');
+  const q3 = document.querySelectorAll('#m-q3 .choice-btn.selected');
+  const q4 = document.querySelectorAll('#m-q4 .choice-btn.selected');
+  if (q1.length < 1 || q2.length < 1 || q3.length < 1 || q4.length !== 1) {
+    errEl.textContent = 'Моля, отговори на всичките четири въпроса.';
+    errEl.style.display = 'block';
+    return;
+  }
+  errEl.style.display = 'none';
+  answers.meaning = {
+    q1: Array.from(q1).map(function(b) { return b.textContent; }),
+    q2: Array.from(q2).map(function(b) { return b.textContent; }),
+    q3: Array.from(q3).map(function(b) { return b.textContent; }),
+    q4: q4[0].textContent
+  };
+  if (sessionStorage.getItem('davai_paid') === '1') {
+    // Вече платено (cross-domain upsell arrival — виж checkPaymentReturn()) — направо Фаза 2, без нов paywall
+    generateFullAnalysis(sessionStorage.getItem('davai_sid') || null);
+  } else {
+    generateAnalysis();
+  }
+}
+
+// ─── НАВИГАЦИЯ ───────────────────────────────────────────────────────────────
+function showScreen(id) {
+  stopVoice();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  window.scrollTo(0, 0);
+  setTimeout(initVoiceInputs, 50);
+}
+
+// ─── СТАРТ НА ОДИТА (без предварително плащане) ──────────────────────────────
+function startAuditWithEmail() {
+  const val = (document.getElementById('intro-email').value || '').trim();
+  const err = document.getElementById('intro-email-error');
+  if (!val) {
+    err.textContent = 'Въведи имейл за да получиш резултата и да свържем анализите си.';
+    err.style.display = 'block';
+    return;
+  }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)) {
+    err.textContent = 'Моля въведи валиден имейл.';
+    err.style.display = 'block';
+    return;
+  }
+  err.style.display = 'none';
+  oditEmail = val;
+  try { sessionStorage.setItem(LS_ODIT_EMAIL, oditEmail); } catch(e) {}
+  startAudit();
+}
+
+function startAudit() {
+  trackEvent('quiz_started', {});
+  buildSituations();
+  showScreen('areas');
+  renderArea();
+}
+
+// ─── ПЛАЩАНЕ ЗА ПЪЛНИ РЕЗУЛТАТИ ──────────────────────────────────────────────
+async function payForFullResults() {
+  trackEvent('buy_clicked', { value: 14.60, currency: 'EUR' });
+  // Пълният анализ се генерира СЛЕД плащане — пазим само отговорите
+  try { sessionStorage.setItem('davai_answers', JSON.stringify(answers)); } catch(e) {}
+
+  try {
+    const fb = getFbParams();
+    const res = await fetch(CONFIG.workerUrl + '/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        priceId: CONFIG.priceId,
+        successUrl: (location.origin + location.pathname) + '?payment=success&session_id={CHECKOUT_SESSION_ID}',
+        cancelUrl: (location.origin + location.pathname),
+        voucherCode: promoCode || undefined,
+        email: oditEmail || undefined,
+        fbclid: fb.fbclid, fbc: fb.fbc, fbp: fb.fbp
+      })
+    });
+    const data = await res.json();
+    if (data.url) {
+      if (data.bypass) sessionStorage.setItem('davai_paid', '1'); // 100% код — няма session_id
+      window.location.href = data.url;
+      return;
+    }
+  } catch(e) {}
+
+  // Fallback ако Worker не отговори
+  window.location.href = CONFIG.paymentLink;
+}
+
+// ─── ПРОВЕРКА НА ПЛАЩАНЕТО СЛЕД REDIRECT ─────────────────────────────────────
+async function checkPaymentReturn() {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get('payment');
+
+  if (status === 'success') {
+    const sid = params.get('session_id') || null;
+    const unlockToken = params.get('unlock_token') || null;
+    window.history.replaceState({}, document.title, window.location.pathname);
+    try { answers = JSON.parse(sessionStorage.getItem('davai_answers') || '{}'); } catch(e) { answers = {}; }
+    const hasAnswers = answers && Object.keys(answers).length > 0;
+    const allowed = sid || sessionStorage.getItem('davai_paid') === '1';
+    if (hasAnswers && allowed) {
+      sessionStorage.setItem('davai_paid', '1');
+      if (sid) sessionStorage.setItem('davai_sid', sid);
+      trackEvent('purchase', { value: 14.60, currency: 'EUR' });
+      generateFullAnalysis(sid);              // Фаза 2 — генерира се сега, след плащане
+    } else if (sid) {
+      // Платено е (има session_id от Stripe), но няма локални отговори — плащане,
+      // инициирано от друг домейн (напр. upsell от Нумерологичния одит). Имейлът идва
+      // от Stripe и се предпопълва в интрото — потребителят потвърждава/коригира го
+      // и продължава сам (полето остава задължителна стъпка, никога не се прескача).
+      sessionStorage.setItem('davai_paid', '1');
+      sessionStorage.setItem('davai_sid', sid);
+      trackEvent('purchase', { value: 14.60, currency: 'EUR' });
+      answers = {};
+      try {
+        const eres = await fetch(CONFIG.workerUrl + '/session-email', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sid })
+        });
+        const edata = await eres.json();
+        if (edata.email) oditEmail = edata.email;
+      } catch(e) {}
+      showScreen('intro');
+      if (oditEmail) document.getElementById('intro-email').value = oditEmail;
+      alert('Плащането е потвърдено! Провери имейла отдолу (или го промени) и натисни „Започни одита →", за да продължиш към въпросите.');
+    } else if (unlockToken) {
+      // Cross-domain 100% промо bypass (напр. от Нумерологичния одит) — sessionStorage не се
+      // пренася между домейни и bypass няма реален Stripe session_id, затова токенът се
+      // верифицира еднократно през Worker-а, преди да се отключи съдържанието. Имейлът (ако
+      // токенът носи такъв) се предпопълва в интрото — полето остава задължителна стъпка,
+      // никога не се прескача директно към въпросника.
+      try {
+        const vres = await fetch(CONFIG.workerUrl + '/verify-unlock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: unlockToken, product: 'odit' })
+        });
+        const vdata = await vres.json();
+        if (vdata.valid) {
+          sessionStorage.setItem('davai_paid', '1');
+          trackEvent('purchase', { value: 14.60, currency: 'EUR' });
+          answers = {};
+          if (vdata.email) oditEmail = vdata.email;
+          showScreen('intro');
+          if (oditEmail) document.getElementById('intro-email').value = oditEmail;
+          alert('Плащането е потвърдено! Провери имейла отдолу (или го промени) и натисни „Започни одита →", за да продължиш към въпросите.');
+        } else {
+          showScreen('intro');
+        }
+      } catch(e) { showScreen('intro'); }
+    } else {
+      showScreen('intro');
+    }
+    return;
+  }
+
+  if (status === 'cancelled') {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    showScreen('intro');
+    return;
+  }
+
+  if (params.get('natal') === 'success') {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    try {
+      const savedResult = sessionStorage.getItem('davai_analysis');
+      const savedAnswers = sessionStorage.getItem('davai_answers');
+      if (savedResult) {
+        analysisResult = JSON.parse(savedResult);
+        answers = JSON.parse(savedAnswers || '{}');
+        paymentVerified = true;
+        renderResults(analysisResult);
+        setTimeout(function() {
+          const upsell = document.getElementById('natal-upsell');
+          if (upsell) { upsell.style.display = 'block'; }
+          toggleNatalForm();
+          document.getElementById('natal-upsell').scrollIntoView({ behavior: 'smooth' });
+        }, 400);
+      } else {
+        showScreen('intro');
+      }
+    } catch(e) { showScreen('intro'); }
+    return;
+  }
+
+  // Презареждане след успешно плащане → покажи вече генерирания пълен анализ
+  const savedFull = sessionStorage.getItem('davai_analysis');
+  if (savedFull) {
+    try {
+      analysisResult = JSON.parse(savedFull);
+      answers = JSON.parse(sessionStorage.getItem('davai_answers') || '{}');
+      paymentVerified = true;
+      renderResults(analysisResult);
+      return;
+    } catch(e) {}
+  }
+  // Плащането е минало, но Фаза 2 не е завършила (грешка) → повтори автоматично
+  if (sessionStorage.getItem('davai_paid') === '1') {
+    try { answers = JSON.parse(sessionStorage.getItem('davai_answers') || '{}'); } catch(e) { answers = {}; }
+    if (answers && Object.keys(answers).length > 0) {
+      generateFullAnalysis(sessionStorage.getItem('davai_sid') || null);
+    }
+  }
+}
+
+
+// ─── НОВ ОДИТ (изчиства запазеното състояние) ────────────────────────────────
+function startOver() {
+  try {
+    sessionStorage.removeItem('davai_analysis');
+    sessionStorage.removeItem('davai_answers');
+    sessionStorage.removeItem('davai_paid');
+    sessionStorage.removeItem('davai_sid');
+  } catch(e) {}
+  window.location.href = window.location.pathname;
+}
+
+// ─── НАТАЛНА КАРТА — ПЛАЩАНЕ ─────────────────────────────────────────────────
+async function payForNatal() {
+  trackEvent('natal_buy_clicked', { value: 8.90, currency: 'EUR' });
+  if (!CONFIG.natalPaymentLink || CONFIG.natalPaymentLink === 'NATAL_PAYMENT_LINK_HERE') {
+    // Без конфигуриран линк — показва формата директно (за тест)
+    toggleNatalForm();
+    return;
+  }
+  try {
+    sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
+    sessionStorage.setItem('davai_answers', JSON.stringify(answers));
+  } catch(e) {}
+  // Програматичен checkout — за пълна Meta attribution (fbclid/fbc/fbp), fallback към Payment Link
+  try {
+    const fb = getFbParams();
+    const res = await fetch(CONFIG.workerUrl + '/create-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: 890,
+        productName: 'DAVAI! Natal Chart',
+        product: 'natal',
+        successUrl: CONFIG.siteUrl + '?natal=success',
+        cancelUrl: CONFIG.siteUrl,
+        voucherCode: promoCode || undefined,
+        email: oditEmail || undefined,
+        fbclid: fb.fbclid, fbc: fb.fbc, fbp: fb.fbp
+      })
+    });
+    const data = await res.json();
+    if (data.url) { window.location.href = data.url; return; }
+    throw new Error(data.error || 'no url');
+  } catch(e) {
+    window.location.href = CONFIG.natalPaymentLink; // краен fallback
+  }
+}
+
+// ─── КРОСЕЛ КЪМ НУМЕРОЛОГИЧНИЯ ОДИТ (-25%, само в тази посока) ───────────────
+function goNumerology() {
+  trackEvent('numerology_upsell_clicked', { value: 9.68, currency: 'EUR' });
+  var fb = getFbParams();
+  var url = 'https://natal.davai.v.bg/?promo=DAVAI-AUDIT25';
+  if (oditEmail) url += '&email=' + encodeURIComponent(oditEmail);
+  // _fbc/_fbp са бисквитки на ТОЗИ домейн — не се четат от natal.davai.v.bg след redirect,
+  // затова ги пренасяме изрично през URL (natal.davai.v.bg ги подхваща и пази до реалния checkout).
+  if (fb.fbclid) url += '&fbclid=' + encodeURIComponent(fb.fbclid);
+  if (fb.fbc) url += '&fbc=' + encodeURIComponent(fb.fbc);
+  if (fb.fbp) url += '&fbp=' + encodeURIComponent(fb.fbp);
+  window.location.href = url;
+}
+
+// ─── ОБЛАСТИ ─────────────────────────────────────────────────────────────────
+function sitBlockHTML(n) {
+  return '<div class="sit-block" id="sit-block-' + n + '"><div class="sit-label">Ситуация ' + n +
+    (n > 3 ? ' <span style="color:var(--text-tertiary);font-weight:400;">(по избор)</span>' : '') + '</div>' +
+    '<textarea id="sit-' + n + '" placeholder="Опиши конкретно — какво се случи, как реагира, какъв беше резултатът..."></textarea></div>';
+}
+
+function buildSituations() {
+  const c = document.getElementById('situations-container');
+  sitCount = 3;
+  c.innerHTML = [1,2,3].map(sitBlockHTML).join('') +
+    '<button type="button" class="btn btn-secondary" id="add-situation-btn" onclick="addSituation()" style="margin:4px 0 12px;background:var(--green-light);color:var(--green-dark);border:1px solid var(--green);font-weight:600;">+ Добави още една ситуация</button>' +
+    '<div class="field-help">💡 Добави поне 3 ситуации — колкото повече споделиш, толкова по-точен е анализът.</div>';
+  setTimeout(initVoiceInputs, 50);
+}
+
+function addSituation() {
+  if (sitCount >= 5) return;
+  sitCount++;
+  const btn = document.getElementById('add-situation-btn');
+  btn.insertAdjacentHTML('beforebegin', sitBlockHTML(sitCount));
+  if (sitCount >= 5) btn.style.display = 'none';
+  setTimeout(initVoiceInputs, 50);
+}
+
+function renderArea() {
+  const a = AREAS[current];
+  const pct = Math.round(((current + 1) / AREAS.length) * 100);
+  document.getElementById('area-progress-text').textContent = (current + 1) + ' от ' + AREAS.length;
+  document.getElementById('area-progress-pct').textContent = pct + '%';
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('area-name').textContent = a.name;
+  document.getElementById('area-question').textContent = a.q;
+  document.getElementById('area-desc').value = answers[a.key]?.desc || '';
+  document.getElementById('area-desc').placeholder = a.ph || 'Бъди конкретен. Детайлите правят анализа точен...';
+  const saved = answers[a.key]?.rating || null;
+  document.getElementById('rating-grid').innerHTML = [1,2,3,4,5,6,7,8,9,10].map(n =>
+    '<button class="rating-btn' + (saved === n ? ' selected' : '') + '" onclick="selectRating(' + n + ')">' + n + '</button>'
+  ).join('');
+  document.getElementById('btn-back').style.visibility = current === 0 ? 'hidden' : 'visible';
+  setTimeout(initVoiceInputs, 50);
+}
+
+function selectRating(n) {
+  if (!answers[AREAS[current].key]) answers[AREAS[current].key] = {};
+  answers[AREAS[current].key].rating = n;
+  document.querySelectorAll('.rating-btn').forEach((b, i) => b.classList.toggle('selected', i + 1 === n));
+}
+
+function saveCurrentArea() {
+  const a = AREAS[current];
+  if (!answers[a.key]) answers[a.key] = {};
+  answers[a.key].desc = document.getElementById('area-desc').value.trim();
+}
+
+function nextArea() {
+  const a = AREAS[current];
+  saveCurrentArea();
+  if (!answers[a.key]?.rating) { alert('Моля, дай оценка от 1 до 10.'); return; }
+  if ((answers[a.key]?.desc || '').length < 20) { alert('Моля, опиши ситуацията с поне няколко думи.'); return; }
+  if (!_odit50 && (current + 1) >= AREAS.length / 2) { _odit50 = true; trackEvent('quiz_progress_50', {}); }
+  if (current < AREAS.length - 1) { current++; renderArea(); }
+  else { showScreen('situations'); }
+}
+
+function prevArea() { saveCurrentArea(); if (current > 0) { current--; renderArea(); } }
+function goToLastArea() { current = AREAS.length - 1; showScreen('areas'); renderArea(); }
+
+function nextToLessons() {
+  const sits = [];
+  for (let n = 1; n <= 5; n++) { const el = document.getElementById('sit-' + n); if (el) sits.push(el.value.trim()); }
+  const filled = sits.filter(s => s.length > 10);
+  if (filled.length < 3) { alert('Моля, опиши поне три ситуации.'); return; }
+  answers.situations = sits;
+  showScreen('lessons');
+}
+
+// ─── LOADING ─────────────────────────────────────────────────────────────────
+function animateLoadingSteps() {
+  let i = 0;
+  const interval = setInterval(() => {
+    if (i > 0) {
+      document.getElementById('lstep-' + i).classList.remove('active');
+      document.getElementById('lstep-' + i).classList.add('done');
+    }
+    i++;
+    if (i <= 5) document.getElementById('lstep-' + i).classList.add('active');
+    else clearInterval(interval);
+  }, 4500);
+  return interval;
+}
+
+// ─── ОБОБЩЕНИЯ ЗА ПРОМПТА (общи за двете фази) ───────────────────────────────
+function buildSummaries() {
+  const aSum = AREAS.map(a => a.name + ' [' + (answers[a.key]?.rating || '?') + '/10]: ' + (answers[a.key]?.desc || '')).join('\n\n');
+  const sSum = (answers.situations || []).filter(s => s.length > 5).map((s, i) => 'Ситуация ' + (i+1) + ': ' + s).join('\n\n');
+  const m = answers.meaning || {};
+  const mSum = [
+    'На какво разчита най-много: ' + (m.q1 || []).join(' и '),
+    'Кое е по-болезнено: ' + (m.q2 || []).join(' и '),
+    'Кога се чувства най-жив: ' + (m.q3 || []).join(' и '),
+    'Жизнен етап (самоописание): ' + (m.q4 || '')
+  ].filter(function(l) { return !l.endsWith(': '); }).join('\n');
+  return { aSum, sSum, mSum };
+}
+
+// ─── ФАЗА 1: БЕЗПЛАТНО PREVIEW (една малка бърза заявка) ──────────────────────
+async function generateAnalysis() {
+  const reg = document.getElementById('regrets').value.trim();
+  const pr = document.getElementById('proud').value.trim();
+  const ls = document.getElementById('lessons-text').value.trim();
+  if (reg.length < 10 || pr.length < 10 || ls.length < 10) { alert('Моля, попълни и трите полета.'); return; }
+  answers.regrets = reg; answers.proud = pr; answers.lessons = ls;
+  trackEvent('quiz_completed', {});
+  // Запази отговорите — нужни за Фаза 2 след връщане от плащане
+  try { sessionStorage.setItem('davai_answers', JSON.stringify(answers)); } catch(e) {}
+
+  showScreen('loading');
+  const loadingTimer = animateLoadingSteps();
+  const { aSum, sSum, mSum } = buildSummaries();
+
+  const freeBody = JSON.stringify({ prompt: buildPromptFree(aSum, sSum, mSum), max_tokens: 2200 });
+  try {
+    let free = null, lastErr = '';
+    for (let attempt = 0; attempt < 2 && !free; attempt++) {
+      const res = await fetch(CONFIG.workerUrl + '/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: freeBody });
+      const data = await res.json();
+      if (data.error) { lastErr = data.error; continue; }
+      free = repairAndParseJSON(data.content);
+    }
+    if (!free) throw new Error(lastErr || 'Неуспешен анализ — опитай отново.');
+    clearInterval(loadingTimer);
+    analysisResult = free;
+    renderPreview(free);
+  } catch(e) {
+    clearInterval(loadingTimer);
+    showScreen('results');
+    document.getElementById('results-content').innerHTML =
+      '<div class="card"><div class="card-title">Грешка</div><div class="card-text">Нещо се обърка: ' + e.message + '</div></div>';
+  }
+}
+
+// Вика верифицирания /analyze-paid при плащане; ако Worker-ът още няма endpoint-а (404) —
+// временно пада към /analyze (същата сигурност като досега, до Worker deploy-а).
+async function callAnalyzePaid(body, sid) {
+  if (sid) {
+    const b = Object.assign({}, body, { session_id: sid });
+    const r = await fetch(CONFIG.workerUrl + '/analyze-paid', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b) });
+    if (r.status !== 404) return r.json();   // 200 или 402 → връщаме (не заобикаляме верификацията)
+    // 404 = стар Worker без /analyze-paid → временен fallback
+  }
+  const r2 = await fetch(CONFIG.workerUrl + '/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  return r2.json();
+}
+
+// ─── ФАЗА 2: ПЪЛЕН АНАЛИЗ (само след плащане — двете заявки паралелно) ────────
+async function generateFullAnalysis(sid) {
+  showScreen('loading');
+  const loadingTimer = animateLoadingSteps();
+  const { aSum, sSum, mSum } = buildSummaries();
+
+  // Кръстосан анализ (Фуния 2) — обобщения от предходни платени Нумерология/Натал по имейл.
+  // Best-effort: ако /cross-context не отговори, продължаваме без контекст (не блокира одита).
+  let crossContext = { numerology: null, natal: null };
+  if (oditEmail) {
+    try {
+      const cres = await fetch(CONFIG.workerUrl + '/cross-context', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: oditEmail })
+      });
+      const cdata = await cres.json();
+      if (cdata && (cdata.numerology || cdata.natal)) crossContext = cdata;
+    } catch(e) {}
+  }
+
+  // Три по-малки паралелни заявки (вместо една голяма) — предпазва от Cloudflare timeout
+  const body1 = { prompt: buildPromptCore(aSum, sSum, mSum, crossContext), max_tokens: 6000 };
+  const body2 = { prompt: buildPromptAreas(aSum, sSum), max_tokens: 4000 };
+  const body3 = { prompt: buildPromptLessonsMeaning(aSum, sSum, mSum, crossContext), max_tokens: 4000 };
+
+  try {
+    const [data1, data2, data3] = await Promise.all([
+      callAnalyzePaid(body1, sid),
+      callAnalyzePaid(body2, sid),
+      callAnalyzePaid(body3, sid)
+    ]);
+    if (data1.error) throw new Error(data1.error);
+    let core = repairAndParseJSON(data1.content);
+    if (!core) {
+      // Повторен опит за основната заявка (AI понякога връща отрязан/невалиден JSON)
+      const retry = await callAnalyzePaid(body1, sid);
+      if (!retry.error) core = repairAndParseJSON(retry.content);
+    }
+    if (!core) throw new Error('Неуспешен анализ — опитай отново.');
+    if (!data2.error) {
+      const areas = repairAndParseJSON(data2.content);
+      if (areas) Object.assign(core, areas);
+    }
+    if (!data3.error) {
+      let lessonsMeaning = repairAndParseJSON(data3.content);
+      if (!lessonsMeaning) {
+        const retry3 = await callAnalyzePaid(body3, sid);
+        if (!retry3.error) lessonsMeaning = repairAndParseJSON(retry3.content);
+      }
+      if (lessonsMeaning) Object.assign(core, lessonsMeaning);
+    }
+    clearInterval(loadingTimer);
+    analysisResult = core;
+    paymentVerified = true;
+    try { sessionStorage.setItem('davai_analysis', JSON.stringify(core)); } catch(e) {}
+    renderResults(core);
+    fetchPrinciples();
+    trackEvent('natal_upsell_shown', {});
+
+    // Кръстосан анализ — обобщение за бъдещ Натал add-on (fire-and-forget, не блокира UI)
+    if (oditEmail) {
+      const bits = [core.summary, core.top_pattern];
+      (core.patterns || []).forEach(p => bits.push(p.title + ': ' + p.description));
+      (core.blind_spots || []).forEach(b => bits.push(b.area + ': ' + b.insight));
+      if (core.lessons_deep) {
+        const ld = core.lessons_deep;
+        if (ld.lesson_3) bits.push(ld.lesson_3.situation);
+        if (ld.closing) bits.push(ld.closing);
+      }
+      if (core.meaning_analysis && core.meaning_analysis.where_it_points) bits.push(core.meaning_analysis.where_it_points);
+      const analysisText = bits.filter(Boolean).join('\n');
+      fetch(CONFIG.workerUrl + '/save-summary', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product: 'odit', email: oditEmail, analysisText })
+      }).catch(function() {});
+    }
+  } catch(e) {
+    clearInterval(loadingTimer);
+    showScreen('results');
+    document.getElementById('results-content').innerHTML =
+      '<div class="card"><div class="card-title">Грешка</div><div class="card-text">Плащането мина успешно, но генерирането се прекъсна: ' + e.message + '. Презареди страницата, за да продължи автоматично.</div></div>';
+  }
+}
+
+// ─── JSON REPAIR ─────────────────────────────────────────────────────────────
+function repairAndParseJSON(txt) {
+  txt = txt.replace(/```json\n?|```\n?/g, '').trim();
+  // Опит 1: директно парсване
+  try { return JSON.parse(txt); } catch(e) {}
+  // Опит 2: намери последния затворен root обект { }
+  let depth = 0, inStr = false, escaped = false, lastClose = -1;
+  const start = txt.indexOf('{');
+  if (start === -1) return null;
+  for (let i = start; i < txt.length; i++) {
+    const c = txt[i];
+    if (escaped) { escaped = false; continue; }
+    if (c === '\\' && inStr) { escaped = true; continue; }
+    if (c === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (c === '{') depth++;
+    else if (c === '}') { depth--; if (depth === 0) lastClose = i; }
+  }
+  if (lastClose > start) {
+    try { return JSON.parse(txt.slice(start, lastClose + 1)); } catch(e) {}
+  }
+  return null;
+}
+
+// ─── ПРОМПТ 1: ПСИХОЛОГИЧЕСКИ ПРОФИЛ, МОДЕЛИ, СЛЕПИ ЗОНИ ────────────────────
+// Граматични правила — добавят се към всеки AI промпт за чист български
+const GRAMMAR_RULES = `
+
+ЕЗИК И ГРАМАТИКА (задължително):
+Пиши на чист, граматически правилен български език. Проверявай внимателно:
+- Правилна употреба на възвратните местоимения (се, си, ме, те и т.н.)
+- Правилен словоред в изречението
+- Естествено звучене — избягвай изкуствени или неестествени конструкции
+- Преди да генерираш текст, провери дали всяко изречение звучи така, както би го казал образован носител на българския език`;
+
+// ─── ПРОМПТ (Фаза 1): само безплатното preview — кратко и бързо ───────────────
+function buildPromptFree(aSum, sSum, mSum) {
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  return `Днешна дата: ${today}.
+
+Ти си личен одитор — говориш ДИРЕКТНО към човека (второ лице: "Ти...", "Плащаш..."). Никога трето лице.
+
+ГЛАВЕН ПРИНЦИП — следвай тази логика за всяка секция:
+1. Покажи, че разбираш човека
+2. Назови модела или цената
+3. НЕ обяснявай напълно причината
+4. Остави естествен въпрос, на който пълният анализ ще даде отговор
+Формулата е: Прозрение → Любопитство → Обещание за яснота
+НЕ: Прозрение → Обяснение → Заключение
+Пиши на чист, естествен български. Без жаргон, без изкуствено звучене. Проверявай граматиката — особено възвратните местоимения (се, си, ме, те).
+
+ДАННИ:
+${aSum}
+
+СИТУАЦИИ: ${sSum}
+
+СЪЖАЛЕНИЯ: ${answers.regrets}
+ГОРДОСТ: ${answers.proud}
+УРОЦИ: ${answers.lessons}
+
+СМИСЪЛ (четири избора): ${mSum}
+
+Генерирай КРАТКО безплатно preview. ВЪРНИ САМО ВАЛИДЕН JSON:
+{
+  "free_preview": {
+    "score_synthesis": "Едно изречение, което улавя общата картина от всичките 7 оценки. Не изброявай областите — улови усещането зад тях. Тон: 'Животът ти е добър — но има цена, която плащаш за това.'",
+    "score_overview": "2-3 изречения. Премини естествено през областите — кои теглят нагоре, кои надолу, и какво разказва картината. Ако някъде оценката е ниска, но описанието показва повече ресурс — отбележи го. Наблюдение, не оценка.",
+    "score_underestimation": "1-2 изречения. Посочи конкретна област, в която оценката е по-ниска от това, което описанието показва. Обясни защо — свикване, перфекционизъм, приемане за нормално. Да предизвика разпознаване.",
+    "score_breakthrough": "1 изречение. Покажи, че съществува ЕДНА конкретна област, която влияе непропорционално силно върху всички останали — но НЕ назовавай коя е тя, НЕ използвай нейната оценка/име. Само загатни, че такава съществува и че платеният анализ разкрива коя е и защо. Пример за тон: 'Данните показват, че една от областите в живота ти влияе много повече на всички останали, отколкото изглежда на пръв поглед.' или 'Има една област, която определя много повече решенията и резултатите ти, отколкото предполагаш.' Завърши с естествено любопитство към пълния анализ.",
+    "main_pattern_quote": "Цитат в курсив, ТОЧНО три изречения. Изр.1: назовава модела с конкретна ситуация от отговорите. Изр.2: описва автоматичната реакция — какво прави човекът. Изр.3: посочва, че моделът присъства и другаде, и обещава яснота в пълния анализ. НЕ обяснявай напълно причините, НЕ давай заключение. Пример за тон: 'След развода си си изградил начин да се справяш сам. Толкова добре, че вече рядко допускаш някой истински близо до себе си. Пълният анализ показва кога този модел се е превърнал от защита в ограничение.'"
+  },
+  "central_diagnosis": {
+    "price_statement": "Едно изречение, което назовава цената — кратко, директно, конкретно. САМО назовава цената; не обяснява откъде идва, не описва последствията. Пример: 'В момента изглежда, че плащаш цената на контрола.'",
+    "opening_question": "Едно отварящо изречение веднага след — задава въпрос, на който пълният анализ ще отговори. Пример: 'Но кога контролът е започнал да ти помага — и кога е започнал да ти пречи?'"
+  },
+  "blind_spot_teaser": "Едно изречение, което назовава, че има нещо, което другите виждат по-ясно. Не обяснявай какво е — само че съществува. Пример: 'Има нещо, което хората около теб вероятно виждат по-ясно, отколкото ти самият.'",
+  "blind_spot_effect": "Едно изречение за ефекта. Пример: 'Тази сляпа зона влияе на отношенията ти много повече, отколкото предполагаш.'"
+}
+КРИТИЧНО: Второ лице. Чист български. JSON завършен. Кратко.`;
+}
+
+// Кръстосан анализ (Фуния 2) — обобщения от предходна Нумерология/Натал по имейл.
+// НЕ добавя нов блок в анализа — само инструктира AI-то да вплете находките в
+// съществуващите блокове (Навици/Блокажи/Уроци/Смисъл), никога да не ги повтаря буквално.
+function crossContextBlock(crossContext, section) {
+  if (!crossContext || (!crossContext.numerology && !crossContext.natal)) return '';
+  let s = '\n\nКРЪСТОСАН КОНТЕКСТ (от предходни платени анализи на този клиент — НЕ добавяй нов раздел, само вплети находките в съществуващите блокове по-долу, без да ги повтаряш буквално):\n';
+  if (crossContext.numerology) s += 'От Нумерологичния одит: ' + crossContext.numerology + '\n';
+  if (crossContext.natal) s += 'От Наталната карта: ' + crossContext.natal + '\n';
+  if (crossContext.natal) {
+    s += '\nЗАБРАНЕНО при позоваване на наталната карта: суров астрологичен жаргон без обяснение — "MC", "Асцендент", "Луна в Риби" и подобни. ПРАВИЛНО: описвай на ясен български какво означава — напр. "жизненото призвание според наталната карта", "начинът, по който те възприемат другите според картата", "емоционалната ти природа".';
+  }
+
+  if (section === 'blockages') {
+    if (crossContext.numerology) s += '\nАко има нумерологично обобщение: в Блокажи свържи основния поведенчески модел с конкретното жизнено число и неговия архетип.';
+    if (crossContext.natal) s += '\nАко има натален контекст: в Блокажи свържи поведенческите модели с планетарните енергии от картата.';
+  } else if (section === 'lessons_meaning') {
+    if (crossContext.numerology) s += '\nАко има нумерологично обобщение: в Уроци потвърди уроците с кармичния контекст от нумерологията — число на съдбата, лична година. В Смисъл финалният синтез свързва жизненото число с призванието и смисловата посока.';
+    if (crossContext.natal) s += '\nАко има натален контекст: в Уроци потвърди уроците с астрологичния кармичен контекст — MC, доминиращи планети. В Смисъл MC и жизненото число се срещат във финалния синтез.';
+  }
+
+  if (crossContext.numerology && crossContext.natal) {
+    s += '\nИма и двата контекста едновременно: не изброявай числата и планетите отделно. Вплитай ги в наратива там, където потвърждават или допълват откритото в одита. Конкретно: в Урок №3 и в Смисъл — задължително.';
+  }
+
+  s += '\nКъдето моделите съвпадат между системите — потвърди го и задълбочи в контекста на реалния живот. Където контрастират — назови контраста директно.';
+  return s;
+}
+
+function buildPromptCore(aSum, sSum, mSum, crossContext) {
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  return `Днешна дата: ${today}.
+
+Ти си личен одитор — говориш ДИРЕКТНО към човека (второ лице: "Ти...", "Плащаш...", "Виждам в теб..."). Никога трето лице. Чист БЪЛГАРСКИ — без "локус", "schema", "pattern", "attachment". Използвай: "начин на свързване", "основното убеждение", "откъде даваш".
+
+ДАННИ:
+${aSum}
+
+СИТУАЦИИ: ${sSum}
+
+СЪЖАЛЕНИЯ: ${answers.regrets}
+ГОРДОСТ: ${answers.proud}
+УРОЦИ: ${answers.lessons}
+
+СМИСЪЛ (четири избора на клиента):
+${mSum}
+${crossContextBlock(crossContext, 'blockages')}
+
+АНАЛИЗИРАЙ ПРЕЗ 4 ЛЕЩИ:
+1. НАЧИН НА СВЪРЗВАНЕ: Сигурен/Тревожен/Избягващ/Объркан — конкретно от отговорите.
+2. ЧИЕ ВЛИЯНИЕ: Собственото/На другите/Смесено — конкретен пример.
+3. ОТКЪДЕ ДАВА: От страх/дълг/изтощение/пълнота — каква цена плаща.
+4. ОСНОВНО УБЕЖДЕНИЕ: Прекален контрол, Самосаботаж, Чувство на измама, Бягство от конфликти, Нужда от одобрение, Отлагане, Черно-бяло мислене.
+
+ОГЛЕДАЛО №1 — "Навици — Как живееш днес"
+
+Този раздел е част от ПЛАТЕНИЯ анализ. Човекът вече е платил и очаква яснота, дълбочина и конкретика — не загатвания. Този раздел трябва да НАДГРАЖДА безплатния preview, не да го повтаря: където безплатната част е назовавала модел или цена, тук ги обясняваш докрай, с примери от отговорите на човека.
+
+ФИЛОСОФИЯ (присъства навсякъде, без да е лозунг):
+Всичко има цена. Въпросът не е дали я плащаш, а дали плащаш правилната. Показвай тази идея чрез конкретните изводи — каква цена е платена за силните страни, каква цена се плаща днес, къде цената вече е станала твърде висока, кои избори носят краткосрочно облекчение, но дългосрочна загуба. НЕ повтаряй едни и същи фрази за "цената".
+
+СТИЛ:
+Пиши като човек, който е наблюдавал живота на читателя — не като психолог, коуч или учител. Тон: честен, човешки, директен, спокоен, уважителен. Всеки извод произтича от данните във въпросника. Не измисляй, не драматизирай, не използвай мотивационни клишета, празни похвали или психологически жаргон.
+
+СЕКЦИЯ 1 (поле "summary") — ОБОБЩЕНИЕ:
+Първото изречение въвежда философията на цената. Пример за тон (не копирай дословно, адаптирай към човека): "Животът ти изглежда стабилен. Но стабилността има цена — и отговорите ти показват точно каква е тя." След това разкажи историята зад оценките — НЕ изброявай числа: кои области са най-силни, защо са силни, каква цена е платена за тях; кои области страдат, защо страдат, как влияят върху останалите; назови ЯСНО най-важната област (без загатване) и обясни защо тя оказва най-голямо влияние върху останалите. Подкрепи всеки извод с конкретни примери от отговорите на човека.
+
+СЕКЦИЯ 2 (поле "what_works") — КАКВО ВЕЧЕ РАБОТИ ДОБРЕ:
+Целта не е похвала, а човекът да разбере на какво може да стъпи. Опиши конкретните му силни страни (само тези, които реално се виждат в отговорите — напр. постоянство, дисциплина, отговорност, устойчивост, способност да учи или да изгражда отношения). Свържи ги с философията на цената. Пример за тон: "Това не са качества, които си получил случайно. За всяко от тях вече си платил правилната цена." Без мотивационен език, без преувеличение.
+
+СЕКЦИЯ 3 (поле "top_pattern") — ОСНОВНИЯТ МОДЕЛ:
+Тук давай пълна яснота — назови модела, не загатвай. Обясни: как се проявява; в кои области се вижда; как му е помогнал досега; каква цена започва да носи днес. Свържи с конкретни примери от въпросника. Пиши така, че човекът да каже "Да, точно така функционирам." Завърши секцията с естествен мост към следващото огледало, напр.: "Вече виждаш как този модел влияе на живота ти. Следващото огледало ще покаже откъде идва и защо продължава да управлява решенията ти."
+${(crossContext.numerology && crossContext.natal) ? 'АКО има обобщение и от Нумерологията, и от Наталната карта (дадени по-горе): добави В КРАЯ на top_pattern едно изречение, което свързва основния модел с жизненото число и планетарната енергия — вплетено в наратива, никога изброено. Пример за тон (адаптирай към конкретните данни, не копирай): "Нумерологията го потвърждава от различен ъгъл — жизнено число 9 носи архетипа на даването, но психичното 4 търси структура и сигурност. Напрежението между двете е точно това, което виждаме тук."' : ''}
+
+ВЪРНИ САМО ВАЛИДЕН JSON:
+{
+  "summary": "Секция 1 — Обобщение. Виж пълната инструкция по-горе. 3-5 изречения.",
+  "what_works": "Секция 2 — Какво вече работи добре. Виж пълната инструкция по-горе. 2-3 изречения.",
+  "summary_actions": ["Действие 1 с дата след ${today}", "Действие 2", "Действие 3"],
+  "top_pattern": "Секция 3 — Основният модел. Виж пълната инструкция по-горе. 3-5 изречения, завършва с мост към следващото огледало.",
+  "psychological_profile": {
+    "attachment_style": "1-2 изречения с пример от отговорите. Без термини.",
+    "locus_of_control": "1-2 изречения с конкретен пример.",
+    "giving_schema": "1-2 изречения — откъде даваш и каква цена плащаш.",
+    "core_schema": "1-2 изречения с прости думи."
+  },
+  "patterns": [{"title": "Заглавие", "description": "2 изречения директно: 'Когато X, ти правиш Y...', 'Цената е...'", "severity": "high или medium", "psychological_root": "1 изречение."}],
+  "blind_spots": [{"area": "Областта", "insight": "2 изречения: 'Разказваш си, че...', 'Реалността е...'"}],
+  "blind_spot_teaser": "Едно завършено изречение — самостоятелна мисъл за основната слепа зона. Не отрязано наполовина.",
+  "giving_analysis": {
+    "current_giving": "1-2 изречения — как даваш и на кого.",
+    "giving_cost": "1 изречение.",
+    "giving_invitation": "2 изречения — даването от пълнота за теб конкретно."
+  },
+  "central_diagnosis": {
+    "price_statement": "В момента плащаш цената на [конкретното — контрол/страх/саможертва/...]. Едно директно твърдение — НЕ 'защо', а 'какво коства'.",
+    "cost_areas": [
+      { "area": "Отношения", "description": "1-2 изречения конкретно как моделът те ограничава с хората." },
+      { "area": "Пари и кариера", "description": "1-2 изречения конкретно финансово и в работата." },
+      { "area": "Спокойствие", "description": "1-2 изречения какво коства на вътрешния ресурс." },
+      { "area": "Тяло и здраве", "description": "1-2 изречения как се проявява физически." }
+    ]
+  }
+}
+ЦЕНТРАЛНА ДИАГНОЗА: Синтезирай top_pattern + psychological_profile → намери ЦЕНАТА в реалния живот. НЕ обяснявай защо е такъв (вече казано). Само какво коства — конкретно в отношения, пари, спокойствие, тяло.
+${crossContext.natal ? 'АКО има обобщение от Наталната карта (дадено по-горе): добави в price_statement едно изречение, свързващо основния блокаж с конкретна планетарна енергия от картата — БЕЗ астрологични термини без обяснение (напр. вместо "MC във Везни" пиши "жизненото призвание според наталната карта е свързано с баланс и служене").' : ''}
+КРИТИЧНО: Второ лице. Чист български. Max 2-3 изречения на поле. JSON завършен.${GRAMMAR_RULES}`;
+}
+
+// ─── ПРОМПТ (Фаза 2, паралелна заявка): ОГЛЕДАЛО №3 (Уроци) + СМИСЪЛ ────────
+// Разделено от buildPromptCore, за да не удължава една-единствена заявка
+// (по-дълга генерация носеше риск от Cloudflare timeout). meaning_analysis
+// (СМИСЪЛ) е преместен тук БУКВАЛНО непроменен.
+function buildPromptLessonsMeaning(aSum, sSum, mSum, crossContext) {
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  return `Днешна дата: ${today}.
+
+Ти си личен одитор — говориш ДИРЕКТНО към човека (второ лице: "Ти...", "Плащаш...", "Виждам в теб..."). Никога трето лице. Чист БЪЛГАРСКИ.
+
+ДАННИ:
+${aSum}
+
+СИТУАЦИИ: ${sSum}
+
+СЪЖАЛЕНИЯ: ${answers.regrets}
+ГОРДОСТ: ${answers.proud}
+УРОЦИ: ${answers.lessons}
+
+СМИСЪЛ (четири избора на клиента):
+${mSum}
+${crossContextBlock(crossContext, 'lessons_meaning')}
+
+ОГЛЕДАЛО №3 — "Уроци — Какво животът се опитва да ти покаже" (поле "lessons_deep")
+
+Стил и философия: същите като в останалите огледала. Чист, граматически правилен български. Тон: честен, човешки, директен, спокоен, уважителен — не психолог, не коуч. Всеки извод произтича от конкретните отговори на човека. Без клишета, без изкуствен драматизъм, без повторение на едни и същи фрази.
+
+УВОД (поле "intro"): Отвори с кратка философска рамка (2-3 изречения), която въвежда идеята, че животът повтаря един и същ урок, докато не бъде научен. Пример за тон: "Животът рядко ни наказва. По-често ни повтаря един и същ урок, докато не го научим." След това свържи идеята конкретно с отговорите на човека — без клише, с конкретика от неговия въпросник.
+
+УРОК №1 (поле "lesson_1"): Конкретен урок, извлечен директно от отговорите на човека (ситуации, съжаления, гордост, уроци). Включи три елемента: как се проявява (конкретна ситуация от отговорите), каква цена плаща заради него, какво би се променило, ако го научи.
+
+УРОК №2 (поле "lesson_2"): Следващият повтарящ се урок, различен от Урок №1. Същата структура: ситуация, цена, възможност. Не повтаряй фрази от Урок №1.
+
+УРОК №3 — НАЙ-ДЪЛБОКИЯТ УРОК (поле "lesson_3"): Свързан обикновено с идентичността, страха, доверието, приемането, свободата или отговорността на човека — избери темата, която реално произтича от неговите отговори, не произволно. Този урок трябва да е най-личният и най-проникновен от трите. Същата структура: ситуация, цена, възможност.
+${(crossContext.numerology && crossContext.natal) ? 'АКО има обобщение и от Нумерологията, и от Наталната карта: разшири Урок №3 с допълнителен абзац (поле "cross_synthesis" в lesson_3), който свързва три различни системи в едно и също послание — жизненото число и неговия архетип, призванието от наталната карта (БЕЗ астрологични термини — описано на ясен български), и общия кармичен/жизнен урок, който и трите системи сочат. Течен текст, 4-5 изречения, никога изброяване.' : ''}
+
+ОБЩИЯТ УРОК (поле "closing"): Едно изречение, което обобщава връзката между трите урока — затваря секцията, мост към Смисъл. Пример за тон: "Животът не те спира. Опитва се да те научи на нещо, което вече не можеш да заобиколиш." или: "Докато плащаш една и съща цена по един и същ начин, ще получаваш сходни резултати, дори ситуациите да изглеждат различни."
+
+${(crossContext.numerology && crossContext.natal) ? `ТРИТЕ СИСТЕМИ — ЕДНАТА КАРТИНА (поле "three_systems", само защото има обобщение и от Нумерологията, и от Наталната карта — иначе остави null): Нов блок, 150-200 думи, който се показва след Смисъл, преди епилога. НЕ изброявай какво е установил всеки анализ поотделно. Пиши обобщение в единен, течен нарати, което показва: как трите системи (одит, нумерология, натална карта) описват един и същ човек; кои теми се повтарят и в трите; какво означава това потвърждение за конкретния човек; завърши с едно изречение, което обединява всичко. Тон: спокоен, авторитетен, психологически дълбок. Без мистицизъм, без изброяване, без астрологични термини без обяснение.` : ''}
+
+ВЪРНИ САМО ВАЛИДЕН JSON:
+{
+  "lessons_deep": {
+    "intro": "Уводът на Огледало №3. Виж инструкцията по-горе. 3-4 изречения.",
+    "lesson_1": { "situation": "1-2 изречения — конкретна ситуация.", "cost": "1 изречение — цената.", "opportunity": "1 изречение — какво би се променило." },
+    "lesson_2": { "situation": "1-2 изречения — различна ситуация от Урок 1.", "cost": "1 изречение.", "opportunity": "1 изречение." },
+    "lesson_3": { "situation": "1-2 изречения — най-дълбокият, най-личен урок.", "cost": "1 изречение.", "opportunity": "1 изречение.", "cross_synthesis": "САМО ако има обобщение и от Нумерологията, и от Наталната карта — виж инструкцията по-горе. Иначе null." },
+    "closing": "Общият урок — 1 изречение, мост към Смисъл."
+  },
+  "meaning_analysis": {
+    "declared_vs_lived": "2-3 изречения — съпостави на какво казва, че разчита (от СМИСЪЛ въпрос 1) с реалните модели от областите и ситуациите. Конкретно, без съд.",
+    "where_it_points": "2-3 изречения — покажи конкретно накъде сочи тази разлика, базирано на отговора за болезненото (въпрос 2) и поведенческите модели. Като наблюдение, не поука.",
+    "the_giving_moment": "2 изречения. Ако в уроците, гордостта или ситуациите има конкретен момент на безусловно даване — отрази го и покажи защо е по-близо до истинския смисъл. Ако няма — 'Помисли за последния път, когато си дал нещо — време, внимание, помощ — без да очакваш нищо обратно. Това усещане е по-близо до истинския смисъл от всяко постижение.'",
+    "current_anchor": "На какво стои в момента, базирано директно на отговора от въпрос 1. Описано просто и директно към него.",
+    "anchor_honesty": "Едно честно, но не присъдно изречение — дали тази опора издържа с времето или се изтощава, конкретно спрямо неговия избор.",
+    "life_stage_reflection": "2 изречения директно базирани на отговора от въпрос 4. Покажи, че независимо от позицията, въпросът е същият — търсене на смисъл.",
+    "the_real_question": "Генерирай финален персонализиран въпрос по следната формула, в бавен, контемплативен тон с кратки изречения: 1. Подканващо изречение — въпрос или мека покана да остави основния си блокаж/модел (от Огледало 2) за момент, НЕ директно твърдение 'представи си че утре изчезва'. 2. Кратко уточнение: 'Не утре. Сега, само за момент.' или еквивалент. 3. 1-2 кратки изречения с конкретни елементи от живота му (от данните — бизнес, дете, връзка, каквото е релевантно), потвърждаващи че остават непокътнати. 4. 'Само [блокажа] — го няма.' 5. 'Кой остава?' Запази изреченията кратки. Тонът е бавен — всяко изречение е отделна мисъл."
+  },
+  "three_systems": "САМО ако има обобщение и от Нумерологията, и от Наталната карта — виж инструкцията 'ТРИТЕ СИСТЕМИ — ЕДНАТА КАРТИНА' по-горе. 150-200 думи, течен текст. Иначе null."
+}
+КРИТИЧНО: Второ лице. Чист български. Max 2-3 изречения на поле. JSON завършен.${GRAMMAR_RULES}`;
+}
+
+// ─── ПРОМПТ 2: ОБЛАСТИ, РУТИНИ, ВЪПРОСИ ─────────────────────────────────────
+function buildPromptAreas(aSum, sSum) {
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  return `Днешна дата: ${today}.
+
+Ти си личен одитор — говориш ДИРЕКТНО (второ лице). Чист БЪЛГАРСКИ.
+
+ДАННИ (включва самооценката на клиента):
+${aSum}
+
+СЪЖАЛЕНИЯ: ${answers.regrets}
+ГОРДОСТ: ${answers.proud}
+УРОЦИ: ${answers.lessons}
+
+ВАЖНО — РЕАЛНА ОЦЕНКА: За всяка от 7-те области прецени обективно дали описанието оправдава по-висока оценка от дадената. Ако клиентът се е подценил с 2 или повече точки — вписвай "assessed_score" и "encouragement". Прави го САМО при съществена разлика и САМО ако реалната е по-висока. Ако разликата е под 2 точки или реалната е по-ниска — assessed_score: null.
+
+ВЪРНИ САМО ВАЛИДЕН JSON:
+{
+  "areas": [
+    {
+      "name": "Точното ime на областта",
+      "score": числото_на_клиента,
+      "assessed_score": числото_от_анализа_ако_е_с_2+_точки_по-голямо (иначе null),
+      "encouragement": "1-2 изречения директно: 'Виждам, че се оцени на X, но реалността показва...' Окуражи го да види постиженията си. САМО ако assessed_score съществува, иначе null.",
+      "insight": "2 изречения директно.",
+      "actions": ["Действие 1 с дата след ${today}", "Действие 2", "Действие 3"]
+    }
+  ],
+  "morning_routines": ["Рутина 1 — конкретна за теб", "Рутина 2", "Рутина 3"],
+  "evening_routines": ["Рутина 1 — за твоите нужди", "Рутина 2", "Рутина 3"],
+  "daily_questions": ["Въпрос 1 — свързан с основния ти модел", "Въпрос 2", "Въпрос 3", "Въпрос 4", "Въпрос 5"]
+}
+Включи ВСИЧКИТЕ 7 области. Max 2 изречения на поле. JSON завършен.${GRAMMAR_RULES}`;
+}
+
+// ─── ТРИТЕ ОГЛЕДАЛА — ПОМОЩНИ ФУНКЦИИ ────────────────────────────────────────
+function scoreClass(n) { return n >= 7 ? 'score-high' : n >= 4 ? 'score-mid' : 'score-low'; }
+
+function lockedCard(title, placeholder) {
+  return '<div class="card" style="position:relative;overflow:hidden;">' +
+    '<div class="card-title" style="color:var(--text-tertiary);">🔒 ' + title + '</div>' +
+    '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">' + placeholder + '</div>' +
+    '<div style="position:absolute;inset:0;background:rgba(250,250,248,0.15);"></div>' +
+    '</div>';
+}
+
+function mirrorSeparator(numLabel, colorHex, title, intro) {
+  return '<div style="margin:2.5rem 0 1.5rem;">' +
+    '<div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">' +
+      '<div style="height:1px;flex:1;background:var(--border);"></div>' +
+      '<div style="font-size:11px;font-weight:600;color:' + colorHex + ';text-transform:uppercase;letter-spacing:0.12em;white-space:nowrap;padding:5px 16px;border:1px solid ' + colorHex + ';border-radius:20px;background:white;">' + numLabel + '</div>' +
+      '<div style="height:1px;flex:1;background:var(--border);"></div>' +
+    '</div>' +
+    '<div style="font-family:\'Playfair Display\',serif;font-size:1.35rem;font-weight:500;color:var(--text);margin-bottom:10px;">' + title + '</div>' +
+    '<div style="font-size:14px;color:var(--text-secondary);line-height:1.7;font-style:italic;">' + intro + '</div>' +
+  '</div>';
+}
+
+// ─── ЕДИННА РЕНДИРАЩА ФУНКЦИЯ — следва структурата на Трите Огледала ─────────
+function renderAnalysis(d, isPaid) {
+  const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
+  let html = '';
+
+  // Средна оценка
+  html += '<div class="card">';
+  html += '<div style="display:flex;align-items:baseline;gap:8px;">';
+  html += '<div class="avg-score">' + avg + '</div><div class="avg-label">/10 средна оценка</div></div>';
+  html += '</div>';
+
+  // ═══════════════════════════════════════════════════════════════
+  // ОГЛЕДАЛО №1 — НАВИЦИ
+  // ═══════════════════════════════════════════════════════════════
+  html += mirrorSeparator('ОГЛЕДАЛО №1', '#1D9E75', 'Навици — Как живееш днес',
+    'Това огледало показва реалното състояние на живота ти в 7 ключови области. Не как би искал да бъде. Как е в действителност.');
+
+  // FREE: Обобщение
+  if (d.summary) {
+    html += '<div class="card">';
+    html += '<div class="summary-block"><div class="summary-label">Обобщение</div>';
+    html += '<div class="card-text">' + d.summary + '</div></div>';
+    html += '</div>';
+  }
+
+  // Какво вече работи добре (само в платения анализ)
+  if (isPaid && d.what_works) {
+    html += '<div class="card">';
+    html += '<div class="card-title">Какво вече работи добре</div>';
+    html += '<div class="card-text">' + d.what_works + '</div>';
+    html += '</div>';
+  }
+
+  // FREE: Основен модел
+  if (d.top_pattern) {
+    html += '<div class="card" style="border-left:3px solid var(--green);">';
+    html += '<div class="card-title">Основният модел</div>';
+    html += '<div class="card-text" style="font-style:italic;font-size:15px;">"' + d.top_pattern + '"</div>';
+    html += '</div>';
+    // Преход към Огледало №2 (фиксиран текст, само в платения анализ)
+    if (isPaid) {
+      html += '<div class="card-text" style="font-style:italic;color:var(--text-secondary);margin:-4px 0 14px;">Дотук разгледахме живота ти такъв, какъвто е днес. В следващото огледало ще разбереш защо именно тези модели продължават да се повтарят.</div>';
+    }
+  }
+
+  // Области: платена → интегриран изглед (оценка + прозрение + действия); безплатна → оценка + blurred preview
+  if (d.areas && d.areas.length) {
+    if (isPaid) {
+      d.areas.forEach(function(a) {
+        const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
+        html += '<div class="area-result"><div class="area-result-header">';
+        html += '<div class="area-result-name">' + a.name + '</div>';
+        if (hasGap) {
+          html += '<div style="display:flex;align-items:center;gap:8px;">';
+          html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score||0) + '/10</span>';
+          html += '<span class="score-badge score-high" style="font-size:13px;padding:5px 14px;">▲ ' + a.assessed_score + '/10</span>';
+          html += '</div>';
+        } else {
+          html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
+        }
+        html += '</div>';
+        if (hasGap && a.encouragement) {
+          html += '<div style="background:var(--green-light);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:10px;">';
+          html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Реалната картина</div>';
+          html += '<div style="font-size:13px;color:var(--green-dark);line-height:1.6;">' + a.encouragement + '</div>';
+          html += '</div>';
+        }
+        if (a.insight) html += '<div class="area-insight">' + a.insight + '</div>';
+        (a.actions || []).forEach(function(act, i) {
+          html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div><div class="action-text">' + act + '</div></div>';
+        });
+        html += '</div>';
+      });
+      if (d.summary_actions && d.summary_actions.length) {
+        html += '<div class="card">';
+        html += '<div class="field-label" style="margin-bottom:10px;">Три стъпки към основната промяна</div>';
+        d.summary_actions.forEach(function(a, i) {
+          html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div>';
+          html += '<div class="action-text" style="font-size:14px;color:var(--text);">' + a + '</div></div>';
+        });
+        html += '</div>';
+      }
+    } else {
+      html += '<div class="card">';
+      html += '<div class="card-title" style="margin-bottom:14px;">7 области — текущи оценки</div>';
+      d.areas.forEach(function(a) {
+        const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
+        html += '<div style="padding:10px 0;border-bottom:1px solid var(--border);">';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;">';
+        html += '<div style="font-size:14px;font-weight:500;color:var(--text);">' + a.name + '</div>';
+        if (hasGap) {
+          html += '<div style="display:flex;align-items:center;gap:8px;">';
+          html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score||0) + '/10</span>';
+          html += '<span class="score-badge score-high">▲ ' + a.assessed_score + '/10</span>';
+          html += '</div>';
+        } else {
+          html += '<span class="score-badge ' + scoreClass(a.score||0) + '">' + (a.score||0) + '/10</span>';
+        }
+        html += '</div>';
+        if (a.insight) {
+          html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;font-style:italic;margin-top:8px;margin-bottom:6px;">' + a.insight + '</div>';
+        }
+        html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;">';
+        (a.actions && a.actions.length ? a.actions : ['Конкретна стъпка', 'Второ действие', 'Трето действие']).forEach(function(act) {
+          html += '<div style="font-size:12px;color:var(--text-secondary);padding:2px 0;">→ ' + act + '</div>';
+        });
+        html += '</div>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+  }
+
+  // Финал на Огледало №1 (фиксиран текст, само в платения анализ)
+  if (isPaid) {
+    html += '<div class="card-text" style="text-align:center;font-style:italic;color:var(--text-secondary);margin:18px 4px 4px;">Не можеш да промениш цената, която плащаш, докато не я видиш ясно.</div>';
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // ОГЛЕДАЛО №2 — БЛОКАЖИ
+  // ═══════════════════════════════════════════════════════════════
+  html += mirrorSeparator('ОГЛЕДАЛО №2', '#4A3BAA', 'Блокажи — Какво те спира',
+    'Тук започват истинските прозрения. Повтарящи се модели, самосаботаж, ограничения, които сам си изградил.');
+
+  // FREE: Психологически профил
+  if (d.psychological_profile) {
+    const pp = d.psychological_profile;
+    html += '<div class="card" style="border:2px solid var(--purple-light);">';
+    html += '<div class="card-title" style="color:var(--purple-text);margin-bottom:16px;">🧠 Психологически профил</div>';
+    [
+      { label: 'Стил на привързаност', value: pp.attachment_style },
+      { label: 'Локус на контрол',     value: pp.locus_of_control },
+      { label: 'Схема на даване',      value: pp.giving_schema },
+      { label: 'Основна схема',        value: pp.core_schema }
+    ].forEach(function(item) {
+      if (!item.value) return;
+      html += '<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--purple-text);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + item.label + '</div>';
+      html += '<div class="card-text">' + item.value + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  // PAID: Поведенчески модели, слепи зони, схема на даване
+  if (isPaid) {
+    if (d.patterns && d.patterns.length) {
+      html += '<div class="card"><div class="card-title">Поведенческите модели</div>';
+      d.patterns.forEach(function(p) {
+        html += '<div style="margin-bottom:18px;">';
+        html += '<span class="tag ' + (p.severity === 'high' ? 'tag-red' : 'tag-amber') + '">' + p.title + '</span>';
+        html += '<div class="card-text" style="margin-bottom:8px;">' + p.description + '</div>';
+        if (p.psychological_root) {
+          html += '<div style="font-size:12px;color:var(--purple-text);background:var(--purple-light);border-radius:8px;padding:6px 10px;display:inline-block;">🔍 ' + p.psychological_root + '</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+    if (d.blind_spots && d.blind_spots.length) {
+      html += '<div class="card"><div class="card-title">Къде се лъжеш</div>';
+      d.blind_spots.forEach(function(b) {
+        html += '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">' + b.area + '</div>';
+        html += '<div class="card-text">' + b.insight + '</div></div>';
+      });
+      html += '</div>';
+    }
+    if (d.giving_analysis) {
+      const ga = d.giving_analysis;
+      html += '<div class="card" style="border-left:3px solid var(--green);">';
+      html += '<div class="card-title" style="margin-bottom:16px;">🤲 Твоята схема на даване</div>';
+      if (ga.current_giving) {
+        html += '<div class="summary-block" style="margin-bottom:14px;">';
+        html += '<div class="summary-label">Как даваш сега</div>';
+        html += '<div class="card-text">' + ga.current_giving + '</div></div>';
+      }
+      if (ga.giving_cost) {
+        html += '<div style="background:var(--red-light);border-radius:10px;padding:12px 14px;margin-bottom:14px;">';
+        html += '<div style="font-size:11px;font-weight:500;color:var(--red-text);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Цената, която плащаш</div>';
+        html += '<div class="card-text">' + ga.giving_cost + '</div></div>';
+      }
+      if (ga.giving_invitation) {
+        html += '<div style="background:var(--green-light);border-radius:10px;padding:12px 14px;">';
+        html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Даването от пълнота — как би изглеждало</div>';
+        html += '<div class="card-text">' + ga.giving_invitation + '</div></div>';
+      }
+      html += '</div>';
+    }
+  } else {
+    html += '<div class="card"><div class="card-title">Поведенчески модели</div>';
+    html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">';
+    html += (d.patterns ? d.patterns.length : 3) + ' идентифицирани модела с психологически корен и конкретна цена. Всеки съдържа конкретен пример от твоите отговори и психологическия корен зад него.';
+    html += '</div></div>';
+
+    // Слепи зони: teaser отворен + пълно съдържание заключено
+    html += '<div class="card">';
+    html += '<div class="card-title">Слепи зони</div>';
+    if (d.blind_spot_teaser) {
+      html += '<div class="card-text" style="margin-bottom:12px;">' + d.blind_spot_teaser + '</div>';
+    }
+    if (d.blind_spots && d.blind_spots.length) {
+      d.blind_spots.forEach(function(b) {
+        html += '<div style="margin-bottom:12px;">';
+        html += '<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;">' + b.area + '</div>';
+        html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.6;">' + b.insight + '</div>';
+        html += '</div>';
+      });
+    } else {
+      html += '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">Разказваш си, че правиш всичко необходимо. Реалността е различна.</div>';
+    }
+    html += '</div>';
+
+    html += lockedCard('Схема на даване',
+      'Откъде даваш и каква цена плащаш. Даването от пълнота — как би изглеждало за теб конкретно.');
+  }
+
+  // ЦЕНТРАЛНА ДИАГНОЗА (само платена версия, между Огледало 2 и Огледало 3)
+  if (isPaid && d.central_diagnosis) {
+    var cd = d.central_diagnosis;
+    html += '<div style="margin:2.5rem 0;padding:28px 24px;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:16px;">';
+    html += '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:14px;">Централна диагноза</div>';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.35rem;color:white;line-height:1.4;margin-bottom:22px;">' + cd.price_statement + '</div>';
+    (cd.cost_areas || []).forEach(function(ca, i) {
+      html += '<div style="' + (i > 0 ? 'border-top:1px solid rgba(255,255,255,0.08);padding-top:12px;' : '') + 'margin-bottom:12px;">';
+      html += '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">' + ca.area + '</div>';
+      html += '<div style="font-size:14px;color:rgba(255,255,255,0.8);line-height:1.6;">' + ca.description + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // ОГЛЕДАЛО №3 — УРОЦИ
+  // ═══════════════════════════════════════════════════════════════
+  html += mirrorSeparator('ОГЛЕДАЛО №3', '#854F0B', 'Уроци — Какво животът се опитва да ти покаже',
+    'Всяка трудност носи урок. Това огледало показва кои уроци вече си научил, кои избягваш, и къде животът те кани да пораснеш.');
+
+  if (isPaid) {
+    if (d.lessons_deep) {
+      const ld = d.lessons_deep;
+      html += '<div class="card" style="border:2px solid var(--amber);background:linear-gradient(135deg,#fffbf2,#fff);">';
+      if (ld.intro) html += '<div class="card-text" style="margin-bottom:18px;">' + ld.intro + '</div>';
+      [ld.lesson_1, ld.lesson_2, ld.lesson_3].forEach(function(l, i) {
+        if (!l) return;
+        html += '<div style="' + (i > 0 ? 'border-top:1px solid var(--border);padding-top:16px;margin-top:16px;' : '') + '">';
+        html += '<div class="card-title" style="margin-bottom:8px;">Урок №' + (i + 1) + (i === 2 ? ' — най-дълбокият' : '') + '</div>';
+        if (l.situation) html += '<div class="card-text" style="margin-bottom:8px;">' + l.situation + '</div>';
+        if (l.cost) html += '<div style="font-size:13px;color:var(--red-text);margin-bottom:6px;"><strong>Цената:</strong> ' + l.cost + '</div>';
+        if (l.opportunity) html += '<div style="font-size:13px;color:var(--green-dark);">' + l.opportunity + '</div>';
+        if (l.cross_synthesis) html += '<div class="card-text" style="margin-top:10px;font-style:italic;">' + l.cross_synthesis + '</div>';
+        html += '</div>';
+      });
+      if (ld.closing) html += '<div class="card-text" style="font-style:italic;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">' + ld.closing + '</div>';
+      html += '</div>';
+    }
+    if (d.morning_routines || d.evening_routines) {
+      html += '<div class="card"><div class="card-title">Твоите персонални рутини</div>';
+      html += '<div class="routine-grid">';
+      html += '<div class="routine-card"><div class="routine-card-title morning">☀ Сутрин</div>';
+      (d.morning_routines || []).forEach(function(r) { html += '<div class="routine-item">→ ' + r + '</div>'; });
+      html += '</div>';
+      html += '<div class="routine-card"><div class="routine-card-title evening">🌙 Вечер</div>';
+      (d.evening_routines || []).forEach(function(r) { html += '<div class="routine-item">→ ' + r + '</div>'; });
+      html += '</div></div></div>';
+    }
+    if (d.daily_questions && d.daily_questions.length) {
+      html += '<div class="card"><div class="card-title">Въпроси за всеки ден</div>';
+      html += '<div class="card-text" style="margin-bottom:14px;font-size:13px;">Задавай си тези въпроси сутрин или вечер. Нека работят в теб.</div>';
+      html += '<ul class="daily-q-list">';
+      d.daily_questions.forEach(function(q, i) {
+        html += '<li class="daily-q-item"><div class="daily-q-num">' + (i+1) + '</div><div class="daily-q-text">' + q + '</div></li>';
+      });
+      html += '</ul></div>';
+    }
+    // Meaning — след трите огледала, златист акцент
+    if (d.meaning_analysis) {
+      html += renderMeaningAnalysis(d.meaning_analysis);
+    }
+    // Трите системи — само ако има кръстосан контекст от Нумерология И Натал (виж buildPromptLessonsMeaning)
+    if (d.three_systems) {
+      html += '<div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,#fdf8ee,#fff);margin-top:1rem;">';
+      html += '<div class="card-title" style="margin-bottom:10px;">Трите системи — Едната картина</div>';
+      html += '<div class="card-text" style="line-height:1.8;">' + d.three_systems + '</div>';
+      html += '</div>';
+    }
+    // Share block с реферален код (fetchPrinciples() вмъква личния кодекс преди него)
+    var _baseUrl = CONFIG.siteUrl.split('?')[0];
+    html += '<div class="card share-block" style="margin-top:1rem;background:var(--green-light);border:2px solid rgba(29,158,117,0.25);padding:24px;">';
+    html += '<div class="card-title" style="margin-bottom:4px;">Знаеш ли някой, на когото би помогнало?</div>';
+    html += '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px;">Въведи имейла си за да получиш личния си реферален код:</div>';
+    html += '<div class="no-print" style="margin-bottom:14px;">';
+    html += '<input type="email" id="ref-email-input" placeholder="твоят@имейл.com" oninput="previewRefCode(this.value)" style="width:100%;border:1px solid rgba(0,0,0,0.15);border-radius:10px;padding:10px 14px;font-size:14px;font-family:\'DM Sans\',sans-serif;background:white;color:var(--text);">';
+    html += '</div>';
+    html += '<div id="ref-code-wrap" style="display:none;margin-bottom:12px;">';
+    html += '<div style="font-size:13px;color:var(--text-secondary);margin-bottom:6px;">Твоят личен реферален код:</div>';
+    html += '<div id="ref-code-chip" style="font-family:monospace;font-size:20px;font-weight:700;color:var(--green);background:white;padding:10px 22px;border-radius:10px;display:inline-block;letter-spacing:0.05em;"></div>';
+    html += '</div>';
+    html += '<div style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:10px;">Приятелят получава <strong>25% отстъпка</strong>.<br>На всеки 5 успешни препоръки ти получаваш <strong>безплатен одит</strong>.</div>';
+    html += '<div style="font-size:13px;font-weight:600;color:var(--green-dark);margin-bottom:6px;">👇 Копирай линка и го изпрати сам (WhatsApp, Viber, SMS) — носи 25% отстъпка на получателя:</div>';
+    html += '<div id="ref-url-display" style="padding:12px 14px;background:white;border:2px solid var(--green);border-radius:10px;font-size:13px;font-weight:600;color:var(--green-dark);word-break:break-all;margin-bottom:14px;">' + _baseUrl + '</div>';
+    html += '<div class="no-print" style="display:flex;gap:10px;flex-wrap:wrap;">';
+    html += '<button class="btn btn-primary" id="ref-share-btn" data-href="' + _baseUrl + '" data-code="" onclick="shareReferralLink(this)">Сподели линка</button>';
+    html += '</div></div>';
+  } else {
+    html += lockedCard('Персонални рутини · Дневни въпроси · Личен кодекс',
+      'Сутрешни и вечерни рутини · 5 ключови въпроса · 5-7 лични принципа извлечени от твоите думи.');
+    // Смисъл — заключен, златист акцент
+    html += '<div class="card" style="position:relative;overflow:hidden;border:1px solid var(--gold);">' +
+      '<div class="card-title" style="color:var(--gold);">🔒 Смисъл</div>' +
+      '<div style="filter:blur(5px);user-select:none;pointer-events:none;font-size:13px;color:var(--text-secondary);line-height:1.8;">Четирите избора разкриват разликата между казаното и живяното — и въпросът за носене с теб.</div>' +
+      '<div style="position:absolute;inset:0;background:rgba(250,250,248,0.15);"></div>' +
+    '</div>';
+    // Payment CTA
+    html += '<div style="background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);border-radius:16px;padding:32px 28px;text-align:center;color:white;margin:1.5rem 0;">';
+    html += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px;">Пълният анализ е готов</div>';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-size:2.6rem;font-weight:600;color:white;line-height:1;margin-bottom:4px;">';
+    html += '<span style="font-size:1.3rem;vertical-align:super;color:rgba(255,255,255,0.6);">€</span>14,60</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:22px;">Еднократно · Незабавен достъп · PDF + имейл</div>';
+    html += '<button onclick="payForFullResults()" style="background:#1D9E75;color:white;border:none;padding:15px 36px;border-radius:50px;font-size:15px;font-weight:500;cursor:pointer;font-family:\'DM Sans\',sans-serif;letter-spacing:0.01em;">Отключи пълния анализ — €14.60 →</button>';
+    html += '<div style="font-size:12px;color:rgba(255,255,255,0.25);margin-top:14px;">🔒 Обработено от Stripe · Криптирано и сигурно</div>';
+    html += '</div>';
+  }
+
+  return html;
+}
+
+// ─── БЕЗПЛАТНО PREVIEW (нова freemium структура — 7 елемента) ─────────────────
+function renderFreePreview(d) {
+  const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
+  const fp = d.free_preview || {};
+  let html = '';
+
+  // ЕЛЕМЕНТ 1 — Средна оценка + 4 елемента
+  html += '<div class="card">';
+  html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:16px;">';
+  html += '<div class="avg-score">' + avg + '</div><div class="avg-label">/10 средна оценка</div></div>';
+  if (fp.score_synthesis) html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.2rem;line-height:1.5;color:var(--text);margin-bottom:14px;">' + fp.score_synthesis + '</div>';
+  if (fp.score_overview) html += '<div class="card-text" style="margin-bottom:14px;">' + fp.score_overview + '</div>';
+  if (fp.score_underestimation) html += '<div style="background:var(--green-light);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--green-dark);line-height:1.6;">' + fp.score_underestimation + '</div>';
+  if (fp.score_breakthrough) html += '<div class="card-text" style="font-weight:500;color:var(--text);">' + fp.score_breakthrough + '</div>';
+  html += '</div>';
+
+  // ЕЛЕМЕНТ 2 — Централна диагноза + отварящ въпрос
+  var cd = d.central_diagnosis;
+  if (cd && cd.price_statement) {
+    html += '<div class="card" style="border-left:3px solid var(--purple-text);">';
+    html += '<div class="card-text" style="font-size:15px;color:var(--text);line-height:1.7;">' + cd.price_statement + '</div>';
+    if (cd.opening_question) html += '<div style="font-style:italic;color:var(--text-secondary);font-size:14px;margin-top:10px;line-height:1.6;">' + cd.opening_question + '</div>';
+    html += '</div>';
+  }
+
+  // ЕЛЕМЕНТ 3 — Основният модел (цитат, 3 изречения)
+  var quote = fp.main_pattern_quote || d.top_pattern;
+  if (quote) {
+    html += '<div class="card" style="border-left:3px solid var(--green);">';
+    html += '<div class="card-title">Основният модел</div>';
+    html += '<div class="card-text" style="font-style:italic;font-size:15px;line-height:1.75;">„' + quote + '"</div>';
+    html += '</div>';
+  }
+
+  // ЕЛЕМЕНТ 4 — Сляпа зона (назоваване + ефект) + заключващ блок
+  var teaser = d.blind_spot_teaser || (d.blind_spots && d.blind_spots[0] && d.blind_spots[0].insight);
+  if (teaser) {
+    html += '<div class="card">';
+    html += '<div class="card-title">Твоята най-голяма сляпа зона</div>';
+    html += '<div class="card-text" style="font-size:15px;line-height:1.75;">' + teaser + '</div>';
+    if (d.blind_spot_effect) html += '<div class="card-text" style="font-size:15px;line-height:1.75;margin-top:8px;">' + d.blind_spot_effect + '</div>';
+    html += '<div style="text-align:center;font-size:26px;opacity:0.85;margin-top:14px;">🔒</div>';
+    html += '</div>';
+  }
+
+  // ЕЛЕМЕНТ 5 — Какво открихме още за теб (фиксиран списък)
+  var discoveries = [
+    'Кои модели стоят зад повечето ти решения',
+    'Как мислиш и реагираш в различни житейски ситуации',
+    'В кои области плащаш най-високата цена',
+    'Къде губиш енергия, без да го осъзнаваш',
+    'Кои са най-силните ти страни и как да ги използваш по-добре',
+    'Каква е логичната следваща стъпка за теб'
+  ];
+  html += '<div class="card">';
+  html += '<div class="card-title" style="margin-bottom:14px;">Какво открихме още за теб</div>';
+  discoveries.forEach(function(line) {
+    html += '<div style="display:flex;gap:10px;align-items:flex-start;padding:7px 0;font-size:14px;color:var(--text-secondary);line-height:1.55;">';
+    html += '<span style="color:var(--green);font-weight:600;flex-shrink:0;">✓</span><span>' + line + '</span></div>';
+  });
+  html += '</div>';
+
+  // ЕЛЕМЕНТ 6 — Затварящ текст (фиксиран)
+  html += '<div style="text-align:center;font-size:15px;line-height:1.85;color:var(--text-secondary);margin:26px 8px;">';
+  html += 'Това, което видя дотук, е само началото.<br>Вече знаеш как изглежда животът ти днес.<br>Сега е време да разбереш защо е така и какво можеш да промениш.';
+  html += '</div>';
+
+  // ЕЛЕМЕНТ 7 — CTA + бутон
+  html += renderFreeCTA();
+  return html;
+}
+
+function renderFreeCTA() {
+  var html = '<div class="card" style="border:2px solid var(--green);">';
+  html += '<div class="card-text" style="font-size:15px;line-height:1.8;color:var(--text);">';
+  html += 'Ти вече направи най-трудната част — беше честен със себе си.<br><br>';
+  html += 'В пълния анализ чрез „Метода на трите огледала" ще откриеш:<br>';
+  html += '<strong>Къде си</strong>, <strong>Какво те държи там</strong>, и <strong>Каква е следващата ти стъпка</strong>.<br><br>';
+  html += 'Нека твоите отговори ти покажат това, което е трудно да видиш сам.';
+  html += '</div>';
+
+  html += '<div style="margin:18px 0;">';
+  html += '<div class="field-label" style="margin-bottom:10px;">В пълния анализ ще откриеш:</div>';
+  [
+    'Кой модел управлява най-много решенията ти',
+    'Каква е истинската цена, която плащаш всеки ден',
+    'Защо попадаш в едни и същи ситуации',
+    'Какво всъщност те спира, въпреки че полагаш усилия',
+    'Коя е първата промяна с най-голям ефект',
+    'Личен план за следващия етап от живота ти'
+  ].forEach(function(item) {
+    html += '<div style="display:flex;gap:10px;padding:5px 0;font-size:14px;color:var(--text-secondary);"><span style="color:var(--green);flex-shrink:0;">✓</span><span>' + item + '</span></div>';
+  });
+  html += '</div>';
+
+  // Цена
+  html += '<div style="text-align:center;background:var(--bg);border-radius:12px;padding:20px;margin-bottom:16px;">';
+  html += '<div style="font-size:13px;color:var(--text-tertiary);margin-bottom:2px;">Реална стойност на твоя персонален анализ:</div>';
+  html += '<div style="margin-bottom:12px;"><span class="price-strike">49,00 €</span></div>';
+  html += '<div style="font-size:13px;color:var(--text-tertiary);margin-bottom:2px;">Твоята инвестиция днес:</div>';
+  html += '<div style="font-family:\'Playfair Display\',serif;font-size:2.8rem;font-weight:600;color:var(--green);line-height:1;">14,60 €</div>';
+  html += '<div style="font-size:12px;color:var(--text-tertiary);margin-top:8px;">Еднократно плащане</div>';
+  html += '</div>';
+
+  html += '<button class="btn btn-primary" onclick="payForFullResults()" style="width:100%;justify-content:center;padding:16px;">Отключи моя анализ</button>';
+  html += '<div class="secure-note" style="margin-top:10px;">🔒 Обработено от Stripe · Криптирано и сигурно</div>';
+  html += '</div>';
+  return html;
+}
+
+// ─── PREVIEW (преди плащане) ──────────────────────────────────────────────────
+function renderPreview(d) {
+  showScreen('results');
+  var saveCard = document.querySelector('#screen-results .card.no-print');
+  if (saveCard) saveCard.style.display = 'none';
+  document.getElementById('natal-upsell').style.display = 'none';
+  document.getElementById('numerology-upsell').style.display = 'none';
+  document.getElementById('perplexity-upsell').style.display = 'none';
+  document.getElementById('results-content').innerHTML = renderFreePreview(d);
+  trackEvent('free_result_shown', {});
+  trackEvent('offer_shown', {});
+}
+
+function renderResults(d) {
+  showScreen('results');
+  var saveCard = document.querySelector('#screen-results .card.no-print');
+  if (saveCard) saveCard.style.display = '';
+  document.getElementById('results-content').innerHTML = renderAnalysis(d, true);
+  if (d.patterns && d.patterns.length > 0) {
+    document.getElementById('perplexity-upsell').style.display = 'block';
+  }
+  // fetchPrinciples() НЕ се вика тук — renderResults() се ползва и от restore пътища
+  // (презареждане, natal upsell), където би пуснал нова AI заявка при всяко зареждане.
+  // Генерира се само веднъж, в generateFullAnalysis().
+}
+
+function renderResults_UNUSED_v3_START(d) {
+  const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
+  let html = '';
+
+  html += '<div class="card">';
+  html += '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:16px;">';
+  html += '<div class="avg-score">' + avg + '</div><div class="avg-label">/10 средна оценка</div></div>';
+  if (d.summary) {
+    html += '<div class="summary-block"><div class="summary-label">Обобщение</div>';
+    html += '<div class="card-text">' + d.summary + '</div></div>';
+  }
+  if (d.summary_actions?.length) {
+    html += '<div style="margin-top:16px;"><div class="field-label" style="margin-bottom:10px;">Три стъпки към основната промяна</div>';
+    d.summary_actions.forEach((a, i) => {
+      html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div>';
+      html += '<div class="action-text" style="font-size:14px;color:var(--text);">' + a + '</div></div>';
+    });
+    html += '</div>';
+  }
+  html += '</div>';
+
+  if (d.top_pattern) {
+    html += '<div class="card" style="border-left:3px solid var(--green);">';
+    html += '<div class="card-title">Основният модел</div>';
+    html += '<div class="card-text" style="font-style:italic;font-size:15px;">"' + d.top_pattern + '"</div></div>';
+  }
+
+  // Психологически профил (нов)
+  if (d.psychological_profile) {
+    const pp = d.psychological_profile;
+    html += '<div class="card" style="border:2px solid var(--purple-light);">';
+    html += '<div class="card-title" style="color:var(--purple-text);margin-bottom:16px;">🧠 Психологически профил</div>';
+    const profileItems = [
+      { label: 'Стил на привързаност', value: pp.attachment_style },
+      { label: 'Локус на контрол', value: pp.locus_of_control },
+      { label: 'Схема на даване', value: pp.giving_schema },
+      { label: 'Основна схема', value: pp.core_schema }
+    ];
+    profileItems.forEach(function(item) {
+      if (!item.value) return;
+      html += '<div style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--purple-text);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">' + item.label + '</div>';
+      html += '<div class="card-text">' + item.value + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  if (d.patterns?.length) {
+    html += '<div class="card"><div class="card-title">Поведенческите модели</div>';
+    d.patterns.forEach(p => {
+      html += '<div style="margin-bottom:18px;">';
+      html += '<span class="tag ' + (p.severity === 'high' ? 'tag-red' : 'tag-amber') + '">' + p.title + '</span>';
+      html += '<div class="card-text" style="margin-bottom:8px;">' + p.description + '</div>';
+      if (p.psychological_root) {
+        html += '<div style="font-size:12px;color:var(--purple-text);background:var(--purple-light);border-radius:8px;padding:6px 10px;display:inline-block;">🔍 ' + p.psychological_root + '</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (d.blind_spots?.length) {
+    html += '<div class="card"><div class="card-title">Къде се лъжеш</div>';
+    d.blind_spots.forEach(b => {
+      html += '<div style="margin-bottom:14px;"><div style="font-size:13px;font-weight:500;margin-bottom:4px;">' + b.area + '</div>';
+      html += '<div class="card-text">' + b.insight + '</div></div>';
+    });
+    html += '</div>';
+  }
+
+  // Анализ на даването (нов)
+  if (d.giving_analysis) {
+    const ga = d.giving_analysis;
+    html += '<div class="card" style="border-left:3px solid var(--green);">';
+    html += '<div class="card-title" style="margin-bottom:16px;">🤲 Твоята схема на даване</div>';
+    if (ga.current_giving) {
+      html += '<div class="summary-block" style="margin-bottom:14px;">';
+      html += '<div class="summary-label">Как даваш сега</div>';
+      html += '<div class="card-text">' + ga.current_giving + '</div></div>';
+    }
+    if (ga.giving_cost) {
+      html += '<div style="background:var(--red-light);border-radius:10px;padding:12px 14px;margin-bottom:14px;">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--red-text);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Цената, която плащаш</div>';
+      html += '<div class="card-text">' + ga.giving_cost + '</div></div>';
+    }
+    if (ga.giving_invitation) {
+      html += '<div style="background:var(--green-light);border-radius:10px;padding:12px 14px;">';
+      html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Даването от пълнота — как би изглеждало</div>';
+      html += '<div class="card-text">' + ga.giving_invitation + '</div></div>';
+    }
+    html += '</div>';
+  }
+
+  if (d.areas?.length) {
+    html += '<div class="card"><div class="card-title">Анализ по области</div>';
+    d.areas.forEach(a => {
+      const hasGap = a.assessed_score && a.assessed_score > (a.score || 0) + 1;
+      html += '<div class="area-result"><div class="area-result-header">';
+      html += '<div class="area-result-name">' + a.name + '</div>';
+      if (hasGap) {
+        html += '<div style="display:flex;align-items:center;gap:8px;">';
+        html += '<span class="score-badge score-mid" style="text-decoration:line-through;opacity:0.5;">' + (a.score || 0) + '/10</span>';
+        html += '<span class="score-badge score-high" style="font-size:13px;padding:5px 14px;">▲ ' + a.assessed_score + '/10</span>';
+        html += '</div>';
+      } else {
+        html += '<span class="score-badge ' + scoreClass(a.score || 0) + '">' + (a.score || 0) + '/10</span>';
+      }
+      html += '</div>';
+      if (hasGap && a.encouragement) {
+        html += '<div style="background:var(--green-light);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;margin-bottom:10px;">';
+        html += '<div style="font-size:11px;font-weight:500;color:var(--green-dark);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Реалната картина</div>';
+        html += '<div style="font-size:13px;color:var(--green-dark);line-height:1.6;">' + a.encouragement + '</div>';
+        html += '</div>';
+      }
+      if (a.insight) html += '<div class="area-insight">' + a.insight + '</div>';
+      (a.actions || []).forEach((act, i) => {
+        html += '<div class="action-item"><div class="action-num">' + (i+1) + '</div><div class="action-text">' + act + '</div></div>';
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  if (d.morning_routines?.length || d.evening_routines?.length) {
+    html += '<div class="card"><div class="card-title">Твоите персонални рутини</div>';
+    html += '<div class="routine-grid">';
+    html += '<div class="routine-card"><div class="routine-card-title morning">☀ Сутрин</div>';
+    (d.morning_routines || []).forEach(r => { html += '<div class="routine-item">→ ' + r + '</div>'; });
+    html += '</div>';
+    html += '<div class="routine-card"><div class="routine-card-title evening">🌙 Вечер</div>';
+    (d.evening_routines || []).forEach(r => { html += '<div class="routine-item">→ ' + r + '</div>'; });
+    html += '</div></div></div>';
+  }
+
+  if (d.daily_questions?.length) {
+    html += '<div class="card"><div class="card-title">Въпроси за всеки ден</div>';
+    html += '<div class="card-text" style="margin-bottom:14px;font-size:13px;">Задавай си тези въпроси сутрин или вечер. Нека работят в теб.</div>';
+    html += '<ul class="daily-q-list">';
+    d.daily_questions.forEach((q, i) => {
+      html += '<li class="daily-q-item"><div class="daily-q-num">' + (i+1) + '</div><div class="daily-q-text">' + q + '</div></li>';
+    });
+    html += '</ul></div>';
+  }
+
+  if (d.meaning_analysis) {
+    html += renderMeaningAnalysis(d.meaning_analysis);
+  }
+
+  // Личен кодекс
+  if (d.principles && d.principles.length) {
+    html += '<div class="card" style="border:2px solid #1a1a1a;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);color:#fff;">';
+    html += '<div class="card-title" style="color:#fff;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:24px;text-transform:uppercase;letter-spacing:0.06em;">Принципите, открити чрез твоя живот</div>';
+    d.principles.forEach(function(p) {
+      html += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:20px 0;">';
+      html += '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:10px;">';
+      html += '<div style="font-family:\'Playfair Display\',serif;font-size:2rem;font-weight:600;color:var(--green);line-height:1;flex-shrink:0;">' + p.number + '</div>';
+      html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;font-weight:500;color:#fff;line-height:1.3;">' + p.title + '</div>';
+      html += '</div>';
+      html += '<div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.7;margin-bottom:10px;font-style:italic;">' + p.statement + '</div>';
+      html += '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em;">Откъде идва</div>';
+      html += '<div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;margin-bottom:12px;">' + p.origin + '</div>';
+      html += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;">';
+      html += '<div style="font-size:11px;color:var(--green);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Сутрешен въпрос</div>';
+      html += '<div style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;">' + p.morning_question + '</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+}
+
+// ─── ЛИЧЕН КОДЕКС (отделна заявка — избягва 524 timeout) ─────────────────────
+async function fetchPrinciples() {
+  // Добавяме loading placeholder в резултатите
+  const placeholder = document.createElement('div');
+  placeholder.id = 'principles-loading';
+  placeholder.className = 'card';
+  placeholder.style.cssText = 'border:2px solid #2d2d2d;background:#1a1a1a;text-align:center;padding:24px;margin-bottom:14px;';
+  placeholder.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Извличаме личния ти кодекс...</div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+
+  // Вмъкваме преди share блока
+  const shareBlock = document.querySelector('.share-block');
+  if (shareBlock) shareBlock.parentNode.insertBefore(placeholder, shareBlock);
+
+  const today = new Date().toLocaleDateString('bg-BG', {day:'numeric', month:'long', year:'numeric'});
+  const mainPattern = (analysisResult && analysisResult.top_pattern) || '';
+  const prompt = 'Днешна дата: ' + today + '.\n\nТи си психолог и лайф коуч. Имаш следните лични данни на човек:\n\nСЪЖАЛЕНИЯ: ' + answers.regrets + '\n\nГОРДОСТ: ' + answers.proud + '\n\nУРОЦИ ПО ТРУДНИЯ НАЧИН: ' + answers.lessons + '\n\nОСНОВНИЯТ МОДЕЛ, ОТКРИТ В АНАЛИЗА: ' + mainPattern + '\n\n' +
+    'ЧАСТ 1 — ЛИЧЕН КОДЕКС:\nИзвлечи 5-7 лични принципа, САМО от неговите собствени думи — не общи принципи от книги. Търси убежденията, които той вече е открил чрез опит, но никога не е формулирал официално. Всеки принцип трябва да звучи като негов — с неговия глас, свързан с реален момент.\n\n' +
+    'ГЛАС — ЗАДЪЛЖИТЕЛНО ПРАВИЛО ЗА ЦЕЛИЯ КОДЕКС: Принципът (statement), "ОТКЪДЕ ИДВА" (origin) и СУТРЕШНИЯТ ВЪПРОС (morning_question) се пишат ИЗКЛЮЧИТЕЛНО в първо лице — "аз", "разбрах", "видях", "научих", "усетих". НИКОГА трето лице — забранени са форми като "той", "се е стремял", "го е научило", "е поставял". Дори когато описваш минал урок или момент, той се разказва от гледната точка на самия човек, отвътре — не като наблюдение отвън. Това правило важи за целия анализ, не само за тази секция.\n\n' +
+    'РАЗНООБРАЗИЕ В statement: Седемте принципа НЕ трябва да звучат еднакво. Варирай началото на изречението във всяка точка — различен ритъм всеки път, докато оставаш в първо лице. Примери за възможни начала (само за вдъхновение, не длъжен да ги ползваш буквално): "Дълго вярвах, че...", "Научих по трудния начин, че...", "Все по-често осъзнавам, че...", "Днес знам, че...", "Отказвам повече да...", "Избирам да...", "Напомням си, че...", "Аз...". "Аз..." е позволено, но не за всичките 7 точки — най-много за 1-2 от тях. Целта е разнообразен ритъм на изречението, не разнообразно лице — първото лице остава задължително навсякъде.\n\n' +
+    'ЧАСТ 2 — "СЛЕД ЕДНА ГОДИНА..." (поле "epilogue"):\nПоследният раздел от целия анализ. Целта му не е да анализира, а да затвори преживяването спокойно и човешки.\n\n' +
+    'ПЕРСОНАЛИЗАЦИЯ: Текстът следва фиксирана структура и философия за първите две трети. Само последната една трета се персонализира — свързва се с основния модел, вече открит в анализа (даден по-горе). Не измисляй нова тема — използвай точно него.\n\n' +
+    'ЗАБРАНЕНО: Не обещавай резултати. Не предсказвай бъдещето. Не използвай мотивационен език. Не използвай фрази като "Всичко е възможно.", "Ти можеш.", "Успехът е в твоите ръце.", "Ще промениш живота си."\n\n' +
+    'Пиши така, сякаш разговаряш с близък човек.\n\n' +
+    'СТРУКТУРА:\n1. Започни с несигурност. Пример: "Не знам как ще изглежда животът ти след една година."\n' +
+    '2. Кажи какво е почти сигурно — не че животът ще стане по-лесен, а че ако човекът започне да вижда по-ясно себе си, ще започне да вижда по различен начин и живота около себе си.\n' +
+    '3. Кажи, че някои неща ще останат, други ще си тръгнат — без да уточняваш кои.\n' +
+    '4. Свържи текста с философията на ДАВАЙ!: най-голямата промяна няма да бъде какво му се случва, а каква цена избира да плаща.\n' +
+    '5. ПЕРСОНАЛИЗАЦИЯ (последната една трета): използвай основния модел от анализа (напр. контрол → цената на контрола; страх → цената на страха; постоянно угаждане → цената на одобрението; отлагане → цената на отлагането; избягване на конфликт → цената на мълчанието; живот за другите → цената да забравиш себе си). Пиши КОНКРЕТНО, не общо — с осезаеми, лични образи (напр. по-бавно, но истинско развитие; хората около теб, на които най-накрая им олеква да дишат; тялото, което е носило напрежението и сега започва да го пуска). Избягвай общи, разтегливи изречения без конкретен образ. Не измисляй нови теми.\n' +
+    '6. Завърши спокойно, с фиксирана логика (адаптирай формулировката, но запази смисъла и реда): "Животът рядко иска от нас повече. По-често ни показва един и същ урок, докато не сме готови да го научим." После: "Когато най-накрая го научим, преставаме да плащаме цената му отново и отново." Последният ред ВИНАГИ завършва с: "Тогава не ставаме друг човек. Ставаме повече себе си."\n\n' +
+    'Върни САМО валиден JSON на БЪЛГАРСКИ:\n{"principles":[{"number":1,"title":"Кратко заглавие (3-5 думи)","statement":"Формулировка в първо лице — ВАРИРАЙ началото на изречението между точките, не всичките 7 да звучат еднакво (напр. не всички да започват с \'Аз...\')","origin":"От кой точен опит или урок идва — 1 изречение, ЗАДЪЛЖИТЕЛНО ПЪРВО ЛИЦЕ (напр. \'Разбрах го, когато...\', \'Видях го, след като...\')","morning_question":"Въпрос за сутринта, директно свързан с принципа"}],"epilogue":"Текстът на \'След една година...\' по структурата по-горе. 8-10 изречения общо."}';
+
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: prompt, max_tokens: 3800 })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const parsed = JSON.parse(data.content.replace(/```json\n?|```\n?/g, '').trim());
+    if (analysisResult) { analysisResult.principles = parsed.principles || []; analysisResult.epilogue = parsed.epilogue || ''; }
+    renderPrinciples(parsed.principles || [], parsed.epilogue || '');
+  } catch(e) {
+    const el = document.getElementById('principles-loading');
+    if (el) el.innerHTML = '<div style="color:rgba(255,255,255,0.3);font-size:13px;">Личният кодекс не успя да се зареди.</div>';
+  }
+}
+
+function renderPrinciples(principles, epilogue) {
+  if ((!principles || !principles.length) && !epilogue) {
+    const el = document.getElementById('principles-loading');
+    if (el) el.remove();
+    return;
+  }
+  let html = '';
+  if (principles && principles.length) {
+    html += '<div class="card" style="border:2px solid #1a1a1a;background:linear-gradient(135deg,#1a1a1a 0%,#2d2d2d 100%);color:#fff;">';
+    html += '<div class="card-title" style="color:#fff;letter-spacing:0.08em;margin-bottom:4px;">ЛИЧЕН КОДЕКС</div>';
+    html += '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:24px;text-transform:uppercase;letter-spacing:0.06em;">Принципите, открити чрез твоя живот</div>';
+    principles.forEach(function(p) {
+      html += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:20px 0;">';
+      html += '<div style="display:flex;align-items:baseline;gap:14px;margin-bottom:10px;">';
+      html += '<div style="font-family:\'Playfair Display\',serif;font-size:2rem;font-weight:600;color:var(--green);line-height:1;flex-shrink:0;">' + p.number + '</div>';
+      html += '<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;font-weight:500;color:#fff;line-height:1.3;">' + p.title + '</div>';
+      html += '</div>';
+      html += '<div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.7;margin-bottom:10px;font-style:italic;">' + p.statement + '</div>';
+      html += '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">Откъде идва</div>';
+      html += '<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:12px;">' + p.origin + '</div>';
+      html += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid var(--green);border-radius:0 8px 8px 0;padding:10px 14px;">';
+      html += '<div style="font-size:11px;color:var(--green);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Сутрешен въпрос</div>';
+      html += '<div style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;">' + p.morning_question + '</div>';
+      html += '</div></div>';
+    });
+    html += '</div>';
+  }
+  // "След една година..." — епилог, абсолютно последната страница на отчета
+  if (epilogue) {
+    html += '<div class="card" style="border:none;background:var(--bg);text-align:center;padding:36px 28px;margin-top:14px;">';
+    html += '<div style="font-family:\'Playfair Display\',serif;font-style:italic;font-size:1.2rem;color:var(--text);margin-bottom:18px;">След една година...</div>';
+    html += '<div class="card-text" style="font-size:15px;line-height:1.9;text-align:left;">' + epilogue.replace(/\n+/g, '<br><br>') + '</div>';
+    html += '</div>';
+  }
+  const el = document.getElementById('principles-loading');
+  if (el) el.outerHTML = html;
+}
+
+// ─── СМИСЪЛ — РЕНДИРАНЕ ──────────────────────────────────────────────────────
+function renderMeaningAnalysis(ma) {
+  if (!ma) return '';
+  let h = '<div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,var(--gold-light) 0%,#fff 100%);margin-top:1.5rem;">';
+  h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">Последният слой</div>';
+  h += '<div style="font-family:\'Playfair Display\',serif;font-size:1.3rem;font-weight:500;color:var(--gold-dark);margin-bottom:20px;">Смисъл</div>';
+
+  if (ma.declared_vs_lived) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Казано срещу живяното</div>';
+    h += '<div class="card-text">' + ma.declared_vs_lived + '</div></div>';
+  }
+  if (ma.where_it_points) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Накъде сочи</div>';
+    h += '<div class="card-text">' + ma.where_it_points + '</div></div>';
+  }
+  if (ma.the_giving_moment) {
+    h += '<div style="background:rgba(176,141,87,0.08);border-radius:10px;padding:14px 16px;margin-bottom:16px;">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Моментът на даването</div>';
+    h += '<div class="card-text">' + ma.the_giving_moment + '</div></div>';
+  }
+  if (ma.current_anchor || ma.anchor_honesty) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    if (ma.current_anchor) {
+      h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">На какво стоиш сега</div>';
+      h += '<div class="card-text" style="margin-bottom:10px;">' + ma.current_anchor + '</div>';
+    }
+    if (ma.anchor_honesty) {
+      h += '<div class="card-text" style="font-style:italic;color:var(--text-tertiary);">' + ma.anchor_honesty + '</div>';
+    }
+    h += '</div>';
+  }
+  if (ma.life_stage_reflection) {
+    h += '<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid rgba(176,141,87,0.2);">';
+    h += '<div style="font-size:11px;font-weight:500;color:var(--gold);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">Къде се намираш сега</div>';
+    h += '<div class="card-text">' + ma.life_stage_reflection + '</div></div>';
+  }
+  h += '<div style="border-left:3px solid var(--gold);padding:14px 16px;margin-bottom:16px;background:rgba(176,141,87,0.05);border-radius:0 10px 10px 0;">';
+  h += '<div class="card-text" style="color:var(--gold-dark);line-height:1.9;margin-bottom:10px;">Забелязваш ли — почти всичко, на което разчиташ, може да се изтощи.</div>';
+  h += '<div class="card-text" style="color:var(--gold-dark);line-height:1.9;margin-bottom:10px;">Но има Нещо, на което можеш да се опреш, дори когато всичко друго изчезне. Нещо, което те носи, без да го молиш за това. Някои Го наричат Бог. Други — Творец, или просто Това, което е по-голямо от тях. Името няма значение. Важното е, че никога не си бил сам в това — само си забравил да погледнеш натам.</div>';
+  h += '<div class="card-text" style="color:var(--gold-dark);font-weight:500;">Не бързай към отговора.</div>';
+  h += '</div>';
+  if (ma.the_real_question) {
+    h += '<div style="background:var(--gold-dark);border-radius:12px;padding:20px 22px;text-align:center;">';
+    h += '<div style="font-size:11px;color:rgba(255,255,255,0.45);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Въпросът за носене с теб</div>';
+    h += '<div style="font-family:\'Playfair Display\',serif;font-size:1.1rem;color:#fff;line-height:1.6;font-style:italic;">' + ma.the_real_question + '</div>';
+    h += '</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function generateReferralCode(email) {
+  var prefix = (email.split('@')[0] || '').replace(/[^a-zA-Z]/g, '').substring(0, 4).toUpperCase() || 'USER';
+  var hash = 0;
+  for (var i = 0; i < email.length; i++) {
+    hash = ((hash << 5) - hash) + email.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return 'DAVAI-' + prefix + ((Math.abs(hash) % 900) + 100);
+}
+
+function previewRefCode(email) {
+  var wrap = document.getElementById('ref-code-wrap');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (wrap) wrap.style.display = 'none';
+    return;
+  }
+  var code = generateReferralCode(email);
+  var baseUrl = CONFIG.siteUrl.split('?')[0];
+  var refUrl = baseUrl + '?ref=' + code;
+  var chip = document.getElementById('ref-code-chip');
+  if (chip) chip.textContent = code;
+  var urlEl = document.getElementById('ref-url-display');
+  if (urlEl) urlEl.textContent = refUrl;
+  var btn = document.getElementById('ref-share-btn');
+  if (btn) { btn.dataset.href = refUrl; btn.dataset.code = code; }
+  if (wrap) wrap.style.display = 'block';
+}
+
+async function shareReferralLink(btn) {
+  var url = btn.dataset.href || CONFIG.siteUrl;
+  var code = btn.dataset.code || '';
+  var shareData = {
+    title: 'ДАВАЙ! — Личен одит на живота',
+    text: 'Виж това, мисля че може да ти бъде полезно. С код ' + code + ' получаваш 25% отстъпка.',
+    url: url
+  };
+  if (navigator.share) {
+    try { await navigator.share(shareData); trackEvent('referral_link_copied', { method: 'share' }); } catch(e) {}
+  } else {
+    try {
+      await navigator.clipboard.writeText(url);
+      trackEvent('referral_link_copied', { method: 'clipboard' });
+      var orig = btn.textContent;
+      btn.textContent = 'Копирано ✓';
+      setTimeout(function() { btn.textContent = orig; }, 2000);
+    } catch(e) {}
+  }
+}
+
+// ─── PERPLEXITY АНАЛИЗ ───────────────────────────────────────────────────────
+async function fetchPerplexityAnalysis() {
+  const btn = document.getElementById('perplexity-btn');
+  const errEl = document.getElementById('perplexity-error');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = '🔍 Търсим в реални източници...';
+
+  try {
+    const d = analysisResult;
+    if (!d || !d.patterns) throw new Error('Няма анализ');
+
+    const res = await fetch(CONFIG.workerUrl + '/perplexity', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patterns: d.patterns,
+        blind_spots: d.blind_spots || [],
+        top_pattern: d.top_pattern || ''
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (!data.result) {
+      // Graceful fallback — приятелско съобщение, не сурова JSON грешка
+      const pr = document.getElementById('perplexity-results');
+      pr.innerHTML = '<div class="card"><div class="card-text">' + (data.message || 'Техниките не можаха да се заредят този път.') + '</div></div>';
+      pr.style.display = 'block';
+      document.getElementById('perplexity-upsell').style.display = 'none';
+      return;
+    }
+    renderPerplexityResults(data.result);
+    document.getElementById('perplexity-upsell').style.display = 'none';
+  } catch(e) {
+    errEl.textContent = 'Грешка: ' + e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Намери техниките →';
+  }
+}
+
+function renderPerplexityResults(data) {
+  const container = document.getElementById('perplexity-results');
+  if (!data) { container.innerHTML = '<div class="card"><p>Няма резултати.</p></div>'; container.style.display = 'block'; return; }
+
+  let html = '';
+
+  // Техники по модел
+  if (data.techniques_by_pattern?.length) {
+    html += '<div class="card" style="border:2px solid var(--amber);background:linear-gradient(135deg,#fffbf2,#fff);">';
+    html += '<div class="card-title" style="margin-bottom:4px;">🎯 Техники за твоите модели</div>';
+    html += '<div class="card-text" style="margin-bottom:20px;color:var(--amber-text);">Три действия, приложими още днес — от реални изследвания.</div>';
+
+    data.techniques_by_pattern.forEach(function(item) {
+      html += '<div style="margin-bottom:20px;">';
+      html += '<div style="font-weight:600;font-size:15px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);">📌 ' + item.pattern + '</div>';
+
+      (item.techniques || []).forEach(function(t, i) {
+        html += '<div style="background:var(--amber);border-radius:12px;padding:14px 16px;margin-bottom:10px;">';
+        html += '<div style="font-weight:600;font-size:14px;margin-bottom:6px;">' + (i+1) + '. ' + t.name + '</div>';
+        html += '<div style="font-size:14px;color:var(--amber-text);margin-bottom:8px;line-height:1.6;">' + t.action + '</div>';
+        html += '<div style="font-style:italic;font-size:13px;color:#6b4c12;margin-bottom:10px;padding:8px;background:rgba(255,255,255,0.5);border-radius:8px;">"' + t.sentence + '"</div>';
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+        html += '<div style="font-size:12px;background:rgba(255,255,255,0.6);border-radius:8px;padding:8px;"><span style="color:#A32D2D;font-weight:600;">✗ Губиш:</span> ' + t.cost + '</div>';
+        html += '<div style="font-size:12px;background:rgba(255,255,255,0.6);border-radius:8px;padding:8px;"><span style="color:#0F6E56;font-weight:600;">✓ Печелиш:</span> ' + t.gain + '</div>';
+        html += '</div></div>';
+      });
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Източници
+  if (data.library?.length) {
+    html += '<div class="card" style="margin-top:1rem;">';
+    html += '<div class="card-title" style="margin-bottom:4px;">📚 Препоръчани източници за самостоятелна работа</div>';
+    html += '<div class="card-text" style="margin-bottom:16px;">На база на твоя профил и поведенческите модели, предлагаме следните източници — ключовото е синтезирано за теб.</div>';
+
+    data.library.forEach(function(src) {
+      const typeIcon = src.type === 'книга' ? '📖' : src.type === 'подкаст' ? '🎙️' : '📄';
+      html += '<div style="border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;">';
+      html += '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:2px;">';
+      html += '<div style="font-weight:600;font-size:14px;">' + typeIcon + ' ' + src.source + '</div>';
+      if (src.lang) html += '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:' + (src.lang === 'БГ' ? 'var(--green-light)' : 'var(--amber)') + ';color:' + (src.lang === 'БГ' ? 'var(--green-dark)' : 'var(--amber-text)') + ';">' + src.lang + '</span>';
+      html += '</div>';
+      if (src.author) html += '<div style="font-size:12px;color:var(--text-tertiary);margin-bottom:10px;">' + src.author + '</div>';
+      html += '<ul style="margin:0 0 10px 16px;font-size:13px;color:var(--text-secondary);line-height:1.7;">';
+      (src.techniques || []).forEach(function(t) { html += '<li>' + t + '</li>'; });
+      html += '</ul>';
+      if (src.sentence) html += '<div style="font-style:italic;font-size:13px;color:var(--text-secondary);padding:8px 12px;background:var(--bg);border-radius:8px;">"' + src.sentence + '"</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  container.innerHTML = html;
+  container.style.display = 'block';
+  container.classList.add('loaded');
+  perplexityEmailHTML = buildPerplexityEmailSection(data);
+  container.scrollIntoView({ behavior: 'smooth' });
+}
+
+function buildPerplexityEmailSection(data) {
+  if (!data) return '';
+  var h = '<div style="margin-top:20px;padding:20px;border:1px solid #f0d898;border-radius:12px;background:#fffbf2;">';
+  h += '<h2 style="color:#854F0B;font-size:15px;margin:0 0 14px;">🎯 Конкретни техники и препоръчани източници</h2>';
+  if (data.techniques_by_pattern && data.techniques_by_pattern.length) {
+    data.techniques_by_pattern.forEach(function(item) {
+      h += '<h3 style="font-size:14px;color:#333;margin:14px 0 8px;">📌 ' + item.pattern + '</h3>';
+      (item.techniques || []).forEach(function(t, i) {
+        h += '<div style="background:#fff;border-radius:8px;padding:10px;margin-bottom:8px;border:1px solid #f0d898;">';
+        h += '<strong>' + (i+1) + '. ' + t.name + '</strong><br>';
+        h += '<p style="margin:4px 0;font-size:13px;">' + t.action + '</p>';
+        h += '<p style="margin:4px 0;font-size:12px;font-style:italic;color:#6b4c12;">"' + t.sentence + '"</p>';
+        h += '<p style="font-size:12px;color:#A32D2D;margin:2px 0;">✗ ' + t.cost + '</p>';
+        h += '<p style="font-size:12px;color:#0F6E56;margin:2px 0;">✓ ' + t.gain + '</p>';
+        h += '</div>';
+      });
+    });
+  }
+  if (data.library && data.library.length) {
+    h += '<h3 style="font-size:14px;color:#333;margin:16px 0 8px;">📚 Препоръчани източници</h3>';
+    data.library.forEach(function(src) {
+      h += '<div style="border:1px solid #eee;border-radius:8px;padding:10px;margin-bottom:8px;">';
+      h += '<strong>' + src.source + '</strong>';
+      if (src.lang) h += ' <span style="font-size:11px;background:#E1F5EE;color:#0F6E56;padding:1px 6px;border-radius:8px;">' + src.lang + '</span>';
+      if (src.author) h += '<br><span style="font-size:12px;color:#999;">' + src.author + '</span>';
+      if (src.techniques && src.techniques.length) h += '<ul style="font-size:12px;margin:6px 0 0 16px;">' + src.techniques.map(function(t){return '<li>' + t + '</li>';}).join('') + '</ul>';
+      if (src.sentence) h += '<p style="font-size:12px;font-style:italic;color:#555;margin:4px 0 0;">"' + src.sentence + '"</p>';
+      h += '</div>';
+    });
+  }
+  h += '</div>';
+  return h;
+}
+
+// ─── НАТАЛНА КАРТА ───────────────────────────────────────────────────────────
+function toggleNatalForm() {
+  const form = document.getElementById('natal-form');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+async function fetchNatalChart() {
+  const dateVal = document.getElementById('natal-date').value;
+  const timeVal = document.getElementById('natal-time').value;
+  const city = document.getElementById('natal-city').value.trim();
+  const tzone = document.getElementById('natal-tzone').value;
+  const errEl = document.getElementById('natal-error');
+  errEl.style.display = 'none';
+
+  if (!dateVal || !city) {
+    errEl.textContent = 'Моля въведи дата и град на раждане.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const [year, month, day] = dateVal.split('-').map(Number);
+  const [hour, min] = (timeVal || '12:00').split(':').map(Number);
+
+  const btn = document.getElementById('natal-submit-btn');
+  btn.disabled = true; btn.textContent = 'Изчислява се...';
+
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/natal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ day, month, year, hour, min, city, tzone })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderNatalResults(data.planets);
+    document.getElementById('natal-upsell').style.display = 'none';
+    fetchNatalAnalysis(data.planets);
+  } catch(e) {
+    errEl.textContent = 'Грешка: ' + e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Изчисли натална карта →';
+  }
+}
+
+const SIGN_BG = {
+  Aries:'Овен', Taurus:'Телец', Gemini:'Близнаци', Cancer:'Рак',
+  Leo:'Лъв', Virgo:'Дева', Libra:'Везни', Scorpio:'Скорпион',
+  Sagittarius:'Стрелец', Capricorn:'Козирог', Aquarius:'Водолей', Pisces:'Риби'
+};
+const PLANET_BG = {
+  Sun:'☀️ Слънце', Moon:'🌙 Луна', Mercury:'☿ Меркурий', Venus:'♀️ Венера',
+  Mars:'♂️ Марс', Jupiter:'♃ Юпитер', Saturn:'♄ Сатурн', Ascendant:'⬆️ Асцендент'
+};
+
+const SIGNS_ORDER = ['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'];
+const MAIN_PLANETS = ['Sun','Moon','Mercury','Venus','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto'];
+
+function degToSign(deg) {
+  return SIGNS_ORDER[Math.floor((deg % 360) / 30)];
+}
+
+function renderNatalResults(data) {
+  const container = document.getElementById('natal-results');
+  // API response: { planets: [...], houses: [...], ascendant: 198.92 (degree), midheaven: ... }
+  const allPlanets = (data.planets || []).filter(function(p) { return MAIN_PLANETS.includes(p.name); });
+  const ascDeg = data.ascendant;
+  const mcDeg = data.midheaven;
+
+  let html = '<div class="card" style="border:2px solid var(--purple-light);">';
+  html += '<div class="card-title" style="margin-bottom:4px;">Натална карта</div>';
+  html += '<div class="card-text" style="margin-bottom:16px;color:var(--purple-text);">Планетите в момента на твоето раждане</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+
+  // Ascendant & Midheaven
+  if (ascDeg !== undefined) {
+    const aSign = SIGN_BG[degToSign(ascDeg)] || degToSign(ascDeg);
+    html += '<div style="background:var(--purple-light);border-radius:10px;padding:10px 12px;">';
+    html += '<div style="font-size:12px;color:var(--purple-text);font-weight:500;">⬆️ Асцендент</div>';
+    html += '<div style="font-size:15px;font-weight:600;margin-top:2px;">' + aSign + '</div></div>';
+  }
+  if (mcDeg !== undefined) {
+    const mcSign = SIGN_BG[degToSign(mcDeg)] || degToSign(mcDeg);
+    html += '<div style="background:var(--purple-light);border-radius:10px;padding:10px 12px;">';
+    html += '<div style="font-size:12px;color:var(--purple-text);font-weight:500;">☝️ Среднонебие (MC)</div>';
+    html += '<div style="font-size:15px;font-weight:600;margin-top:2px;">' + mcSign + '</div></div>';
+  }
+
+  allPlanets.forEach(function(p) {
+    const name = PLANET_BG[p.name] || p.name;
+    const sign = SIGN_BG[p.sign] || p.sign;
+    const deg = Math.floor(p.norm_degree) + '°';
+    const retro = p.is_retro === 'true' ? ' ℞' : '';
+    html += '<div style="background:var(--purple-light);border-radius:10px;padding:10px 12px;">';
+    html += '<div style="font-size:12px;color:var(--purple-text);font-weight:500;">' + name + retro + '</div>';
+    html += '<div style="font-size:15px;font-weight:600;margin-top:2px;">' + sign + ' ' + deg + '</div>';
+    html += '</div>';
+  });
+
+  html += '</div></div>';
+  container.innerHTML = html;
+  container.style.display = 'block';
+  container.classList.add('loaded');
+  container.scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─── AI АНАЛИЗ НА НАТАЛНАТА КАРТА ────────────────────────────────────────────
+async function fetchNatalAnalysis(planetsData) {
+  const container = document.getElementById('natal-results');
+  const loadingDiv = document.createElement('div');
+  loadingDiv.id = 'natal-ai-loading';
+  loadingDiv.className = 'card';
+  loadingDiv.style.cssText = 'border:2px solid var(--purple-light);margin-top:1rem;text-align:center;padding:24px;';
+  loadingDiv.innerHTML = '<div class="card-text" style="color:var(--purple-text);margin-bottom:14px;">🔮 Анализираме наталната карта.</div><div class="dots"><div class="dot" style="background:var(--purple-text)"></div><div class="dot" style="background:var(--purple-text)"></div><div class="dot" style="background:var(--purple-text)"></div></div>';
+  container.appendChild(loadingDiv);
+
+  const allPlanets = (planetsData.planets || []).filter(function(p) { return MAIN_PLANETS.includes(p.name); });
+  const ascDeg = planetsData.ascendant;
+  const mcDeg = planetsData.midheaven;
+  const ascSign = SIGN_BG[degToSign(ascDeg)] || degToSign(ascDeg);
+  const mcSign = SIGN_BG[degToSign(mcDeg)] || degToSign(mcDeg);
+  const planetsText = allPlanets.map(function(p) {
+    return (PLANET_BG[p.name] || p.name).replace(/[^\w\sА-я]/gu,'').trim() + ' в ' + (SIGN_BG[p.sign] || p.sign) + (p.is_retro === 'true' ? ' (ретроградна)' : '');
+  }).join(', ');
+
+  // /natal-analysis — единствен източник (Worker), чете кръстосан контекст по имейл сам
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/natal-analysis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ascSign, mcSign, planetsText, email: oditEmail || undefined })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderNatalAnalysis(data.report);
+  } catch(e) {
+    const el = document.getElementById('natal-ai-loading');
+    if (el) el.innerHTML = '<div class="card-text" style="color:var(--red-text);">Грешка при астрологичния анализ: ' + e.message + '</div>';
+  }
+}
+
+// Прост параграфен рендер на течен текст (наталният анализ вече е ЕДИН непрекъснат
+// разказ без раздели — виж buildNatalPrompt в Worker-а)
+function natalTextToHtml(text) {
+  return (text || '').split(/\n+/).map(function(p) {
+    p = p.trim();
+    if (!p) return '';
+    return '<p class="card-text" style="margin-bottom:14px;line-height:1.75;">' + escapeHtmlClient(p) + '</p>';
+  }).join('');
+}
+function escapeHtmlClient(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function renderNatalAnalysis(reportText) {
+  let html = '<div class="card" style="border:2px solid var(--purple-light);background:linear-gradient(135deg,#f5f3ff 0%,#fff 100%);margin-top:1rem;">';
+  html += '<div class="card-title" style="color:var(--purple-text);margin-bottom:4px;">🔮 Астрологичен психоанализ</div>';
+  html += '<div class="card-text" style="margin-bottom:18px;color:var(--purple-text);">Архетипните сили и предизвикателства на твоята карта</div>';
+  html += natalTextToHtml(reportText);
+  html += '</div>';
+
+  const el = document.getElementById('natal-ai-loading');
+  if (el) el.outerHTML = html;
+  // Съхрани за имейл (inline styles за email клиенти)
+  natalEmailHTML = buildNatalEmailSection(reportText);
+  natalReportText = reportText;
+  // Обнови #natal-results с loaded клас
+  var nr = document.getElementById('natal-results');
+  if (nr) { nr.classList.add('loaded'); nr.style.display = 'block'; }
+
+  var actionsDiv = document.createElement('div');
+  actionsDiv.className = 'card no-print';
+  actionsDiv.style.marginTop = '10px';
+  actionsDiv.innerHTML = '<div class="field-label" style="margin-bottom:10px;">Запази резултата:</div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+    '<button class="btn btn-ghost" onclick="trackEvent(\'pdf_download\', {}); window.print()">⬇ Свали като PDF</button>' +
+    '<button class="btn btn-ghost" id="natal-email-btn" onclick="sendNatalEmailQuick()">📧 Изпрати на имейл</button>' +
+    '</div><div id="natal-email-status" style="font-size:12px;margin-top:8px;"></div>';
+  if (nr) nr.appendChild(actionsDiv);
+}
+
+async function sendNatalEmailQuick() {
+  const btn = document.getElementById('natal-email-btn');
+  const status = document.getElementById('natal-email-status');
+  if (!oditEmail || !natalReportText) return;
+  btn.disabled = true; btn.textContent = 'Изпращане...';
+  try {
+    const res = await fetch(CONFIG.workerUrl + '/send-natal-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: oditEmail, report: natalReportText })
+    });
+    const data = await res.json();
+    btn.disabled = false; btn.textContent = '📧 Изпрати на имейл';
+    status.textContent = data.ok ? '✓ Изпратено на ' + oditEmail : 'Грешка — опитай пак';
+    status.style.color = data.ok ? 'var(--green)' : 'var(--red-text)';
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '📧 Изпрати на имейл';
+    status.textContent = 'Грешка — опитай пак';
+    status.style.color = 'var(--red-text)';
+  }
+}
+
+function buildNatalEmailSection(reportText) {
+  if (!reportText) return '';
+  var h = '<div style="margin-top:20px;padding:20px;border:1px solid #d0c8f8;border-radius:12px;background:#f8f6ff;">';
+  h += '<h2 style="color:#4A3BAA;font-size:15px;margin:0 0 14px;">🔮 Астрологичен психоанализ</h2>';
+  h += reportText.split(/\n+/).filter(function(p){return p.trim();}).map(function(p){ return '<p>' + p.trim() + '</p>'; }).join('');
+  h += '</div>';
+  return h;
+}
+
+// ─── ИМЕЙЛ ───────────────────────────────────────────────────────────────────
+function openEmailModal() {
+  var refInput = document.getElementById('ref-email-input');
+  if (refInput && refInput.value) {
+    document.getElementById('email-input').value = refInput.value;
+  }
+  document.getElementById('email-modal').classList.remove('hidden');
+}
+function closeEmailModal() {
+  document.getElementById('email-modal').classList.add('hidden');
+  document.getElementById('email-error').style.display = 'none';
+}
+
+async function sendEmail() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    document.getElementById('email-error').style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('send-email-btn');
+  btn.disabled = true; btn.textContent = 'Изпращане...';
+
+  try {
+    const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
+    // Build email HTML with Three Mirrors structure and inline styles
+    var emailMirror = function(num, color, title) {
+      return '<div style="margin:32px 0 16px;padding:14px 20px;background:#f8f8f6;border-radius:8px;border-left:4px solid ' + color + ';">' +
+        '<div style="font-size:10px;font-weight:700;color:' + color + ';text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">' + num + '</div>' +
+        '<div style="font-size:17px;font-family:Georgia,serif;font-weight:500;color:#1a1a1a;">' + title + '</div>' +
+        '</div>';
+    };
+    var h2 = function(t) { return '<h2 style="font-size:15px;color:#1a1a1a;margin:16px 0 8px;font-family:sans-serif;">' + t + '</h2>'; };
+    var p = function(t) { return '<p style="color:#555;line-height:1.7;margin:0 0 8px;font-size:14px;">' + t + '</p>'; };
+
+    let emailHtml = '';
+    if (analysisResult) {
+      const d = analysisResult;
+
+      // ── ОГЛЕДАЛО №1 — НАВИЦИ ──
+      emailHtml += emailMirror('ОГЛЕДАЛО №1', '#1D9E75', 'Навици — Как живееш днес');
+      if (d.summary) emailHtml += h2('Обобщение') + p(d.summary);
+      if (d.what_works) emailHtml += h2('Какво вече работи добре') + p(d.what_works);
+      if (d.top_pattern) emailHtml += h2('Основен модел') + '<p style="color:#555;line-height:1.7;font-style:italic;font-size:14px;">"' + d.top_pattern + '"</p>';
+      if (d.summary_actions && d.summary_actions.length) emailHtml += h2('Три стъпки') + '<ol style="color:#555;padding-left:20px;line-height:1.7;">' + d.summary_actions.map(function(a) { return '<li style="margin-bottom:6px;">' + a + '</li>'; }).join('') + '</ol>';
+      if (d.areas && d.areas.length) {
+        emailHtml += h2('Анализ по области');
+        d.areas.forEach(function(a) {
+          emailHtml += '<div style="margin-bottom:14px;padding:12px 16px;background:#f5f5f3;border-radius:8px;">';
+          emailHtml += '<div style="font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:6px;">' + a.name + ' — ' + (a.score || 0) + '/10</div>';
+          if (a.insight) emailHtml += '<p style="font-size:13px;color:#555;line-height:1.6;margin:0 0 8px;">' + a.insight + '</p>';
+          if (a.actions && a.actions.length) emailHtml += '<ul style="color:#555;padding-left:16px;margin:0;">' + a.actions.map(function(x) { return '<li style="font-size:13px;margin-bottom:4px;">' + x + '</li>'; }).join('') + '</ul>';
+          emailHtml += '</div>';
+        });
+      }
+
+      // ── ОГЛЕДАЛО №2 — БЛОКАЖИ ──
+      emailHtml += emailMirror('ОГЛЕДАЛО №2', '#4A3BAA', 'Блокажи — Какво те спира');
+      if (d.psychological_profile) {
+        const pp = d.psychological_profile;
+        emailHtml += h2('🧠 Психологически профил');
+        if (pp.attachment_style) emailHtml += p('<strong>Начин на свързване:</strong> ' + pp.attachment_style);
+        if (pp.locus_of_control) emailHtml += p('<strong>Чие влияние:</strong> ' + pp.locus_of_control);
+        if (pp.giving_schema) emailHtml += p('<strong>Откъде даваш:</strong> ' + pp.giving_schema);
+        if (pp.core_schema) emailHtml += p('<strong>Основно убеждение:</strong> ' + pp.core_schema);
+      }
+      if (d.patterns && d.patterns.length) {
+        emailHtml += h2('Поведенчески модели');
+        d.patterns.forEach(function(pt) {
+          emailHtml += '<div style="margin-bottom:12px;">';
+          emailHtml += '<strong style="color:#1a1a1a;">' + pt.title + '</strong>';
+          emailHtml += p(pt.description);
+          if (pt.psychological_root) emailHtml += '<p style="font-size:12px;color:#4A3BAA;font-style:italic;margin:4px 0;">' + pt.psychological_root + '</p>';
+          emailHtml += '</div>';
+        });
+      }
+      if (d.blind_spots && d.blind_spots.length) {
+        emailHtml += h2('Слепи зони');
+        d.blind_spots.forEach(function(b) {
+          emailHtml += '<div style="margin-bottom:10px;"><strong style="color:#1a1a1a;">' + b.area + '</strong>' + p(b.insight) + '</div>';
+        });
+      }
+      if (d.giving_analysis) {
+        const ga = d.giving_analysis;
+        emailHtml += h2('🤲 Схема на даване');
+        if (ga.current_giving) emailHtml += p('<strong>Как даваш сега:</strong> ' + ga.current_giving);
+        if (ga.giving_cost) emailHtml += p('<strong>Цената:</strong> ' + ga.giving_cost);
+        if (ga.giving_invitation) emailHtml += p('<strong>Даването от пълнота:</strong> ' + ga.giving_invitation);
+      }
+
+      // ── ЦЕНТРАЛНА ДИАГНОЗА ──
+      if (d.central_diagnosis) {
+        const cd = d.central_diagnosis;
+        emailHtml += '<div style="margin:32px 0 16px;padding:24px;background:#1a1a1a;border-radius:10px;">';
+        emailHtml += '<div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.14em;margin-bottom:10px;">ЦЕНТРАЛНА ДИАГНОЗА</div>';
+        if (cd.price_statement) emailHtml += '<p style="font-family:Georgia,serif;font-size:17px;color:white;line-height:1.5;margin:0 0 16px;">' + cd.price_statement + '</p>';
+        (cd.cost_areas || []).forEach(function(ca) {
+          emailHtml += '<div style="margin-bottom:10px;border-top:1px solid rgba(255,255,255,0.1);padding-top:10px;">';
+          emailHtml += '<div style="font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:4px;">' + ca.area + '</div>';
+          emailHtml += '<p style="font-size:13px;color:rgba(255,255,255,0.8);line-height:1.6;margin:0;">' + ca.description + '</p>';
+          emailHtml += '</div>';
+        });
+        emailHtml += '</div>';
+      }
+
+      // ── ОГЛЕДАЛО №3 — УРОЦИ ──
+      emailHtml += emailMirror('ОГЛЕДАЛО №3', '#854F0B', 'Уроци — Какво животът се опитва да ти покаже');
+      if (d.lessons_deep) {
+        const ld = d.lessons_deep;
+        if (ld.intro) emailHtml += p(ld.intro);
+        [ld.lesson_1, ld.lesson_2, ld.lesson_3].forEach(function(l, i) {
+          if (!l) return;
+          emailHtml += h2('Урок №' + (i + 1) + (i === 2 ? ' — най-дълбокият' : ''));
+          if (l.situation) emailHtml += p(l.situation);
+          if (l.cost) emailHtml += p('<strong>Цената:</strong> ' + l.cost);
+          if (l.opportunity) emailHtml += p(l.opportunity);
+        });
+        if (ld.closing) emailHtml += p('<em>' + ld.closing + '</em>');
+      }
+      if (d.morning_routines && d.morning_routines.length) emailHtml += h2('☀ Сутрешни рутини') + '<ul style="color:#555;padding-left:20px;line-height:1.7;">' + d.morning_routines.map(function(r) { return '<li style="margin-bottom:4px;">' + r + '</li>'; }).join('') + '</ul>';
+      if (d.evening_routines && d.evening_routines.length) emailHtml += h2('🌙 Вечерни рутини') + '<ul style="color:#555;padding-left:20px;line-height:1.7;">' + d.evening_routines.map(function(r) { return '<li style="margin-bottom:4px;">' + r + '</li>'; }).join('') + '</ul>';
+      if (d.daily_questions && d.daily_questions.length) emailHtml += h2('Въпроси за всеки ден') + '<ol style="color:#555;padding-left:20px;line-height:1.7;">' + d.daily_questions.map(function(q) { return '<li style="margin-bottom:6px;">' + q + '</li>'; }).join('') + '</ol>';
+
+      // ── СМИСЪЛ ──
+      if (d.meaning_analysis) {
+        const ma = d.meaning_analysis;
+        emailHtml += '<div style="margin:32px 0 16px;padding:14px 20px;background:#FDF6EC;border-radius:8px;border-left:4px solid #B08D57;">';
+        emailHtml += '<div style="font-size:10px;font-weight:700;color:#B08D57;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:4px;">ПОСЛЕДНИЯТ СЛОЙ</div>';
+        emailHtml += '<div style="font-size:17px;font-family:Georgia,serif;font-weight:500;color:#7A5E2F;">Смисъл</div>';
+        emailHtml += '</div>';
+        if (ma.declared_vs_lived) emailHtml += p('<strong style="color:#B08D57;">Казано срещу живяното:</strong> ' + ma.declared_vs_lived);
+        if (ma.where_it_points) emailHtml += p('<strong style="color:#B08D57;">Накъде сочи:</strong> ' + ma.where_it_points);
+        if (ma.the_giving_moment) emailHtml += p('<strong style="color:#B08D57;">Моментът на даването:</strong> ' + ma.the_giving_moment);
+        if (ma.current_anchor) emailHtml += p('<strong style="color:#B08D57;">На какво стоиш сега:</strong> ' + ma.current_anchor);
+        if (ma.anchor_honesty) emailHtml += '<p style="color:#666;font-style:italic;line-height:1.7;font-size:14px;">' + ma.anchor_honesty + '</p>';
+        if (ma.life_stage_reflection) emailHtml += p(ma.life_stage_reflection);
+        emailHtml += '<blockquote style="border-left:3px solid #B08D57;margin:12px 0;padding:14px 16px;color:#7A5E2F;line-height:1.9;">';
+        emailHtml += '<p style="margin:0 0 10px;">Забелязваш ли — почти всичко, на което разчиташ, може да се изтощи.</p>';
+        emailHtml += '<p style="margin:0 0 10px;">Но има Нещо, на което можеш да се опреш, дори когато всичко друго изчезне. Нещо, което те носи, без да го молиш за това. Някои Го наричат Бог. Други — Творец, или просто Това, което е по-голямо от тях. Името няма значение. Важното е, че никога не си бил сам в това — само си забравил да погледнеш натам.</p>';
+        emailHtml += '<p style="margin:0;font-weight:600;">Не бързай към отговора.</p>';
+        emailHtml += '</blockquote>';
+        if (ma.the_real_question) emailHtml += '<div style="background:#7A5E2F;border-radius:10px;padding:16px;text-align:center;margin-top:14px;"><p style="color:rgba(255,255,255,0.5);font-size:11px;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;">Въпросът за носене с теб</p><p style="color:#fff;font-style:italic;margin:0;">' + ma.the_real_question + '</p></div>';
+      }
+
+      // ── ЛИЧЕН КОДЕКС ──
+      if (d.principles && d.principles.length) {
+        emailHtml += '<div style="margin-top:28px;padding:28px;background:#1a1a1a;border-radius:14px;">';
+        emailHtml += '<h2 style="color:#fff;font-size:18px;letter-spacing:0.08em;margin:0 0 4px;">ЛИЧЕН КОДЕКС</h2>';
+        emailHtml += '<p style="color:rgba(255,255,255,0.4);font-size:12px;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 20px;">Принципите, открити чрез твоя живот</p>';
+        d.principles.forEach(function(pr) {
+          emailHtml += '<div style="border-top:1px solid rgba(255,255,255,0.12);padding:18px 0;">';
+          emailHtml += '<div style="margin-bottom:8px;"><span style="font-size:1.8rem;font-weight:600;color:#1D9E75;line-height:1;">' + pr.number + '</span> <strong style="font-size:15px;color:#fff;">' + pr.title + '</strong></div>';
+          emailHtml += '<p style="font-size:14px;color:rgba(255,255,255,0.85);font-style:italic;margin-bottom:8px;">' + pr.statement + '</p>';
+          emailHtml += '<p style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:10px;">' + pr.origin + '</p>';
+          emailHtml += '<div style="background:rgba(29,158,117,0.15);border-left:2px solid #1D9E75;padding:8px 12px;border-radius:0 6px 6px 0;">';
+          emailHtml += '<p style="font-size:11px;color:#1D9E75;font-weight:600;text-transform:uppercase;margin:0 0 3px;">Сутрешен въпрос</p>';
+          emailHtml += '<p style="font-size:13px;color:rgba(255,255,255,0.75);margin:0;">' + pr.morning_question + '</p></div></div>';
+        });
+        emailHtml += '</div>';
+      }
+
+      // ── СЛЕД ЕДНА ГОДИНА (епилог, абсолютно последно в отчета) ──
+      if (d.epilogue) {
+        emailHtml += '<div style="margin-top:28px;padding:28px;text-align:center;">';
+        emailHtml += '<h2 style="font-family:Georgia,serif;font-style:italic;font-size:18px;color:#1a1a1a;margin:0 0 16px;">След една година...</h2>';
+        emailHtml += '<p style="color:#555;line-height:1.9;font-size:14px;text-align:left;">' + d.epilogue.replace(/\n+/g, '<br><br>') + '</p>';
+        emailHtml += '</div>';
+      }
+    }
+    // Натален анализ в имейла (от съхранен HTML)
+    if (natalEmailHTML) emailHtml += natalEmailHTML;
+    // Техники в имейла (от съхранен HTML)
+    if (perplexityEmailHTML) emailHtml += perplexityEmailHTML;
+    // Referral block се генерира от Worker-а — не добавяме share block тук
+    const res = await fetch(CONFIG.workerUrl + '/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, resultsHtml: emailHtml, avg })
+    });
+    const data = await res.json();
+    btn.textContent = data.ok ? '✓ Изпратено!' : 'Грешка — опитай пак';
+    if (data.ok) {
+      trackEvent('email_sent', {});
+      if (data.refCode) {
+        var _baseUrl = CONFIG.siteUrl.split('?')[0];
+        var _refUrl = _baseUrl + '?ref=' + data.refCode;
+        var _chip = document.getElementById('ref-code-chip');
+        if (_chip) _chip.textContent = data.refCode;
+        var _urlEl = document.getElementById('ref-url-display');
+        if (_urlEl) _urlEl.textContent = _refUrl;
+        var _btn = document.getElementById('ref-share-btn');
+        if (_btn) { _btn.dataset.href = _refUrl; _btn.dataset.code = data.refCode; }
+      }
+      setTimeout(closeEmailModal, 2000);
+    } else btn.disabled = false;
+  } catch(e) {
+    btn.textContent = 'Грешка — опитай пак';
+    btn.disabled = false;
+  }
+}
+
+// ─── ГЛАСОВО ВЪВЕЖДАНЕ ───────────────────────────────────────────────────────
+const VOICE_DURATIONS = {
+  'area-desc': 120,
+  'sit-1': 180, 'sit-2': 180, 'sit-3': 180, 'sit-4': 180, 'sit-5': 180,
+  'regrets': 180, 'proud': 120, 'lessons-text': 180
+};
+const VOICE_CIRC = 119.4;
+let voiceRec = null, voiceTimerInt = null;
+let voiceSecondsLeft = 0, voiceTotal = 0, voiceOrigDur = 0;
+let voiceTargetId = null, voiceFinal = '';
+
+function initVoiceInputs() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  Object.keys(VOICE_DURATIONS).forEach(function(id) {
+    const ta = document.getElementById(id);
+    if (!ta) return;
+    if (document.getElementById('voice-wrap-' + id)) return;
+    const dur = VOICE_DURATIONS[id];
+    const wrap = document.createElement('div');
+    wrap.className = 'voice-btn-wrap';
+    wrap.id = 'voice-wrap-' + id;
+    wrap.innerHTML = '<div class="voice-cta"><span class="voice-prompt">🎤 Предпочиташ да говориш?</span>' +
+      '<button class="voice-btn voice-btn-accent" onclick="startVoice(\'' + id + '\',' + dur + ')">🎙 Говори</button></div>';
+    ta.insertAdjacentElement('beforebegin', wrap);
+  });
+}
+
+function startVoice(id, dur) {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Гласовото въвеждане работи в Chrome и Edge.'); return; }
+  if (voiceRec) { stopVoice(); return; }
+
+  voiceTargetId = id;
+  voiceOrigDur = dur;
+  voiceTotal = dur;
+  voiceSecondsLeft = dur;
+  voiceFinal = document.getElementById(id).value || '';
+
+  const mins = Math.floor(dur / 60);
+  const wrap = document.getElementById('voice-wrap-' + id);
+  if (!wrap) return;
+  wrap.innerHTML =
+    '<div class="voice-message">Имаш ' + mins + ' минути. Говори конкретно с факти, истории и събития — не какво мислиш за това.</div>' +
+    '<div class="voice-controls">' +
+      '<div class="voice-timer-wrap">' +
+        '<svg class="voice-timer-svg" viewBox="0 0 44 44">' +
+          '<circle class="voice-timer-bg" cx="22" cy="22" r="19"/>' +
+          '<circle class="voice-timer-fill" id="vtc" cx="22" cy="22" r="19"/>' +
+        '</svg>' +
+        '<div class="voice-timer-text" id="vtt">' + fmtTime(voiceSecondsLeft) + '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px;">' +
+        '<button class="voice-stop-btn" onclick="stopVoice()">⏹ Спри записа</button>' +
+        '<button class="voice-add-btn" id="vadd" style="display:none;" onclick="addVoiceMin()">+1 минута</button>' +
+      '</div>' +
+    '</div>';
+
+  voiceRec = new SR();
+  voiceRec.lang = 'bg-BG';
+  voiceRec.continuous = true;
+  voiceRec.interimResults = true;
+  voiceRec.onresult = function(e) {
+    var fin = '', intr = '';
+    for (var i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) fin += e.results[i][0].transcript + ' ';
+      else intr += e.results[i][0].transcript;
+    }
+    if (fin) voiceFinal += fin;
+    var ta = document.getElementById(id);
+    if (ta) ta.value = voiceFinal + intr;
+  };
+  voiceRec.onend = function() {
+    if (voiceSecondsLeft > 0 && voiceRec) { try { voiceRec.start(); } catch(e){} }
+  };
+  voiceRec.onerror = function(e) { if (e.error !== 'no-speech') stopVoice(); };
+  try { voiceRec.start(); } catch(e) { stopVoice(); return; }
+
+  voiceTimerInt = setInterval(function() {
+    voiceSecondsLeft--;
+    var tEl = document.getElementById('vtt');
+    var cEl = document.getElementById('vtc');
+    var aEl = document.getElementById('vadd');
+    if (tEl) tEl.textContent = fmtTime(voiceSecondsLeft);
+    if (cEl) cEl.style.strokeDashoffset = VOICE_CIRC * (1 - voiceSecondsLeft / voiceTotal);
+    if (aEl && voiceSecondsLeft <= 30 && voiceSecondsLeft > 0) aEl.style.display = 'inline-flex';
+    if (voiceSecondsLeft <= 0) stopVoice();
+  }, 1000);
+}
+
+function addVoiceMin() {
+  voiceSecondsLeft += 60; voiceTotal += 60;
+  var el = document.getElementById('vadd');
+  if (el) el.style.display = 'none';
+}
+
+function stopVoice() {
+  if (voiceTimerInt) { clearInterval(voiceTimerInt); voiceTimerInt = null; }
+  if (voiceRec) { voiceRec.onend = null; try { voiceRec.stop(); } catch(e){} voiceRec = null; }
+  if (voiceTargetId) {
+    var wrap = document.getElementById('voice-wrap-' + voiceTargetId);
+    var savedId = voiceTargetId, savedDur = voiceOrigDur;
+    voiceTargetId = null;
+    if (wrap) wrap.innerHTML = '<button class="voice-btn voice-btn-accent" onclick="startVoice(\'' + savedId + '\',' + savedDur + ')">🎙 Говори</button>';
+  }
+}
+
+function fmtTime(s) {
+  return Math.floor(s/60) + ':' + (s%60 < 10 ? '0' : '') + (s%60);
+}
+
+// ─── СТАРТ ───────────────────────────────────────────────────────────────────
+trackEvent('page_loaded', {});
+checkPaymentReturn();
+</script>
+
+<!--
+════════════════════════════════════════════════════════════════
+CLOUDFLARE WORKER (deploy на workers.cloudflare.com)
+Копирай кода долу в нов Worker.
+Environment variables (Settings → Variables → Add):
+  ANTHROPIC_API_KEY  = sk-ant-...
+  RESEND_API_KEY     = re_...
+  STRIPE_SECRET_KEY  = sk_live_...
+════════════════════════════════════════════════════════════════
+
+export default {
+  async fetch(request, env) {
+    const cors = {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    };
+    if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+
+    const url = new URL(request.url);
+    const json = (data, status = 200) =>
+      new Response(JSON.stringify(data), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
+
+    // POST /verify — верифицира Stripe session
+    if (url.pathname === '/verify') {
+      const { sessionId } = await request.json();
+      const res = await fetch('https://api.stripe.com/v1/checkout/sessions/' + sessionId, {
+        headers: { 'Authorization': 'Bearer ' + env.STRIPE_SECRET_KEY }
+      });
+      const session = await res.json();
+      return json({ paid: session.payment_status === 'paid' });
+    }
+
+    // POST /analyze — изпраща до Claude
+    if (url.pathname === '/analyze') {
+      const { prompt, max_tokens } = await request.json();
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: max_tokens || 3000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      const content = data.content.filter(i => i.type === 'text').map(i => i.text).join('');
+      return json({ content });
+    }
+
+    // POST /email — изпраща резултата чрез Resend
+    if (url.pathname === '/email') {
+      const { email, resultsHtml, avg } = await request.json();
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + env.RESEND_API_KEY },
+        body: JSON.stringify({
+          from: 'ДАВАЙ! <audit@yourdomain.com>',
+          to: email,
+          subject: 'Твоят личен одит на живота · ' + avg + '/10',
+          html: `<!DOCTYPE html><html lang="bg"><head><meta charset="UTF-8">
+            <style>body{font-family:-apple-system,sans-serif;background:#FAFAF8;color:#1a1a1a;margin:0;padding:20px}
+            .wrap{max-width:600px;margin:0 auto;background:white;border-radius:14px;padding:32px}
+            h1{font-size:28px;margin-bottom:4px}.green{color:#1D9E75}
+            .sub{font-size:13px;color:#999;letter-spacing:.08em;text-transform:uppercase;margin-bottom:24px}
+            .card{border:1px solid rgba(0,0,0,.1);border-radius:14px;padding:20px;margin-bottom:14px}
+            .footer{font-size:13px;color:#999;margin-top:24px;border-top:1px solid rgba(0,0,0,.1);padding-top:16px}
+            </style></head><body><div class="wrap">
+            <h1>ДА<span class="green">ВАЙ</span><span class="green">!</span></h1>
+            <div class="sub">Личен одит на живота · Средна оценка: ${avg}/10</div>
+            ${resultsHtml}
+            <div class="footer">Одитът е личен документ. Запази го на сигурно място.</div>
+            </div></body></html>`
+        })
+      });
+      return json({ ok: res.ok });
+    }
+
+    return new Response('Not found', { status: 404 });
+  }
+}
+-->
+
+</body>
+</html>
