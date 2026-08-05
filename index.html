@@ -825,7 +825,26 @@ async function checkPaymentReturn() {
           document.getElementById('natal-upsell').scrollIntoView({ behavior: 'smooth' });
         }, 400);
       } else {
-        showScreen('intro');
+        // localStorage резервът липсва/остарял (различно устройство, изчистен браузър) —
+        // опитай KV резерва по session_id, преди да се откажем изцяло.
+        let kvResumed = false;
+        const sid = params.get('session_id');
+        if (sid) {
+          try {
+            const pres = await fetch(CONFIG.workerUrl + '/resume-pending', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ session_id: sid })
+            });
+            const pdata = await pres.json();
+            if (pdata.found && pdata.product === 'natal') {
+              kvResumed = true;
+              showScreen('intro');
+              if (pdata.email) document.getElementById('intro-email').value = pdata.email;
+              alert('Плащането за наталната карта е потвърдено (' + (pdata.email || '') + '), но не можахме да възстановим оригиналния ти Одит анализ на това устройство. Пиши ни с този номер за помощ: ' + sid);
+            }
+          } catch(e) {}
+        }
+        if (!kvResumed) showScreen('intro');
       }
     } catch(e) { showScreen('intro'); }
     return;
@@ -884,7 +903,7 @@ async function payForNatal() {
         amount: 890,
         productName: 'DAVAI! Natal Chart',
         product: 'natal',
-        successUrl: CONFIG.siteUrl + '?natal=success',
+        successUrl: CONFIG.siteUrl + '?natal=success&session_id={CHECKOUT_SESSION_ID}',
         cancelUrl: CONFIG.siteUrl,
         voucherCode: promoCode || undefined,
         email: oditEmail || undefined,
