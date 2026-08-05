@@ -596,6 +596,11 @@ let oditEmail = null; // задължителен, събран на интро 
 // Имейлът трябва да преживее пълния page reload при Stripe/bypass redirect (иначе се губи
 // след връщане и generateFullAnalysis() тръгва без email — виж checkPaymentReturn()).
 const LS_ODIT_EMAIL = 'davai_odit_email';
+// Session-safety за натал add-on плащане (€8.90): localStorage вместо sessionStorage,
+// за да преживее затворен таб/рестартиран браузър между плащане и попълване на формата.
+// Пази се само няколко дни, за да не показва объркващо остарял prefill при връщане седмици по-късно.
+const LS_NATAL_RESUME = 'davai_natal_resume';
+const NATAL_RESUME_MAX_AGE_MS = 3 * 24 * 60 * 60 * 1000;
 try { oditEmail = sessionStorage.getItem(LS_ODIT_EMAIL) || null; } catch(e) {}
 let analysisResult = null;
 let natalEmailHTML = '';    // Съхранява натален анализ за имейл
@@ -800,11 +805,17 @@ async function checkPaymentReturn() {
   if (params.get('natal') === 'success') {
     window.history.replaceState({}, document.title, window.location.pathname);
     try {
-      const savedResult = sessionStorage.getItem('davai_analysis');
-      const savedAnswers = sessionStorage.getItem('davai_answers');
-      if (savedResult) {
-        analysisResult = JSON.parse(savedResult);
-        answers = JSON.parse(savedAnswers || '{}');
+      const raw = localStorage.getItem(LS_NATAL_RESUME);
+      const bundle = raw ? JSON.parse(raw) : null;
+      localStorage.removeItem(LS_NATAL_RESUME);
+      const fresh = bundle && (Date.now() - bundle.ts) < NATAL_RESUME_MAX_AGE_MS;
+      if (fresh && bundle.analysisResult) {
+        analysisResult = bundle.analysisResult;
+        answers = bundle.answers || {};
+        if (bundle.email) {
+          oditEmail = bundle.email;
+          try { sessionStorage.setItem(LS_ODIT_EMAIL, oditEmail); } catch(e) {}
+        }
         paymentVerified = true;
         renderResults(analysisResult);
         setTimeout(function() {
@@ -861,8 +872,7 @@ async function payForNatal() {
     return;
   }
   try {
-    sessionStorage.setItem('davai_analysis', JSON.stringify(analysisResult));
-    sessionStorage.setItem('davai_answers', JSON.stringify(answers));
+    localStorage.setItem(LS_NATAL_RESUME, JSON.stringify({ analysisResult, answers, email: oditEmail, ts: Date.now() }));
   } catch(e) {}
   // Програматичен checkout — за пълна Meta attribution (fbclid/fbc/fbp), fallback към Payment Link
   try {
