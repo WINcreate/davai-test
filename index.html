@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- ДАВАЙ! ЛИЧЕН ОДИТ — деплойва се като index.html в WINcreate/davai-test (odit.davai.v.bg) -->
 <html lang="bg">
 <head>
 <meta charset="UTF-8">
@@ -891,8 +892,14 @@ async function payForNatal() {
 // ─── КРОСЕЛ КЪМ НУМЕРОЛОГИЧНИЯ ОДИТ (-25%, само в тази посока) ───────────────
 function goNumerology() {
   trackEvent('numerology_upsell_clicked', { value: 9.68, currency: 'EUR' });
+  var fb = getFbParams();
   var url = 'https://natal.davai.v.bg/?promo=DAVAI-AUDIT25';
   if (oditEmail) url += '&email=' + encodeURIComponent(oditEmail);
+  // _fbc/_fbp са бисквитки на ТОЗИ домейн — не се четат от natal.davai.v.bg след redirect,
+  // затова ги пренасяме изрично през URL (natal.davai.v.bg ги подхваща и пази до реалния checkout).
+  if (fb.fbclid) url += '&fbclid=' + encodeURIComponent(fb.fbclid);
+  if (fb.fbc) url += '&fbc=' + encodeURIComponent(fb.fbc);
+  if (fb.fbp) url += '&fbp=' + encodeURIComponent(fb.fbp);
   window.location.href = url;
 }
 
