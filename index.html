@@ -592,6 +592,25 @@ let current = 0;
 let answers = {};
 let paymentVerified = false;
 let sitCount = 3;
+// ─── НОРМАЛИЗАЦИЯ + ВАЛИДАЦИЯ НА ИМЕЙЛ ───────────────────────────────────────
+// Имейлът става част от KV ключ на сървъра (summary:*), затова "<user@x.bg>" — типичен
+// резултат от копиране на mailto/markdown линк — създава ОТДЕЛЕН запис за същия човек и
+// къса кръстосания анализ. Старият regex [^@\s] пропускаше скобите тихо, защото
+// забраняваше само "@" и интервал. Чистим стойността преди валидация, вместо да я
+// отхвърляме — потребителят не е сгрешил, просто е поставил линк вместо адрес.
+// Сървърът има огледална normalizeEmail() — тази тук е за да не стига дотам изобщо.
+function normalizeEmail(v) {
+  var e = String(v || '').trim();
+  for (var i = 0; i < 3; i++) {           // цикъл заради "<mailto:user@x.bg>"
+    var before = e;
+    e = e.replace(/^<+/, '').replace(/>+$/, '').trim();
+    e = e.replace(/^mailto:/i, '').trim();
+    if (e === before) break;
+  }
+  return e.toLowerCase();
+}
+var EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
 let oditEmail = null; // задължителен, събран на интро екрана — ключ за кръстосания анализ (summary:*:{email})
 // Имейлът трябва да преживее пълния page reload при Stripe/bypass redirect (иначе се губи
 // след връщане и generateFullAnalysis() тръгва без email — виж checkPaymentReturn()).
@@ -689,14 +708,16 @@ function showScreen(id) {
 
 // ─── СТАРТ НА ОДИТА (без предварително плащане) ──────────────────────────────
 function startAuditWithEmail() {
-  const val = (document.getElementById('intro-email').value || '').trim();
+  const field = document.getElementById('intro-email');
+  const val = normalizeEmail(field.value);
+  if (val !== (field.value || '').trim()) field.value = val;  // покажи какво реално ще се ползва
   const err = document.getElementById('intro-email-error');
   if (!val) {
     err.textContent = 'Въведи имейл за да получиш резултата и да свържем анализите си.';
     err.style.display = 'block';
     return;
   }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)) {
+  if (!EMAIL_RE.test(val)) {
     err.textContent = 'Моля въведи валиден имейл.';
     err.style.display = 'block';
     return;
@@ -2280,9 +2301,12 @@ function generateReferralCode(email) {
   return 'DAVAI-' + prefix + ((Math.abs(hash) % 900) + 100);
 }
 
-function previewRefCode(email) {
+function previewRefCode(rawEmail) {
+  // Нормализираме и тук — иначе предварителният код се смята от друг низ, отколкото
+  // сървърът ще ползва, и показаният на потребителя реферален код няма да съвпадне.
+  var email = normalizeEmail(rawEmail);
   var wrap = document.getElementById('ref-code-wrap');
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!EMAIL_RE.test(email)) {
     if (wrap) wrap.style.display = 'none';
     return;
   }
@@ -2680,8 +2704,10 @@ function closeEmailModal() {
 }
 
 async function sendEmail() {
-  const email = document.getElementById('email-input').value.trim();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  const emailField = document.getElementById('email-input');
+  const email = normalizeEmail(emailField.value);
+  if (email !== (emailField.value || '').trim()) emailField.value = email;
+  if (!EMAIL_RE.test(email)) {
     document.getElementById('email-error').style.display = 'block';
     return;
   }
@@ -3071,4 +3097,3 @@ export default {
 
 </body>
 </html>
-
