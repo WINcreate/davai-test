@@ -137,8 +137,17 @@ src="https://www.facebook.com/tr?id=1275180257473388&ev=PageView&noscript=1"
   .feature-check { color: var(--green); font-weight: 500; flex-shrink: 0; }
   .secure-note { font-size: 12px; color: var(--text-tertiary); text-align: center; margin-top: 12px; }
   /* Диагонално зачеркване — не се слива с цифрите (за старата цена) */
-  .price-strike { position: relative; display: inline-block; font-size: 17px; color: var(--text-tertiary); font-weight: 500; }
-  .price-strike::after { content: ""; position: absolute; left: -3px; right: -3px; top: 52%; height: 2px; background: var(--red-text); transform: rotate(-10deg); border-radius: 2px; }
+  /* Зачертана цена — единен стил за целия продукт. Замества и стария наклонен
+     ::after бар, и inline line-through стиловете. Черен текст, тънка права
+     червена линия. */
+  .price-strike { color: #000000; text-decoration: line-through; text-decoration-color: #A32D2D; text-decoration-thickness: 1px; }
+
+  /* Затварящ текст — идентичен за Одит и Нумерология. Наталната карта НЕ го получава. */
+  .closing-note { border-top: 1px solid var(--border); margin-top: 2rem; padding-top: 22px; font-size: 14px; line-height: 1.8; color: var(--text-secondary); }
+  .closing-note p { margin: 0 0 14px; }
+  .closing-note a { color: var(--green); text-decoration: underline; }
+  .closing-sign { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center; }
+  .closing-brand { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--green); font-weight: 600; }
 
   /* UPSELL */
   .upsell { border: 2px solid var(--green); border-radius: var(--radius); padding: 22px; margin-top: 1.5rem; background: var(--green-light); }
@@ -494,7 +503,7 @@ src="https://www.facebook.com/tr?id=1275180257473388&ev=PageView&noscript=1"
       <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
         <button class="btn btn-primary" onclick="goNumerology()" style="background:var(--purple-text);">Добави нумерологичен одит →</button>
         <div style="display:flex;align-items:baseline;gap:8px;">
-          <span style="font-size:14px;color:var(--text-tertiary);text-decoration:line-through;">12,90 €</span>
+          <span class="price-strike">12,90 €</span>
           <span style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:600;color:var(--purple-text);">9,68 €</span>
         </div>
       </div>
@@ -510,6 +519,22 @@ src="https://www.facebook.com/tr?id=1275180257473388&ev=PageView&noscript=1"
     </div>
 
     <div id="perplexity-results" style="display:none;margin-top:1rem;"></div>
+
+    <!-- ЗАТВАРЯЩ ТЕКСТ — идентичен за Одит и Нумерология. Наталната карта НЕ го получава. -->
+    <div class="closing-note">
+      <p>Благодарим ти за доверието.<br>Вярваме, че този анализ ще ти помогне да видиш себе си с повече яснота и увереност.</p>
+      <p>Анализът не определя съдбата ти. Той е инструмент за себепознание и осъзнат избор. Най-важните решения винаги остават в твоите ръце.</p>
+      <p>Твоите въпроси, обратна връзка и споделени истории ни помагат да правим ДАВАЙ! по-полезен. Можеш да ни пишеш:<br>📩 <a href="mailto:wecare@davai.v.bg">wecare@davai.v.bg</a></p>
+      <p>Последвай ДАВАЙ! във <a href="https://www.facebook.com/profile.php?id=61593294117246" target="_blank" rel="noopener">Facebook</a> или под нашите публикации и реклами.</p>
+      <p>ДАВАЙ! не дава готови отговори. Помага ти да задаваш по-добрите въпроси.</p>
+      <p><em>Ако след този анализ направиш само една малка промяна още тази седмица — коя ще бъде тя?</em></p>
+      <div class="closing-sign">
+        С уважение,<br>
+        <span class="closing-brand">Екипът на ДАВАЙ!</span><br>
+        <em>Твоят вътрешен компас.</em><br>
+        🌐 <a href="https://davai.v.bg">davai.v.bg</a>
+      </div>
+    </div>
 
     <div class="divider no-print"></div>
     <button class="btn btn-secondary no-print" onclick="startOver()">Нов одит →</button>
