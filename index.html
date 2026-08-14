@@ -792,6 +792,12 @@ async function payForFullResults() {
   window.location.href = CONFIG.paymentLink;
 }
 
+// Слой В.1 — URL-ът с session_id е доказателството за право на достъп след Stripe.
+// Чисти се само след потвърден успех, за да не се губи при неуспешен опит.
+function clearReturnUrl() {
+  try { window.history.replaceState({}, document.title, window.location.pathname); } catch(e) {}
+}
+
 // ─── ПРОВЕРКА НА ПЛАЩАНЕТО СЛЕД REDIRECT ─────────────────────────────────────
 async function checkPaymentReturn() {
   const params = new URLSearchParams(window.location.search);
@@ -867,7 +873,8 @@ async function checkPaymentReturn() {
   }
 
   if (params.get('natal') === 'success') {
-    window.history.replaceState({}, document.title, window.location.pathname);
+    // Слой В.1 — URL-ът се чисти чак при потвърдено възстановяване (виж по-долу).
+    // При неуспех остава, за да може презареждане да опита пак със същия session_id.
     try {
       const raw = localStorage.getItem(LS_NATAL_RESUME);
       const bundle = raw ? JSON.parse(raw) : null;
@@ -881,6 +888,7 @@ async function checkPaymentReturn() {
           try { sessionStorage.setItem(LS_ODIT_EMAIL, oditEmail); } catch(e) {}
         }
         paymentVerified = true;
+        clearReturnUrl();          // потвърдено възстановяване — чак сега
         renderResults(analysisResult);
         setTimeout(function() {
           const upsell = document.getElementById('natal-upsell');
