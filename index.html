@@ -450,7 +450,7 @@ src="https://www.facebook.com/tr?id=1275180257473388&ev=PageView&noscript=1"
     <div class="card no-print" style="margin-top:1.5rem;">
       <div class="card-title" style="margin-bottom:12px;">Запази резултата</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-ghost" onclick="openEmailModal()">📧 Изпрати на мейл</button>
+        <button class="btn btn-ghost" id="odit-email-btn" onclick="openEmailModal()">📧 Изпрати на мейл</button>
         <button class="btn btn-ghost" onclick="trackEvent('pdf_download', {}); window.print()">⬇ Свали като PDF</button>
       </div>
     </div>
@@ -644,6 +644,18 @@ const LS_ODIT_EMAIL = 'davai_odit_email';
 // за да преживее затворен таб/рестартиран браузър между плащане и попълване на формата.
 // Пази се само няколко дни, за да не показва объркващо остарял prefill при връщане седмици по-късно.
 const LS_NATAL_RESUME = 'davai_natal_resume';
+
+// session_id-то от връщането след плащане трябва да преживее до момента, в който човекът
+// попълни данните за раждане и стигне до анализа — /natal-analysis вече го изисква
+// безусловно. sessionStorage, за да оцелее и презареждане на страницата.
+const LS_NATAL_SID = 'davai_natal_sid';
+function rememberNatalSessionId(sid) {
+  if (!sid) return;
+  try { sessionStorage.setItem(LS_NATAL_SID, sid); } catch(e) {}
+}
+function getNatalSessionId() {
+  try { return sessionStorage.getItem(LS_NATAL_SID) || null; } catch(e) { return null; }
+}
 const NATAL_RESUME_MAX_AGE_MS = 3 * 24 * 60 * 60 * 1000;
 
 // alert() може тихо да бъде потиснат от браузъра, когато гърми автоматично при
@@ -873,6 +885,9 @@ async function checkPaymentReturn() {
   }
 
   if (params.get('natal') === 'success') {
+    // /natal-analysis вече изисква session_id безусловно, а той идва само тук — в URL-а
+    // след плащане (или bypass_ идентификатора при 100% ваучер).
+    rememberNatalSessionId(params.get('session_id'));
     // Слой В.1 — URL-ът се чисти чак при потвърдено възстановяване (виж по-долу).
     // При неуспех остава, за да може презареждане да опита пак със същия session_id.
     try {
@@ -1234,12 +1249,27 @@ async function generateFullAnalysis(sid) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ product: 'odit', email: oditEmail, analysisText })
       }).catch(function() {});
+
+      // Автоматичен имейл с готовия одит — огледално на нумерологията, която го прави
+      // server-side. Тук е клиентската еквивалентна точка: анализът е завършен и
+      // показан, имейлът е известен. Не се чака (fire-and-forget) — изпращането не
+      // бива да бави резултата на екрана.
+      autoSendOditEmail();
     }
   } catch(e) {
     clearInterval(loadingTimer);
     showScreen('results');
+    // Текстът е фиксиран и неутрален — не твърди нито успех, нито неуспех на плащането.
+    // Преди тук се вграждаше суровият e.message, който при 402 от /analyze-paid е
+    // "Плащането не е потвърдено." и противоречеше на "Плащането мина успешно" в същото
+    // изречение. Механиката не се пипа — автоматичният retry при презареждане (виж
+    // checkPaymentReturn: davai_paid + davai_answers) работи и остава единственият път.
+    console.warn('[davai] generateFullAnalysis прекъсна:', e);
     document.getElementById('results-content').innerHTML =
-      '<div class="card"><div class="card-title">Грешка</div><div class="card-text">Плащането мина успешно, но генерирането се прекъсна: ' + e.message + '. Презареди страницата, за да продължи автоматично.</div></div>';
+      '<div class="card"><div class="card-title">Анализът се забави</div>' +
+      '<div class="card-text">Нищо не е загубено — плащането и отговорите ти са запазени. ' +
+      'Презареди страницата и генерирането ще продължи автоматично. ' +
+      'Ако и тогава не се появи, пиши ни на <a href="mailto:wecare@davai.v.bg">wecare@davai.v.bg</a></div></div>';
   }
 }
 
@@ -2641,11 +2671,14 @@ async function fetchNatalAnalysis(planetsData) {
     const res = await fetch(CONFIG.workerUrl + '/natal-analysis', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ascSign, mcSign, planetsText, email: oditEmail || undefined })
+      body: JSON.stringify({ ascSign, mcSign, planetsText, email: oditEmail || undefined, session_id: getNatalSessionId() || undefined })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     renderNatalAnalysis(data.report);
+    // /natal-analysis вече праща имейла автоматично. Отразяваме го веднага (бутонът и
+    // статусът се създават в renderNatalAnalysis по-горе), за да не праща човек втори път.
+    if (data.emailed) markNatalEmailSent(oditEmail);
   } catch(e) {
     const el = document.getElementById('natal-ai-loading');
     if (el) el.innerHTML = '<div class="card-text" style="color:var(--red-text);">Грешка при астрологичния анализ: ' + e.message + '</div>';
@@ -2692,10 +2725,24 @@ function renderNatalAnalysis(reportText) {
   if (nr) nr.appendChild(actionsDiv);
 }
 
+// Същата защита като при Одита: не изключваме бутона, само казваме къде е отишло.
+let natalEmailSent = false;
+function markNatalEmailSent(toEmail) {
+  natalEmailSent = true;
+  const btn = document.getElementById('natal-email-btn');
+  const status = document.getElementById('natal-email-status');
+  if (btn) btn.textContent = '📧 Изпрати пак';
+  if (status) {
+    status.textContent = '✓ Изпратено на ' + (toEmail || 'твоя имейл');
+    status.style.color = 'var(--green)';
+  }
+}
+
 async function sendNatalEmailQuick() {
   const btn = document.getElementById('natal-email-btn');
   const status = document.getElementById('natal-email-status');
   if (!oditEmail || !natalReportText) return;
+  const label = natalEmailSent ? '📧 Изпрати пак' : '📧 Изпрати на имейл';
   btn.disabled = true; btn.textContent = 'Изпращане...';
   try {
     const res = await fetch(CONFIG.workerUrl + '/send-natal-email', {
@@ -2704,11 +2751,16 @@ async function sendNatalEmailQuick() {
       body: JSON.stringify({ email: oditEmail, report: natalReportText })
     });
     const data = await res.json();
-    btn.disabled = false; btn.textContent = '📧 Изпрати на имейл';
-    status.textContent = data.ok ? '✓ Изпратено на ' + oditEmail : 'Грешка — опитай пак';
-    status.style.color = data.ok ? 'var(--green)' : 'var(--red-text)';
+    btn.disabled = false;
+    if (data.ok) {
+      markNatalEmailSent(oditEmail);
+    } else {
+      btn.textContent = label;
+      status.textContent = 'Грешка — опитай пак';
+      status.style.color = 'var(--red-text)';
+    }
   } catch(e) {
-    btn.disabled = false; btn.textContent = '📧 Изпрати на имейл';
+    btn.disabled = false; btn.textContent = label;
     status.textContent = 'Грешка — опитай пак';
     status.style.color = 'var(--red-text)';
   }
@@ -2725,10 +2777,12 @@ function buildNatalEmailSection(reportText) {
 
 // ─── ИМЕЙЛ ───────────────────────────────────────────────────────────────────
 function openEmailModal() {
+  var field = document.getElementById('email-input');
   var refInput = document.getElementById('ref-email-input');
-  if (refInput && refInput.value) {
-    document.getElementById('email-input').value = refInput.value;
-  }
+  // Приоритет: каквото току-що е написано в рефералното поле. Иначе имейлът от интро
+  // екрана — той е задължителен, значи винаги го имаме, а човек не бива да го пише пак.
+  if (refInput && refInput.value) field.value = normalizeEmail(refInput.value);
+  else if (!field.value && oditEmail) field.value = oditEmail;
   document.getElementById('email-modal').classList.remove('hidden');
 }
 function closeEmailModal() {
@@ -2736,17 +2790,10 @@ function closeEmailModal() {
   document.getElementById('email-error').style.display = 'none';
 }
 
-async function sendEmail() {
-  const emailField = document.getElementById('email-input');
-  const email = normalizeEmail(emailField.value);
-  if (email !== (emailField.value || '').trim()) emailField.value = email;
-  if (!EMAIL_RE.test(email)) {
-    document.getElementById('email-error').style.display = 'block';
-    return;
-  }
-  const btn = document.getElementById('send-email-btn');
-  btn.disabled = true; btn.textContent = 'Изпращане...';
-
+// Строи HTML тялото на имейла от текущия analysisResult. Извадено от sendEmail(),
+// за да го ползват и автоматичното изпращане след генериране, и бутонът за повторно.
+// Връща null при проблем — извикващият решава какво да покаже.
+function buildOditEmailHtml() {
   try {
     const avg = Math.round(AREAS.reduce((s, a) => s + (answers[a.key]?.rating || 0), 0) / AREAS.length);
     // Build email HTML with Three Mirrors structure and inline styles
@@ -2898,25 +2945,83 @@ async function sendEmail() {
     // Техники в имейла (от съхранен HTML)
     if (perplexityEmailHTML) emailHtml += perplexityEmailHTML;
     // Referral block се генерира от Worker-а — не добавяме share block тук
-    const res = await fetch(CONFIG.workerUrl + '/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, resultsHtml: emailHtml, avg })
-    });
-    const data = await res.json();
-    btn.textContent = data.ok ? '✓ Изпратено!' : 'Грешка — опитай пак';
-    if (data.ok) {
+    return { emailHtml: emailHtml, avg: avg };
+  } catch(e) {
+    return null;
+  }
+}
+
+// Единствената точка, през която Одитът праща имейл — и автоматично, и от бутона.
+let oditEmailSent = false;
+
+async function deliverOditEmail(email) {
+  const built = buildOditEmailHtml();
+  if (!built) return { ok: false };
+  const res = await fetch(CONFIG.workerUrl + '/email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email, resultsHtml: built.emailHtml, avg: built.avg })
+  });
+  const data = await res.json();
+  if (data.ok) {
+    oditEmailSent = true;
+    applyRefCode(data.refCode);
+  }
+  return data;
+}
+
+function applyRefCode(refCode) {
+  if (!refCode) return;
+  var _baseUrl = CONFIG.siteUrl.split('?')[0];
+  var _refUrl = _baseUrl + '?ref=' + refCode;
+  var _chip = document.getElementById('ref-code-chip');
+  if (_chip) _chip.textContent = refCode;
+  var _urlEl = document.getElementById('ref-url-display');
+  if (_urlEl) _urlEl.textContent = _refUrl;
+  var _btn = document.getElementById('ref-share-btn');
+  if (_btn) { _btn.dataset.href = _refUrl; _btn.dataset.code = refCode; }
+}
+
+// Бутонът НЕ се изключва — човек може да иска копие на друг адрес. Само казва,
+// че вече е изпратено, за да не праща втори път по погрешка.
+function markOditEmailSent(toEmail) {
+  var b = document.getElementById('odit-email-btn');
+  if (b) b.textContent = '✓ Изпратено' + (toEmail ? ' на ' + toEmail : '') + ' — изпрати пак';
+}
+
+// Автоматично изпращане веднага след генериране — огледално на нумерологията.
+// Имейлът е известен (задължително поле на интро екрана), затова нищо не се пита.
+// Тихо: грешка тук не бива да чупи показването на резултата — бутонът остава резервният път.
+async function autoSendOditEmail() {
+  if (oditEmailSent) return;
+  if (!oditEmail || !EMAIL_RE.test(oditEmail)) return;
+  try {
+    const data = await deliverOditEmail(oditEmail);
+    if (data && data.ok) {
+      trackEvent('email_sent', { auto: true });
+      markOditEmailSent(oditEmail);
+    }
+  } catch(e) {}
+}
+
+// Бутонът в резултатите — повторно изпращане, или изпращане на друг адрес.
+async function sendEmail() {
+  const emailField = document.getElementById('email-input');
+  const email = normalizeEmail(emailField.value);
+  if (email !== (emailField.value || '').trim()) emailField.value = email;
+  if (!EMAIL_RE.test(email)) {
+    document.getElementById('email-error').style.display = 'block';
+    return;
+  }
+  document.getElementById('email-error').style.display = 'none';
+  const btn = document.getElementById('send-email-btn');
+  btn.disabled = true; btn.textContent = 'Изпращане...';
+  try {
+    const data = await deliverOditEmail(email);
+    btn.textContent = (data && data.ok) ? '✓ Изпратено!' : 'Грешка — опитай пак';
+    if (data && data.ok) {
       trackEvent('email_sent', {});
-      if (data.refCode) {
-        var _baseUrl = CONFIG.siteUrl.split('?')[0];
-        var _refUrl = _baseUrl + '?ref=' + data.refCode;
-        var _chip = document.getElementById('ref-code-chip');
-        if (_chip) _chip.textContent = data.refCode;
-        var _urlEl = document.getElementById('ref-url-display');
-        if (_urlEl) _urlEl.textContent = _refUrl;
-        var _btn = document.getElementById('ref-share-btn');
-        if (_btn) { _btn.dataset.href = _refUrl; _btn.dataset.code = data.refCode; }
-      }
+      markOditEmailSent(email);
       setTimeout(closeEmailModal, 2000);
     } else btn.disabled = false;
   } catch(e) {
