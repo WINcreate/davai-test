@@ -475,6 +475,14 @@ src="https://www.facebook.com/tr?id=1275180257473388&ev=PageView&noscript=1"
           </div>
         </div>
         <div style="margin-bottom:10px;">
+          <div class="field-label">Пол <span style="font-weight:400;color:var(--text-tertiary);">— за правилно обръщение в текста</span></div>
+          <select id="natal-gender" class="textarea" style="padding:10px 12px;height:auto;">
+            <option value="">Предпочитам да не посочвам</option>
+            <option value="female">Жена</option>
+            <option value="male">Мъж</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px;">
           <div class="field-label">Град на раждане</div>
           <input type="text" id="natal-city" class="textarea" style="padding:10px 12px;height:auto;" placeholder="напр. Sofia или London">
         </div>
@@ -1338,7 +1346,17 @@ const GRAMMAR_RULES = `
 - Правилна употреба на възвратните местоимения (се, си, ме, те и т.н.)
 - Правилен словоред в изречението
 - Естествено звучене — избягвай изкуствени или неестествени конструкции
-- Преди да генерираш текст, провери дали всяко изречение звучи така, както би го казал образован носител на българския език`;
+- Преди да генерираш текст, провери дали всяко изречение звучи така, както би го казал образован носител на българския език
+
+СЪГЛАСУВАНЕ ПО РОД (задължително):
+Одитът не събира пол. В отговорите обаче често се споменават трети лица по име (деца,
+родители, партньори, колеги).
+- Имената на ТРЕТИ ЛИЦА НЕ определят пола на читателя. Не заключавай неговия род от тях.
+- Ако полът на читателя личи недвусмислено от собствените му отговори — съгласувай с него.
+- Ако НЕ личи, не гадай: сегашно време и съществителни вместо минали причастия
+  ("склонността ти е" вместо "склонен си"/"склонна си").
+- За трети лица съгласувай по ТЕХНИЯ род според името, не по читателя.
+- Никога не смесвай двата рода за един и същ човек в рамките на текста.`;
 
 // ─── ПРОМПТ (Фаза 1): само безплатното preview — кратко и бързо ───────────────
 function buildPromptFree(aSum, sSum, mSum) {
@@ -2703,7 +2721,10 @@ async function fetchNatalAnalysis(planetsData) {
     const res = await fetch(CONFIG.workerUrl + '/natal-analysis', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ascSign, mcSign, planetsText, email: oditEmail || undefined, session_id: getNatalSessionId() || undefined })
+      // Одитът не събира пол на входа на фунията (нарочно — там отиват рекламните пари).
+      // Затова полето е в наталната форма, по избор. Празно = "непосочен", промптът тогава
+      // ползва формулировки, които не изискват съгласуване.
+      body: JSON.stringify({ ascSign, mcSign, planetsText, email: oditEmail || undefined, session_id: getNatalSessionId() || undefined, gender: ((document.getElementById('natal-gender') || {}).value) || undefined })
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
