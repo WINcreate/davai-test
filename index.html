@@ -798,10 +798,41 @@ async function payForFullResults() {
       window.location.href = data.url;
       return;
     }
-  } catch(e) {}
+    throw new Error(data.error || 'no url');
+  } catch(e) {
+    // Преди тук имаше пренасочване към CONFIG.paymentLink — виж showCheckoutError().
+    showCheckoutError('odit', payForFullResults);
+  }
+}
 
-  // Fallback ако Worker не отговори
-  window.location.href = CONFIG.paymentLink;
+// ─── ГРЕШКА ПРИ СТАРТИРАНЕ НА ПЛАЩАНЕ ────────────────────────────────────────
+// Заменя старите пренасочвания към резервни Payment Link-ове. Те бяха на ПЪЛНА цена
+// (ваучерът не се прилагаше) и без session_id — а платените endpoint-и вече изискват
+// session_id безусловно, тоест човек плащаше и после виждаше "Плащането не е потвърдено".
+// Потвърден случай 2026-08-17: 95% ваучер сваля натала под минимума на Stripe (€0.50),
+// checkout-ът се проваля, резервният линк взема €8.90 и анализът не тръгва.
+// По-добре видима грешка с повторен опит, отколкото взети пари без доставен продукт.
+const checkoutAttempts = {};
+function showCheckoutError(key, retryFn) {
+  checkoutAttempts[key] = (checkoutAttempts[key] || 0) + 1;
+  const second = checkoutAttempts[key] >= 2;
+  let box = document.getElementById('checkout-err-box');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'checkout-err-box';
+    box.style.cssText = 'background:var(--amber);color:var(--amber-text);border-radius:12px;padding:16px 20px;font-size:14px;line-height:1.7;margin:16px auto;max-width:600px;';
+    document.body.insertBefore(box, document.body.firstChild);
+  }
+  box.innerHTML =
+    '<div>Плащането не можа да започне в момента. Нищо не е таксувано и нищо не е загубено. ' +
+    'Натисни „Опитай пак" след няколко секунди.' +
+    (second ? ' Ако и този път не тръгне, пиши ни на <a href="mailto:wecare@davai.v.bg" style="color:inherit;">wecare@davai.v.bg</a> — ще довършим ръчно и няма да останеш без анализа.' : '') +
+    '</div>' +
+    '<button type="button" class="btn btn-primary" id="checkout-retry-btn" style="margin-top:12px;">Опитай пак</button>';
+  box.style.display = 'block';
+  try { box.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch(e) {}
+  const rb = document.getElementById('checkout-retry-btn');
+  if (rb) rb.onclick = function() { box.style.display = 'none'; retryFn(); };
 }
 
 // Слой В.1 — URL-ът с session_id е доказателството за право на достъп след Stripe.
@@ -1001,7 +1032,8 @@ async function payForNatal() {
     if (data.url) { window.location.href = data.url; return; }
     throw new Error(data.error || 'no url');
   } catch(e) {
-    window.location.href = CONFIG.natalPaymentLink; // краен fallback
+    // Преди тук имаше пренасочване към CONFIG.natalPaymentLink — виж showCheckoutError().
+    showCheckoutError('natal', payForNatal);
   }
 }
 
